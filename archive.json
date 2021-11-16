@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-11-14T01:04:00.279939+00:00",
+  "timestamp": "2021-11-16T01:02:26.133188+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4902,9 +4902,24 @@
       "labels": [],
       "body": "Right now, we treat the re-init and branch PSK cases as distinct cases, as opposed to just having a general \"export PSK from one group+epoch, insert it into another\" function.  What I would call a \"resumption PSK\", following TLS.   Even though we have the distinction, the content of the PSK itself is the same: (group ID, epoch, resumption secret).  So the only difference is that the PreSharedKeyID has a bit that signals the intent of injecting this resumption PSK.\r\n\r\nDo we really need that bit?  If there's not a compelling need, it would streamline the API and allow for more flexibility if we just had the notion of a resumption PSK.",
       "createdAt": "2021-11-04T14:47:01Z",
-      "updatedAt": "2021-11-04T14:47:01Z",
+      "updatedAt": "2021-11-15T16:24:44Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Key separation by domain is usually a good idea. If we derive a key, the purpose should be \"baked in\", i.e. included in the derivation to avoid potential collision across protocol functionalities/domains. I'm not sure I understand how that makes the API more complex. If it's really bad, we should consider the trade-off, but if it's not too much trouble, I'd prefer we keep the key separation. Can you elaborate a bit on the API complexity?",
+          "createdAt": "2021-11-15T08:28:22Z",
+          "updatedAt": "2021-11-15T08:28:22Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm mostly concerned about being too specific in the \"purpose\" definitions, and thus making applications make a choice that doesn't really make sense.  For example, take the obvious case of TLS-like resumption, where I take a key from the last epoch of a prior instance of the group and use it as input to a new appearance of the group.  Is that a re-init?  There wasn't necessarily a ReInit proposal.  Is it a branch?  \"Branch\" isn't even defined in the spec.  Better to just talk about \"resumption\" as the general act of exporting a secret from one group and inserting it into another.",
+          "createdAt": "2021-11-15T16:24:44Z",
+          "updatedAt": "2021-11-15T16:24:44Z"
+        }
+      ]
     },
     {
       "number": 503,
@@ -36737,6 +36752,58 @@
           ]
         }
       ]
+    },
+    {
+      "number": 507,
+      "id": "PR_kwDOBoyH6c4uiF4t",
+      "title": "Getting rid of the array representation",
+      "url": "https://github.com/mlswg/mls-protocol/pull/507",
+      "state": "OPEN",
+      "author": "franziskuskiefer",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Filing this on behalf of @TWal after discussions with @kkohbrok and @karthikbhargavan.\r\n\r\nThe idea behind it is that the array representation is only one possible implementation for the tree. This PR removes the reliance on nodes indices to address nodes in the tree.\r\n\r\nI'll leave it to @TWal to write a more detailed description.",
+      "createdAt": "2021-11-15T13:20:37Z",
+      "updatedAt": "2021-11-15T13:20:37Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
+      "headRepository": "TWal/mls-protocol",
+      "headRefName": "twal_tree_math",
+      "headRefOid": "54a2b970b6b61fd89104017c7ab5760d02e2f5ba",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 508,
+      "id": "PR_kwDOBoyH6c4uitKX",
+      "title": "Add value for required_capabilities extension",
+      "url": "https://github.com/mlswg/mls-protocol/pull/508",
+      "state": "OPEN",
+      "author": "franziskuskiefer",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2021-11-15T16:18:22Z",
+      "updatedAt": "2021-11-15T16:18:22Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
+      "headRepository": "franziskuskiefer/mls-protocol",
+      "headRefName": "patch-5",
+      "headRefOid": "3c240274dd2bebb0d96eba3a3bba00e844343863",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
