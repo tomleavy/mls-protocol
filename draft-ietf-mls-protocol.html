@@ -4743,6 +4743,8 @@ following structure, comprising all the fields in the PublicGroupState above
 <div class="alignLeft art-text artwork" id="section-11.2.1-9">
 <pre>
 struct {
+    ProtocolVersion version = mls10;
+    CipherSuite cipher_suite;
     opaque group_id&lt;0..255&gt;;
     uint64 epoch;
     opaque tree_hash&lt;0..255&gt;;
