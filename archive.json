@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-11-18T01:02:28.884904+00:00",
+  "timestamp": "2021-11-21T01:04:48.790485+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4434,7 +4434,7 @@
       ],
       "body": "The top of Sec. 5 has exactly one sentence before diving into tree terminology. Please explain at a high level what is the motivation for this structure and maybe how it fits into the rest of the protocol.",
       "createdAt": "2020-12-13T09:57:39Z",
-      "updatedAt": "2021-10-28T18:33:51Z",
+      "updatedAt": "2021-11-20T13:38:06Z",
       "closedAt": null,
       "comments": [
         {
@@ -4450,6 +4450,20 @@
           "body": "LGTM. Thanks!",
           "createdAt": "2021-10-28T17:22:49Z",
           "updatedAt": "2021-10-28T17:22:49Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@yaronf - I put my own spin on this in #513.  Let me know if that looks good to you!",
+          "createdAt": "2021-11-19T22:07:16Z",
+          "updatedAt": "2021-11-19T22:07:16Z"
+        },
+        {
+          "author": "yaronf",
+          "authorAssociation": "NONE",
+          "body": "@bifurcation Absolutely. Thank you!",
+          "createdAt": "2021-11-20T13:38:06Z",
+          "updatedAt": "2021-11-20T13:38:06Z"
         }
       ]
     },
@@ -4563,7 +4577,7 @@
       ],
       "body": "The terminology used in these sections is different, so that it's unclear if they're descriptions of the same operation with different levels of detail or entirely different operations performed at different times. I come in having read most of the original white paper, so that my intuition is that it's one operation performed against data stored in the tree structure. As such, I'm unclear how the `init_secret`->`epoch_secret` relates to the `leaf_secret` via the \"number of secrets [that] are derived from the epoch secret for different purposes\".\r\n\r\nAlso, The Group Creation section makes no reference to any of these secrets by name. I would kind of expect something called, `init_secret`, to be involved during group creation, but it doesn't seem like that's necessary. \r\n\r\nis `authenticated_data` defined anywhere? Is it application level data to be included as desired?",
       "createdAt": "2021-04-28T15:44:52Z",
-      "updatedAt": "2021-10-04T19:51:50Z",
+      "updatedAt": "2021-11-19T22:06:45Z",
       "closedAt": null,
       "comments": [
         {
@@ -4642,6 +4656,13 @@
           "body": "By \"two ratchets\", I was referring to the secrets derived at the leaves of the secret tree... i.e. the final values computed by `DeriveTreeSecret`. There's one using a label of \"application\" and one using a label of \"handshake\". The former is ratcheted for application messages, and the latter for handshake messages. In the diagram I referenced above, the label switches to \"secret\"... probably from an earlier iteration of the doc. In any case, I don't see a reason to have two secrets here. It's more to maintain for little benefit.\r\n\r\nSimply shifting leaves and then truncating the right side of the tree is sufficient to properly remove any arbitrary leaf from the tree? I guess maybe that works with the resolution computation you described, but that could like unmerge half the leaves between the departing index and the end.\r\n\r\nFor the AES-256-GCM authentication tag, for the `crypto` library in Node.js, the tag is retrieved with a separate call after the cipher is finalized (`cipher.getAuthTag()`), so that the ciphertext and the tag are two pieces of information that need to get formatted into a packet and transmitted. I understand that this is just one algorithm and others may only have the ciphertext. But for the ciphersuites that employ AES-256-GCM, two implementations might format the packets differently and be inoperable with each other. ..or there's already an agreed upon formatting that I don't know about. Moreover, the length of the tag is a configurable param for the algorithm, which should be specified somewhere.\r\n\r\nI get it now that recovery is just group creation using the same group ID with a resumption secret thrown in. I kind of like it being an External Init with the resumption secret thrown in. One message instead of N messages.\r\n\r\nMailing lists are terrible at organizing information (not that I'm doing any better putting all my topics in one Issue).",
           "createdAt": "2021-07-02T15:49:49Z",
           "updatedAt": "2021-07-02T15:49:49Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Hi @knightcode , finally getting around to addressing these comments.  Sorry it took a bit!\r\n\r\nNotes from a first read-through (before looking at the exchange with @kkohbrok):\r\n\r\n* Terminology between Ratchet Tree Evolution, Group Creation, Key Schedule - I\r\n  think this has been sorted out by some more recent changes.\r\n* Definition of `commit_secret` - This doesn't go in {{ratchet-tree-evolution}},\r\n  it is defined in the commit generation / handling sections\r\n* \"secret\" / \"handshake\" / \"application\" - Yes, this is intentional.  The first\r\n  derivation splits the application and handshake key chains, then both evolve\r\n  via \"secret\" derivation\r\n* GCM authentication tag - We assume the RFC 5116 AEAD interface, which has a\r\n  unitary ciphertext, not a separate ciphertext+tag.  Added a note to clarify.\r\n* Group creation and external init parts each have discussions in two parts -\r\n  Not immediately clear how to address this; will consider in a broader review.\r\n* Two ratchets per leaf node - Assuming you're talking about the `path_secret`\r\n  vs. `node_secret` distinction, this is to assure that each secret is only used\r\n  with one algortihm.  I have added a note to clarify.\r\n* Easier to understand resolution as depth-first search - Added this to the\r\n  description of resolution.\r\n* \"Truncate the tree...\" - Yep, missing part of the sentence. Reworded.\r\n* Resumption secret & ExternalInit - There's no connection between ExternalInit\r\n  and resumption secrets (just `external_pub`), and in any case, the only epoch\r\n  for which an ExternalInit can be constructed is the current one.  Otherwise,\r\n  you're forking history.  You're correct that the resumption secret is not\r\n  sufficient to join a group, and it's not meant to be.  It is only proof of\r\n  prior involvement with the group.\r\n* For members A, C, D, ... - Your representation of the secret knowledge here\r\n  isn't quite right.  C and D wouldn't know p[1], since it's not on their direct\r\n  path.  In your hypothetical, if A or B did an operation, they would encrypt to\r\n  the *resolution* of node 5, that is to both C and D.  This diagram seems\r\n  useful for building intuition, though, so I've added something like it to the\r\n  ratchet tree section.\r\n\r\n========\r\n\r\nNotes on responses to @kkohbrok:\r\n\r\n* The separate application and handshake ratchet to ensure that application and\r\n  handshake messages don't fate-share -- if the application keys are\r\n  compromised, that doesn't compromise the handshake keys.  While this might not\r\n  matter much in practice, I believe it helps with the security analysis.\r\n* Truncation is not how members are removed from the tree.  That's done by\r\n  blanking a member's leaf and parents.  Truncation is just garbage collection.\r\n  If you have a 1000-member group where leaf 1 is blank (starting at zero), and\r\n  the member at leaf 2 removes members at leaves 3-1000, then you'll end up with\r\n  a tree with three leaves (member A, blank, member B), and truncation will\r\n  clear out the now-blank leaves 3-1000 and all their parents.\r\n* Yeah, there's unfortunate divergence in AES-GCM interfaces.  The good news is\r\n  that even if an implementation produces a different layout, as long as you can\r\n  find the tag, you can rearrange things to match the desired layout here\r\n  (ciphertext || tag).\r\n",
+          "createdAt": "2021-11-19T22:06:45Z",
+          "updatedAt": "2021-11-19T22:06:45Z"
         }
       ]
     },
@@ -4824,15 +4845,15 @@
       "id": "I_kwDOBoyH6c49dYEO",
       "title": "`Ciphersuite` should be part of `PublicGroupStateTbs`",
       "url": "https://github.com/mlswg/mls-protocol/issues/498",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Am I missing something here, or should the ciphersuite really be part of the `PublicGroupStateTbs`? It's part of the `PublicGroupState`, but the way it is right now it doesn't get signed.",
       "createdAt": "2021-10-20T08:14:29Z",
-      "updatedAt": "2021-10-20T13:53:27Z",
-      "closedAt": null,
+      "updatedAt": "2021-11-19T20:22:47Z",
+      "closedAt": "2021-11-19T20:22:47Z",
       "comments": [
         {
           "author": "bifurcation",
@@ -4855,7 +4876,7 @@
       "labels": [],
       "body": "In many places, we use a `typed` pattern of struct, where we have a type uint, followed by a `select` statement decides the type of the following field based on the preceding type uint. For example the `Credential` struct:\r\n```\r\nstruct {\r\n    CredentialType credential_type;\r\n    select (Credential.credential_type) {\r\n        case basic:\r\n            BasicCredential;\r\n\r\n        case x509:\r\n            Certificate chain<1..2^32-1>;\r\n    };\r\n} Credential;\r\n```\r\nOther examples are `Content`/`ContentType`, `PSKType` in `PreSharedKey`, `Sender`/`SenderType` and `Proposal`/`ProposalType`.\r\n\r\nIn the context of [an attempt at creating a macro for this pattern](https://github.com/RustCrypto/formats/pull/125), @franziskuskiefer suggested that we actually define a generic struct for this similar to the `optional<T>` pattern.\r\n```\r\nstruct {\r\n    T type;\r\n    select(typed<T>.type) {\r\n        T.variant1: \r\n            Variant1 \r\n    }\r\n} typed<T>\r\n```\r\nIt would translate, for example, as follows for `typed<CredentialType>` (although we could then probably rename the enum from `CredentialType` to `Credential`:\r\n```\r\nstruct {\r\n    CredentialType credential_type;\r\n    select typed<CredentialType>.type {\r\n        CredentialType.basic: \r\n            Basic\r\n        ...\r\n    }\r\n} typed<CredentialType>\r\n```\r\nIt doesn't quite match up to what's currently in the spec (`Basic` instead of `BasicCredential`), but this rather naive approach is meant more as a basis for discussion than as a complete proposal. Let me know what you think!",
       "createdAt": "2021-10-20T12:22:51Z",
-      "updatedAt": "2021-10-21T11:12:56Z",
+      "updatedAt": "2021-11-19T20:48:42Z",
       "closedAt": null,
       "comments": [
         {
@@ -4871,6 +4892,13 @@
           "body": "We're already somewhat formally extending the TLS serialization format with the `option` type, so why not continue with this. I think it would be useful in the spec. It would be useful for implementers to have a guideline for their template magic. But it might also benefit others in the same way that we are benefiting from the TLS spec.",
           "createdAt": "2021-10-21T11:12:56Z",
           "updatedAt": "2021-10-21T11:12:56Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm not worried about perturbing the TLS serialization format.  I just don't think there's much savings to be had, given that you need to specify the mapping of enum values to types anyway.  ISTM the `variant` syntax I proposed above is about as compact/elegant as you could make it, so I would propose we either do that or just close this issue with no action.",
+          "createdAt": "2021-11-19T20:48:42Z",
+          "updatedAt": "2021-11-19T20:48:42Z"
         }
       ]
     },
@@ -4947,7 +4975,7 @@
       "labels": [],
       "body": "I suggest that we consider including a ciphersuite that enables AES256 GCM with SHA384 and that for signatures ECDSA with P-384 (and SHA-384) is also permitted. The NSA restricts commercial applications to certain algorithms for applications that are used in or in coordination with the U.S. federal government and, from a general availability perspective, adding this could expand protocol use potential. ",
       "createdAt": "2021-11-11T16:54:53Z",
-      "updatedAt": "2021-11-17T22:27:12Z",
+      "updatedAt": "2021-11-19T20:34:27Z",
       "closedAt": null,
       "comments": [
         {
@@ -4963,6 +4991,13 @@
           "body": "Both Suite B and alignment to the [Commercial Capability Packages](https://www.nsa.gov/Resources/Commercial-Solutions-for-Classified-Program/Capability-Packages/#data-at-rest). The other options currently in the spec, size accounted for, do not align to requirements.",
           "createdAt": "2021-11-17T22:27:12Z",
           "updatedAt": "2021-11-17T22:27:12Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "You didn't answer my question about forbidding the use of bigger curves/hashes.  Would the cases you're interested in be covered by the AES-256 / SHA-512 / P-521 suite?",
+          "createdAt": "2021-11-19T20:34:27Z",
+          "updatedAt": "2021-11-19T20:34:27Z"
         }
       ]
     },
@@ -5009,9 +5044,17 @@
       "labels": [],
       "body": "When a new joiner sends an external Commit, within the current structure, they have to generate and send **two** KeyPackages:  First in an Add proposal, and second in `Commit.path.leaf_key_package`.  Obviously, this is wasteful, since the second immediately overwrites the first.  It also complicates receiver processing, since the receiver has to find where the appropriate Add happened so that it knows the sender's index in the new tree, so that it knows how to apply the update path in the Commit.\r\n\r\nWe should remove the requirement for an Add commit in an external Commit, and instead assign the new member the leftmost free slot after all proposals have been applied, then apply the commit from there.",
       "createdAt": "2021-11-12T20:45:00Z",
-      "updatedAt": "2021-11-12T20:45:00Z",
+      "updatedAt": "2021-11-20T11:46:02Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I agree that the key package in the Add proposal is redundant.\r\nI'm not so sure it will simplify implementations so much, because key packages from the update path of a Commit are usually treated like Update proposals (e.g. the constraint that the identity must be the same between the old and new credential).\r\nTl;DR: I agree with the change, but I want to raise awareness about issues this introduces.",
+          "createdAt": "2021-11-20T11:46:02Z",
+          "updatedAt": "2021-11-20T11:46:02Z"
+        }
+      ]
     },
     {
       "number": 506,
@@ -36735,24 +36778,26 @@
       "id": "PR_kwDOBoyH6c4tfxic",
       "title": "Add ciphersuite field to `PublicGroupStateTBS`",
       "url": "https://github.com/mlswg/mls-protocol/pull/501",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "kkohbrok",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #498.",
       "createdAt": "2021-10-21T13:54:01Z",
-      "updatedAt": "2021-11-11T14:50:56Z",
+      "updatedAt": "2021-11-19T20:22:47Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
       "headRepository": "kkohbrok/mls-protocol",
       "headRefName": "add_ciphersuite_to_pgs",
-      "headRefOid": "0f6fb0ef7af0085434ad1040188b94878475fbec",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "d5b5954a813852b20a90aba1b41edb8283bfe097",
+      "closedAt": "2021-11-19T20:22:47Z",
+      "mergedAt": "2021-11-19T20:22:47Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "0aa8fce7086292984c40d55c629d99ef0c78a881"
+      },
       "comments": [],
       "reviews": [
         {
@@ -36794,6 +36839,39 @@
               "updatedAt": "2021-11-11T14:50:56Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wYLab",
+          "commit": {
+            "abbreviatedOid": "0f6fb0e"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-11-19T20:21:24Z",
+          "updatedAt": "2021-11-19T20:21:24Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "No.  That's why they're separate fields in KeyPackage.",
+              "createdAt": "2021-11-19T20:21:24Z",
+              "updatedAt": "2021-11-19T20:21:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wYLqk",
+          "commit": {
+            "abbreviatedOid": "d5b5954"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-11-19T20:22:41Z",
+          "updatedAt": "2021-11-19T20:22:41Z",
+          "comments": []
         }
       ]
     },
@@ -36809,7 +36887,7 @@
       "labels": [],
       "body": "Filing this on behalf of @TWal after discussions with @kkohbrok and @karthikbhargavan.\r\n\r\nThe idea behind it is that the array representation is only one possible implementation for the tree. This PR removes the reliance on nodes indices to address nodes in the tree.\r\n\r\nI'll leave it to @TWal to write a more detailed description.",
       "createdAt": "2021-11-15T13:20:37Z",
-      "updatedAt": "2021-11-17T13:53:55Z",
+      "updatedAt": "2021-11-19T22:58:24Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
@@ -36827,6 +36905,13 @@
           "body": "Thank you Franziskus!\r\n\r\nThe array representation is used in three places:\r\n- in the tree hash (section 7.6),\r\n- in the secret tree (section 8.3) and in the ratchet (section 8.4),\r\n- in the ratchet_tree extension (section 11.3).\r\n\r\nIn the tree hash, we remove the node index in `ParentNodeTreeHashInput`, but keep a leaf index in `LeafNodeHashInput`. The leaf index is actually not needed if we only use the tree hash of the root, but if the protocol evolves later to use tree hashes of subtrees, it is actually important since they give information about where the subtree is located in the whole tree.\r\n\r\nIn the secret tree, we replace the node indices in the KDF by some \"left\" and \"right\" information which are sufficient.\r\n\r\nFor the ratchet_tree extension, we state that the order in which the nodes are serialized is the in-order traversal of the tree.\r\n\r\nThis allows us to remove the whole tree-math section.",
           "createdAt": "2021-11-16T10:27:59Z",
           "updatedAt": "2021-11-16T10:27:59Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "One thing that I noticed working on #513 -- On Remove we truncate the tree to remove unused leaves from the right side.  That algorithm is clear when we're talking about an array representation; just find the rightmost non-blank leaf and remove every node (leaf or not) to the right of that index.  It seems like we should redefine that algorithm with this change.",
+          "createdAt": "2021-11-19T22:58:22Z",
+          "updatedAt": "2021-11-19T22:58:22Z"
         }
       ],
       "reviews": [
@@ -36973,6 +37058,39 @@
               "updatedAt": "2021-11-17T13:53:55Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wYL7W",
+          "commit": {
+            "abbreviatedOid": "9dfd741"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-11-19T20:24:07Z",
+          "updatedAt": "2021-11-19T20:24:08Z",
+          "comments": [
+            {
+              "originalPosition": 333,
+              "body": "I can live with that.  @kkohbrok I think you were going to start an \"implementation considerations\" document?",
+              "createdAt": "2021-11-19T20:24:07Z",
+              "updatedAt": "2021-11-19T20:24:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wYNek",
+          "commit": {
+            "abbreviatedOid": "9dfd741"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "@TWal If you could add the ratchet tree description I provided, I'm OK to merge this.",
+          "createdAt": "2021-11-19T20:33:02Z",
+          "updatedAt": "2021-11-19T20:33:02Z",
+          "comments": []
         }
       ]
     },
@@ -36981,26 +37099,42 @@
       "id": "PR_kwDOBoyH6c4uitKX",
       "title": "Add value for required_capabilities extension",
       "url": "https://github.com/mlswg/mls-protocol/pull/508",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "franziskuskiefer",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2021-11-15T16:18:22Z",
-      "updatedAt": "2021-11-15T16:18:22Z",
+      "updatedAt": "2021-11-19T20:20:21Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
       "headRepository": "franziskuskiefer/mls-protocol",
       "headRefName": "patch-5",
       "headRefOid": "3c240274dd2bebb0d96eba3a3bba00e844343863",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2021-11-19T20:20:21Z",
+      "mergedAt": "2021-11-19T20:20:21Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "bbab27dbd82adcde5a7d61b6ee1d6db36be8ec73"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4wYLJS",
+          "commit": {
+            "abbreviatedOid": "3c24027"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-11-19T20:20:16Z",
+          "updatedAt": "2021-11-19T20:20:16Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 509,
@@ -37046,9 +37180,9 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "Fixes #506 ",
+      "body": "Fixes #506 \r\nFixes #504",
       "createdAt": "2021-11-16T22:43:47Z",
-      "updatedAt": "2021-11-17T14:19:23Z",
+      "updatedAt": "2021-11-19T22:52:21Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
@@ -37150,6 +37284,204 @@
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "no-add-ext-commit",
       "headRefOid": "5a244893cd48393d091743f9533da1eb15326e84",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 512,
+      "id": "PR_kwDOBoyH6c4uymDz",
+      "title": "Remove explicit version pin on HPKE",
+      "url": "https://github.com/mlswg/mls-protocol/pull/512",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "HPKE is in the RFC Editor queue, so there shouldn't be any further changes.\r\n\r\nFixes #500 ",
+      "createdAt": "2021-11-19T20:39:01Z",
+      "updatedAt": "2021-11-20T11:51:17Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "0aa8fce7086292984c40d55c629d99ef0c78a881",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "hpke-version",
+      "headRefOid": "d371e31e8fc737a6823f9f6a38372b89b6d4d9d6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4wY3Jk",
+          "commit": {
+            "abbreviatedOid": "d371e31"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-11-20T11:51:17Z",
+          "updatedAt": "2021-11-20T11:51:17Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 513,
+      "id": "PR_kwDOBoyH6c4uywxD",
+      "title": "Two editorial issues",
+      "url": "https://github.com/mlswg/mls-protocol/pull/513",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #447 \r\nFixes #468 ",
+      "createdAt": "2021-11-19T22:06:36Z",
+      "updatedAt": "2021-11-20T11:58:39Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "0aa8fce7086292984c40d55c629d99ef0c78a881",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "editorial",
+      "headRefOid": "5f86dddea023613f6c670d176fac6331a71d0afe",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4wY3M5",
+          "commit": {
+            "abbreviatedOid": "5f86ddd"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2021-11-20T11:54:13Z",
+          "updatedAt": "2021-11-20T11:58:39Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "```suggestion\r\nThis remove operation allows MLS to efficiently achieve\r\n```",
+              "createdAt": "2021-11-20T11:54:13Z",
+              "updatedAt": "2021-11-20T11:58:39Z"
+            },
+            {
+              "originalPosition": 20,
+              "body": "```suggestion\r\npost-compromise security.  In an Update proposal or a full Commit message, an old, possibly\r\n```",
+              "createdAt": "2021-11-20T11:54:38Z",
+              "updatedAt": "2021-11-20T11:58:40Z"
+            },
+            {
+              "originalPosition": 49,
+              "body": "```suggestion\r\nprivate keys of the tree held by each participant would be as follows, where `_`\r\n```",
+              "createdAt": "2021-11-20T11:55:41Z",
+              "updatedAt": "2021-11-20T11:58:40Z"
+            },
+            {
+              "originalPosition": 96,
+              "body": "Thi reintroduces HPKE draft-08. I guess #512 should be merged after this PR.",
+              "createdAt": "2021-11-20T11:58:19Z",
+              "updatedAt": "2021-11-20T11:58:40Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 514,
+      "id": "PR_kwDOBoyH6c4uyzzj",
+      "title": "384 Ciphersuite Addition",
+      "url": "https://github.com/mlswg/mls-protocol/pull/514",
+      "state": "OPEN",
+      "author": "br-hale",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #503 ",
+      "createdAt": "2021-11-19T22:30:12Z",
+      "updatedAt": "2021-11-19T23:05:05Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "0aa8fce7086292984c40d55c629d99ef0c78a881",
+      "headRepository": "br-hale/mls-protocol",
+      "headRefName": "master",
+      "headRefOid": "eda75bac657d38d5c3459d96736ac8892edb5263",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4wYh9J",
+          "commit": {
+            "abbreviatedOid": "57c5883"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "@br-hale I may have been over-optimistic when I said this was a one-line PR :)  Could you please update the tables below the change you made? You need a row of the following form:\r\n\r\n```\r\n| Value  | KEM    | KDF    | AEAD   | Hash   | Signature              |\r\n|:-------|:-------|:-------|:-------|:-------|:-----------------------|\r\n| 0x0007 | 0x0011 | 0x0002 | 0x0002 | SHA384 | ecdsa_secp384r1_sha384 |\r\n```\r\n\r\n... and to update this text:\r\n\r\n>  In the ciphersuites defined above, \"SHA256\" and \"SHA512\" refer to the SHA-256 and SHA-512 functions defined in {{SHS}}.\r\n\r\nWith those two changes, I think this is good to merge.",
+          "createdAt": "2021-11-19T22:46:29Z",
+          "updatedAt": "2021-11-19T22:51:32Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "```suggestion\r\n| 0x0007          | MLS10_256_DHKEMP384_AES256GCM_SHA384_P384.            | Y           | RFC XXXX  |\r\n```",
+              "createdAt": "2021-11-19T22:46:29Z",
+              "updatedAt": "2021-11-19T22:51:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wYj5A",
+          "commit": {
+            "abbreviatedOid": "eda75ba"
+          },
+          "author": "br-hale",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-11-19T23:05:05Z",
+          "updatedAt": "2021-11-19T23:05:05Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "You committed to a one-line change! \r\nNo problem - changes made, as well as a typo correction that was lingering in the spec.",
+              "createdAt": "2021-11-19T23:05:05Z",
+              "updatedAt": "2021-11-19T23:05:05Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 515,
+      "id": "PR_kwDOBoyH6c4uzS2Z",
+      "title": "Add protocol version to PGS",
+      "url": "https://github.com/mlswg/mls-protocol/pull/515",
+      "state": "OPEN",
+      "author": "raphaelrobert",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "This is a follow-up to #501 (which was merged before all comments were addressed).",
+      "createdAt": "2021-11-20T11:39:00Z",
+      "updatedAt": "2021-11-20T11:39:00Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "0aa8fce7086292984c40d55c629d99ef0c78a881",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "pgs-follow-up",
+      "headRefOid": "e8a6d08f6f64c09cc1cc297265da3d2c2239de3c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
