@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-11-21T01:04:48.790485+00:00",
+  "timestamp": "2021-11-23T01:02:17.584467+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -36887,13 +36887,13 @@
       "labels": [],
       "body": "Filing this on behalf of @TWal after discussions with @kkohbrok and @karthikbhargavan.\r\n\r\nThe idea behind it is that the array representation is only one possible implementation for the tree. This PR removes the reliance on nodes indices to address nodes in the tree.\r\n\r\nI'll leave it to @TWal to write a more detailed description.",
       "createdAt": "2021-11-15T13:20:37Z",
-      "updatedAt": "2021-11-19T22:58:24Z",
+      "updatedAt": "2021-11-22T14:01:44Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_tree_math",
-      "headRefOid": "9dfd74126e4bf3dfc6bf600d029a1ea26194b785",
+      "headRefOid": "7b4704ef4b79ec7e80f5ebc690620eadcad32723",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -36912,6 +36912,34 @@
           "body": "One thing that I noticed working on #513 -- On Remove we truncate the tree to remove unused leaves from the right side.  That algorithm is clear when we're talking about an array representation; just find the rightmost non-blank leaf and remove every node (leaf or not) to the right of that index.  It seems like we should redefine that algorithm with this change.",
           "createdAt": "2021-11-19T22:58:22Z",
           "updatedAt": "2021-11-19T22:58:22Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Suggested text for truncation:\r\n\r\n* Truncate the tree:\r\n    * Remove any blank leaf nodes to the right of the rightmost non-blank leaf\r\n    * Perform the following steps until all parent nodes have two children:\r\n        * If an intermediate node has no children, remove it\r\n        * If an intermediate node N has one child C, remove the node and place C into the same child role with regard to N.\r\n        * If the root node R of the tree has only one child C, remove R and assign C as the root of the tree\r\n\r\nFor example, suppose we had a tree with six leaves, of which (0, 1, 2, 5) were populated, (3, 4) blank, and in this situation a Remove was issued for the member at leaf 5.  Then the Remove would result in the following changes to the tree, resulting in a tree with three leaves, with root node `V`:\r\n\r\n~~~~~\r\n                         X                                    X\r\n                   ______|___                           ______|___\r\n                  /          \\       Blank             /          \\  \r\nStart:           V           |       path             V           |  \r\n               __|__         |       =====>         __|__         |  \r\n              /     \\        |                     /     \\        | \r\n             U       W       Y                    U       W       Y  \r\n            / \\     / \\     / \\                  / \\     / \\     / \\ \r\n           A   B   C   _   _   F                A   B   C   _   _   F\r\n\r\n\r\n                         _                                    _\r\nRemove             ______|___                           ______|   \r\nblank             /          \\       No                /             \r\nleaves           V           |       children         V              \r\n=====>         __|__         |       =====>         __|__            \r\n              /     \\        |                     /     \\          \r\n             U       W       _                    U       W          \r\n            / \\     /                            / \\     / \\         \r\n           A   B   C                            A   B   C   _        \r\n\r\n\r\n                                                               \r\nOne                                                               \r\nchild                                One                             \r\nroot             V                   child            V              \r\n=====>         __|__                 =====>         __|_             \r\n              /     \\                              /    \\           \r\n             U       W                            U     |            \r\n            / \\     /                            / \\    |            \r\n           A   B   C                            A   B   C            \r\n~~~~~\r\n\r\nNote that if a batch of Removes is being processed, the truncation operation can be done once after all paths have been blanked.",
+          "createdAt": "2021-11-21T15:09:29Z",
+          "updatedAt": "2021-11-21T15:09:29Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We may need a similar description of how you extend the tree to the right on Add.  I think the algorithm to add a leaf node `N` would be:\r\n\r\n* We say that the subtree rooted at a node is \"full\" if the number of leaves under it is a power of 2.\r\n* Let X = the parent of the rightmost leaf.  While X is full and X is not the root, let X = parent(X)\r\n* If X is the root, add a new root node Y with left child X and right child N\r\n* If X is not the root (and thus X is not full):\r\n    * Let L = left(X) and R = right(X)\r\n    * Set right(X) to a new node with left child R and right child N\r\n \r\nIt might be better to put these algorithms up in the tree section, as opposed to down here in the protocol.",
+          "createdAt": "2021-11-21T15:21:56Z",
+          "updatedAt": "2021-11-21T15:21:56Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "It makes me a little sad that these are so much more complicated than \"truncate the array\" and \"add two slots to the array\".  I guess I can understand the desire to make clear what happens to the logical tree, but it seems like we're introducing a lot of complexity.",
+          "createdAt": "2021-11-21T15:23:36Z",
+          "updatedAt": "2021-11-21T15:23:36Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The Add algorithm doesn't work on the following tree:\r\n\r\n          V  \r\n        __|_ \r\n       /    \\\r\n      U     |\r\n     / \\    |\r\n    A   B   C\r\n\r\nAfter the While, we would have X = V and take the \"If X is the root\" step, which is wrong because X is not full.\r\n\r\nHere is a corrected Add algorithm:\r\n- Let X = the parent of the rightmost leaf. While X is full and X is not the root, let X = parent(X)\r\n- If X is not full:\r\n  - Let L = left(X) and R = right(X)\r\n  - Set right(X) to a new node with left child R and right child N\r\n- If X is full (and thus X is the root): add a new root node Y with left child X and right child N\r\n\r\nI'm wondering if these algorithms are really necessary. It doesn't hurt to include them as an example on how to do things, but I think we can do simpler explanations using the fact that there is a unique left-balanced tree shape for every number of leaves.\r\n\r\nInformally, we could say:\r\n- for Add: \"add enough blank parent node to have a valid left-balanced tree with n+1 leaves\"\r\n- for Remove: \"remove all leaves to the right of the right-most non-blank leaf, and remove parents nodes to have a valid left-balanced tree\".\r\n\r\nI think explaining what is the expected output of the procedure, rather than explaining one way to do the procedure is easier to understand.\r\n\r\n> It makes me a little sad that these are so much more complicated than \"truncate the array\" and \"add two slots to the array\". I guess I can understand the desire to make clear what happens to the logical tree, but it seems like we're introducing a lot of complexity.\r\n\r\nIt looks like added complexity, but for a new reader trying to understand MLS, I think it is easier to understand changes on the tree explained this way than understanding what happens to the tree when we do modifications on the underlying array representation.",
+          "createdAt": "2021-11-22T13:45:14Z",
+          "updatedAt": "2021-11-22T13:45:14Z"
         }
       ],
       "reviews": [
@@ -37091,6 +37119,66 @@
           "createdAt": "2021-11-19T20:33:02Z",
           "updatedAt": "2021-11-19T20:33:02Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wZRWt",
+          "commit": {
+            "abbreviatedOid": "9dfd741"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-11-21T14:55:31Z",
+          "updatedAt": "2021-11-21T14:55:31Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I would consider using single letters, from the end of the alphabet, for these.  For example:\r\n\r\n```\r\n              X\r\n        ______|______\r\n       /             \\\r\n      V               Z\r\n    __|__           __|\r\n   /     \\         /   \\\r\n  U       W       Y     |\r\n / \\     / \\     / \\    |\r\nA   B   C   D   E   F   G\r\n```",
+              "createdAt": "2021-11-21T14:55:31Z",
+              "updatedAt": "2021-11-21T14:56:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wbruE",
+          "commit": {
+            "abbreviatedOid": "d8e279b"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-11-22T13:55:32Z",
+          "updatedAt": "2021-11-22T13:55:33Z",
+          "comments": [
+            {
+              "originalPosition": 322,
+              "body": "I added the description you provided, and additionally replaced `1 << k` by `2**k` as I think it is more readable.",
+              "createdAt": "2021-11-22T13:55:32Z",
+              "updatedAt": "2021-11-22T13:55:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wbtin",
+          "commit": {
+            "abbreviatedOid": "7b4704e"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-11-22T14:01:44Z",
+          "updatedAt": "2021-11-22T14:01:44Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "That's indeed better like this, I commited it.",
+              "createdAt": "2021-11-22T14:01:44Z",
+              "updatedAt": "2021-11-22T14:01:44Z"
+            }
+          ]
         }
       ]
     },
