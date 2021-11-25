@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-11-23T01:02:17.584467+00:00",
+  "timestamp": "2021-11-25T01:03:05.890427+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4876,7 +4876,7 @@
       "labels": [],
       "body": "In many places, we use a `typed` pattern of struct, where we have a type uint, followed by a `select` statement decides the type of the following field based on the preceding type uint. For example the `Credential` struct:\r\n```\r\nstruct {\r\n    CredentialType credential_type;\r\n    select (Credential.credential_type) {\r\n        case basic:\r\n            BasicCredential;\r\n\r\n        case x509:\r\n            Certificate chain<1..2^32-1>;\r\n    };\r\n} Credential;\r\n```\r\nOther examples are `Content`/`ContentType`, `PSKType` in `PreSharedKey`, `Sender`/`SenderType` and `Proposal`/`ProposalType`.\r\n\r\nIn the context of [an attempt at creating a macro for this pattern](https://github.com/RustCrypto/formats/pull/125), @franziskuskiefer suggested that we actually define a generic struct for this similar to the `optional<T>` pattern.\r\n```\r\nstruct {\r\n    T type;\r\n    select(typed<T>.type) {\r\n        T.variant1: \r\n            Variant1 \r\n    }\r\n} typed<T>\r\n```\r\nIt would translate, for example, as follows for `typed<CredentialType>` (although we could then probably rename the enum from `CredentialType` to `Credential`:\r\n```\r\nstruct {\r\n    CredentialType credential_type;\r\n    select typed<CredentialType>.type {\r\n        CredentialType.basic: \r\n            Basic\r\n        ...\r\n    }\r\n} typed<CredentialType>\r\n```\r\nIt doesn't quite match up to what's currently in the spec (`Basic` instead of `BasicCredential`), but this rather naive approach is meant more as a basis for discussion than as a complete proposal. Let me know what you think!",
       "createdAt": "2021-10-20T12:22:51Z",
-      "updatedAt": "2021-11-19T20:48:42Z",
+      "updatedAt": "2021-11-24T07:53:14Z",
       "closedAt": null,
       "comments": [
         {
@@ -4899,6 +4899,20 @@
           "body": "I'm not worried about perturbing the TLS serialization format.  I just don't think there's much savings to be had, given that you need to specify the mapping of enum values to types anyway.  ISTM the `variant` syntax I proposed above is about as compact/elegant as you could make it, so I would propose we either do that or just close this issue with no action.",
           "createdAt": "2021-11-19T20:48:42Z",
           "updatedAt": "2021-11-19T20:48:42Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Sounds good to me. An alternative would be to put this in the implementation-considerations doc. It currently doesn't have any content, so this might be a good first contribution.",
+          "createdAt": "2021-11-23T14:02:14Z",
+          "updatedAt": "2021-11-23T14:02:14Z"
+        },
+        {
+          "author": "franziskuskiefer",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I suggest to move this to the implementation-considerations doc.",
+          "createdAt": "2021-11-24T07:53:13Z",
+          "updatedAt": "2021-11-24T07:53:13Z"
         }
       ]
     },
