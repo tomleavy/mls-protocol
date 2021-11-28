@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-11-25T01:03:05.890427+00:00",
+  "timestamp": "2021-11-28T01:03:36.587775+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -5083,6 +5083,22 @@
       "body": "Right now, we use hash-based identifiers to reference KeyPackages (e.g., in KeyPackageID) and Proposals (ProposalOrRef).  To avoid truncating hashes, we use full-sized hashes, which are (a) much larger than necessary and (b) vary in size depend on the ciphersuite.\r\n\r\nWe should consider moving toward hash-identifiers that are of a fixed size just long enough to make collisions negligible (say 128 bits, like a UUID).  A rough proposal:\r\n\r\n```\r\nopaque HashIdentifier[16];\r\n\r\nMakeHash(value) = KDF.expand(KDF.extract(\"\", value), \"MLS 1.0 id\", 16)\r\n```",
       "createdAt": "2021-11-12T23:22:06Z",
       "updatedAt": "2021-11-12T23:22:06Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 516,
+      "id": "I_kwDOBoyH6c4_YcyV",
+      "title": "Discard pending Update proposals for the sender if a `path` is included",
+      "url": "https://github.com/mlswg/mls-protocol/issues/516",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Any Update proposal for the sender is redundant if the Commit includes a `path`.",
+      "createdAt": "2021-11-25T09:59:49Z",
+      "updatedAt": "2021-11-25T09:59:49Z",
       "closedAt": null,
       "comments": []
     }
@@ -37250,7 +37266,7 @@
       "labels": [],
       "body": "The specification currently assumes that a Credential provides a singular identity for a client, when in reality that is not the case.  For example, X509Credential can provide a whole collection of identities, and it's up to the application to decide if its preferred identity is among them.  Just like in TLS, a server can send a cert with 100 domains, but the TLS client knows which one it's looking for.\r\n\r\nThis PR refactors the parts of the spec that refer to identity to be consistent with this idea.  The main impacts are to processing of Update and Remove-within-External-Commit, both cases in which you want the new KeyPackage to logically represent the same identity as the old one.\r\n\r\nThis PR also removes the `endpoint_id` field from KeyPackage.  Since we now reference KeyPackages by KeyPackageID, there's no longer a need for a separate identifier.  (Unless we want an identifier that's stable across epochs, but (a) it's not clear to me that that is needed in general and (b) it can easily be added in an extension, as in fact we have done in Webex.)",
       "createdAt": "2021-11-16T22:20:20Z",
-      "updatedAt": "2021-11-16T22:21:34Z",
+      "updatedAt": "2021-11-25T09:42:10Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
@@ -37268,6 +37284,13 @@
           "body": "How appropriate that this is PR (X.)#509 !",
           "createdAt": "2021-11-16T22:20:45Z",
           "updatedAt": "2021-11-16T22:21:34Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The advantage of keeping an `endpoint_id` is that we can mandate in the spec that it can't change across epochs. While if we have a proprietary extension that contains an identifier, every implementation would have to be aware of that extension and enforce that it doesn't change across updates. So I'd be in favor of keeping it.",
+          "createdAt": "2021-11-25T09:42:10Z",
+          "updatedAt": "2021-11-25T09:42:10Z"
         }
       ],
       "reviews": []
@@ -37284,7 +37307,7 @@
       "labels": [],
       "body": "Fixes #506 \r\nFixes #504",
       "createdAt": "2021-11-16T22:43:47Z",
-      "updatedAt": "2021-11-19T22:52:21Z",
+      "updatedAt": "2021-11-25T07:20:25Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
@@ -37364,6 +37387,19 @@
               "updatedAt": "2021-11-17T14:19:23Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4wnX0F",
+          "commit": {
+            "abbreviatedOid": "3c33744"
+          },
+          "author": "franziskuskiefer",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-11-25T07:20:25Z",
+          "updatedAt": "2021-11-25T07:20:25Z",
+          "comments": []
         }
       ]
     },
