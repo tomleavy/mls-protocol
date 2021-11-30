@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 23 May 2022                                     Inria & Mozilla
+Expires: 3 June 2022                                     Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 23 May 2022                                     Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                        19 November 2021
+                                                        30 November 2021
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 May 2022.
+   This Internet-Draft will expire on 3 June 2022.
 
 Copyright Notice
 
@@ -3116,6 +3116,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    follows:
 
    struct {
+       ProtocolVersion version = mls10;
        CipherSuite cipher_suite;
        opaque group_id<0..255>;
        uint64 epoch;
