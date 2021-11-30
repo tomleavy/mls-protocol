@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 23 May 2022                                     Inria & Mozilla
+Expires: 3 June 2022                                     Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 23 May 2022                                     Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                        19 November 2021
+                                                        30 November 2021
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 May 2022.
+   This Internet-Draft will expire on 3 June 2022.
 
 Copyright Notice
 
@@ -681,11 +681,11 @@ Table of Contents
    needed to encrypt to each participant individually (where N is the
    number of members in the group).
 
-   This efficient remove operation allows MLS to efficiently achieve
-   post-compromise security.  In an Update or Commit message, an old,
-   possibly compromised representation of a member is effeciently
-   removed from the group and replaced with a freshly generated
-   instance.
+   This remove operation allows MLS to efficiently achieve post-
+   compromise security.  In an Update proposal or a full Commit message,
+   an old, possibly compromised representation of a member is
+   effeciently removed from the group and replaced with a freshly
+   generated instance.
 
 5.1.  Tree Computation Terminology
 
@@ -888,7 +888,7 @@ Table of Contents
    For example, consider a four-member group (A, B, C, D) where the node
    above the right two members is blank.  (This is what it would look
    like if A created a group with B, C, and D.)  Then the public state
-   of the tree and the views of the private keys of the tree held be
+   of the tree and the views of the private keys of the tree held by
    each participant would be as follows, where _ represents a blank
    node, ? represents an unknown private key, and pk(X) represents the
    public key corresponding to the private key X:
