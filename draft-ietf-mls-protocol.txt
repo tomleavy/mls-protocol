@@ -3176,12 +3176,9 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    *  The proposals included by value in an External Commit MUST meet
       the following conditions:
 
-      -  There MUST be a single Add proposal that adds the new issuing
-         new member to the group
-
       -  There MUST be a single ExternalInit proposal
 
-      -  There MUST NOT be any Update proposals
+      -  There MUST NOT be any Add or Update proposals
 
       -  If a Remove proposal is present, then the credential and
          endpoint_id of the removed leaf MUST be the same as the
@@ -3193,7 +3190,9 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
       -  There MUST NOT be any ExternalInit proposals
 
    *  External Commits MUST contain a path field (and is therefore a
-      "full" Commit)
+      "full" Commit).  The joiner is added at the leftmost free leaf
+      node (just as if they were added with an Add proposal), and the
+      path is calculated relative to that leaf node.
 
    *  External Commits MUST be signed by the new member.  In particular,
       the signature on the enclosing MLSPlaintext MUST verify using the
