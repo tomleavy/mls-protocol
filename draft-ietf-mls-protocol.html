@@ -1026,11 +1026,11 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">MLS</td>
-<td class="right">November 2021</td>
+<td class="right">December 2021</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 3 June 2022</td>
+<td class="center">Expires 4 June 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2021-11-30" class="published">30 November 2021</time>
+<time datetime="2021-12-01" class="published">1 December 2021</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-06-03">3 June 2022</time></dd>
+<dd class="expires"><time datetime="2022-06-04">4 June 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 June 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 4 June 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -4368,7 +4368,11 @@ Proposals with a non-default proposal type MUST NOT be included in a commit
 unless the proposal type is supported by all the members of the group that will
 process the Commit (i.e., not including any members being added or removed by
 the Commit).<a href="#section-11.2-5" class="pilcrow">¶</a></p>
-<p id="section-11.2-6">If there are multiple proposals that apply to the same leaf, the committer
+<p id="section-11.2-6">The sender of a Commit SHOULD NOT include any Update proposals that the sender
+themselves generated.  If sender generated one or more Update proposals during
+an epoch, then it SHOULD instead update its leaf and direct path by sending
+<code>path</code> field in the Commit.<a href="#section-11.2-6" class="pilcrow">¶</a></p>
+<p id="section-11.2-7">If there are multiple proposals that apply to the same leaf, the committer
 chooses one and includes only that one in the Commit, considering the rest
 invalid. The committer MUST prefer any Remove received, or the most recent
 Update for the leaf if there are no Removes. If there are multiple Add proposals
@@ -4379,22 +4383,22 @@ tuple that matches that of an existing KeyPackage in the group MUST be
 considered invalid. The comitter MUST consider invalid any Add or Update
 proposal if the Credential in the contained KeyPackage shares the same signature
 key with a Credential in any leaf of the group, or indeed if the KeyPackage
-shares the same <code>hpke_init_key</code> with another KeyPackage in the group.<a href="#section-11.2-6" class="pilcrow">¶</a></p>
-<p id="section-11.2-7">The Commit MUST NOT combine proposals sent within different epochs. In the event
+shares the same <code>hpke_init_key</code> with another KeyPackage in the group.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
+<p id="section-11.2-8">The Commit MUST NOT combine proposals sent within different epochs. In the event
 that a valid proposal is omitted from the next Commit, the sender of the
-proposal SHOULD retransmit it in the new epoch.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
-<p id="section-11.2-8">A member of the group MAY send a Commit that references no proposals at all,
+proposal SHOULD retransmit it in the new epoch.<a href="#section-11.2-8" class="pilcrow">¶</a></p>
+<p id="section-11.2-9">A member of the group MAY send a Commit that references no proposals at all,
 which would thus have an empty <code>proposals</code> vector.  Such
 a Commit resets the sender's leaf and the nodes along its direct path, and
 provides forward secrecy and post-compromise security with regard to the sender
 of the Commit.  An Update proposal can be regarded as a "lazy" version of this
-operation, where only the leaf changes and intermediate nodes are blanked out.<a href="#section-11.2-8" class="pilcrow">¶</a></p>
-<p id="section-11.2-9">The <code>path</code> field of a Commit message MUST be populated if the Commit covers at
+operation, where only the leaf changes and intermediate nodes are blanked out.<a href="#section-11.2-9" class="pilcrow">¶</a></p>
+<p id="section-11.2-10">The <code>path</code> field of a Commit message MUST be populated if the Commit covers at
 least one Update or Remove proposal. The <code>path</code> field MUST also be populated
 if the Commit covers no proposals at all (i.e., if the proposals vector
 is empty). The <code>path</code> field MAY be omitted if the Commit covers only Add
-proposals.  In pseudocode, the logic for validating a Commit is as follows:<a href="#section-11.2-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-11.2-10">
+proposals.  In pseudocode, the logic for validating a Commit is as follows:<a href="#section-11.2-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-11.2-11">
 <pre>
 hasUpdates = false
 hasRemoves = false
@@ -4408,256 +4412,256 @@ for i, id in commit.proposals:
 
 if len(commit.proposals) == 0 || hasUpdates || hasRemoves:
   assert(commit.path != null)
-</pre><a href="#section-11.2-10" class="pilcrow">¶</a>
+</pre><a href="#section-11.2-11" class="pilcrow">¶</a>
 </div>
-<p id="section-11.2-11">To summarize, a Commit can have three different configurations, with different
-uses:<a href="#section-11.2-11" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-11.2-12">
-<li id="section-11.2-12.1">An "empty" Commit that references no proposals, which updates the committer's
-contribution to the group and provides PCS with regard to the committer.<a href="#section-11.2-12.1" class="pilcrow">¶</a>
+<p id="section-11.2-12">To summarize, a Commit can have three different configurations, with different
+uses:<a href="#section-11.2-12" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-11.2-13">
+<li id="section-11.2-13.1">An "empty" Commit that references no proposals, which updates the committer's
+contribution to the group and provides PCS with regard to the committer.<a href="#section-11.2-13.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-11.2-12.2">A "partial" Commit that references Add, PreSharedKey, or ReInit proposals but
+          <li id="section-11.2-13.2">A "partial" Commit that references Add, PreSharedKey, or ReInit proposals but
 where the path is empty. Such a commit doesn't provide PCS with regard to the
-committer.<a href="#section-11.2-12.2" class="pilcrow">¶</a>
+committer.<a href="#section-11.2-13.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-11.2-12.3">A "full" Commit that references proposals of any type, which provides FS with
+          <li id="section-11.2-13.3">A "full" Commit that references proposals of any type, which provides FS with
 regard to any removed members and PCS for the committer and any updated
-members.<a href="#section-11.2-12.3" class="pilcrow">¶</a>
+members.<a href="#section-11.2-13.3" class="pilcrow">¶</a>
 </li>
         </ol>
-<p id="section-11.2-13">When creating or processing a Commit, three different ratchet trees and
-their associated GroupContexts are used:<a href="#section-11.2-13" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-11.2-14">
-<li id="section-11.2-14.1">"Old" refers to the ratchet tree and GroupContext for the epoch before the
+<p id="section-11.2-14">When creating or processing a Commit, three different ratchet trees and
+their associated GroupContexts are used:<a href="#section-11.2-14" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-11.2-15">
+<li id="section-11.2-15.1">"Old" refers to the ratchet tree and GroupContext for the epoch before the
 commit.  The old GroupContext is used when signing the MLSPlainText so that
 existing group members can verify the signature before processing the
-commit.<a href="#section-11.2-14.1" class="pilcrow">¶</a>
+commit.<a href="#section-11.2-15.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-11.2-14.2">"Provisional" refers to the ratchet tree and GroupContext constructed after
+          <li id="section-11.2-15.2">"Provisional" refers to the ratchet tree and GroupContext constructed after
 applying the proposals that are referenced by the Commit.  The provisional
 GroupContext uses the epoch number for the new epoch, and the old confirmed
 transcript hash.  This is used when creating the UpdatePath, if the
-UpdatePath is needed.<a href="#section-11.2-14.2" class="pilcrow">¶</a>
+UpdatePath is needed.<a href="#section-11.2-15.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-11.2-14.3">"New" refers to the ratchet tree and GroupContext constructed after applying
+          <li id="section-11.2-15.3">"New" refers to the ratchet tree and GroupContext constructed after applying
 the proposals and the UpdatePath (if any).  The new GroupContext uses the
 epoch number for the new epoch, and the new confirmed transcript hash.  This
 is used when deriving the new epoch secrets, and is the only GroupContext
-that newly-added members will have.<a href="#section-11.2-14.3" class="pilcrow">¶</a>
+that newly-added members will have.<a href="#section-11.2-15.3" class="pilcrow">¶</a>
 </li>
         </ol>
-<p id="section-11.2-15">A member of the group creates a Commit message and the corresponding Welcome
-message at the same time, by taking the following steps:<a href="#section-11.2-15" class="pilcrow">¶</a></p>
+<p id="section-11.2-16">A member of the group creates a Commit message and the corresponding Welcome
+message at the same time, by taking the following steps:<a href="#section-11.2-16" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-16.1">Construct an initial Commit object with the <code>proposals</code>
+<li class="normal" id="section-11.2-17.1">Construct an initial Commit object with the <code>proposals</code>
 field populated from Proposals received during the current epoch, and an empty
-<code>path</code> field.<a href="#section-11.2-16.1" class="pilcrow">¶</a>
+<code>path</code> field.<a href="#section-11.2-17.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-16.2">
-            <p id="section-11.2-16.2.1">Generate the provisional ratchet tree and GroupContext by applying the proposals
+          <li class="normal" id="section-11.2-17.2">
+            <p id="section-11.2-17.2.1">Generate the provisional ratchet tree and GroupContext by applying the proposals
 referenced in the initial Commit object, as described in <a href="#proposals" class="xref">Section 11.1</a>. Update
 proposals are applied first, followed by Remove proposals, and then finally
 Add proposals. Add proposals are applied in the order listed in the
 <code>proposals</code> vector, and always to the leftmost unoccupied leaf in the tree, or
-the right edge of the tree if all leaves are occupied.<a href="#section-11.2-16.2.1" class="pilcrow">¶</a></p>
+the right edge of the tree if all leaves are occupied.<a href="#section-11.2-17.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-16.2.2.1">Note that the order in which different types of proposals are applied should
+<li class="normal" id="section-11.2-17.2.2.1">Note that the order in which different types of proposals are applied should
 be updated by the implementation to include any new proposals added by
-negotiated group extensions.<a href="#section-11.2-16.2.2.1" class="pilcrow">¶</a>
+negotiated group extensions.<a href="#section-11.2-17.2.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.2.2.2">PreSharedKey proposals are processed later when deriving the <code>psk_secret</code> for the Key
-Schedule.<a href="#section-11.2-16.2.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.2.2.2">PreSharedKey proposals are processed later when deriving the <code>psk_secret</code> for the Key
+Schedule.<a href="#section-11.2-17.2.2.2" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-11.2-16.3">Decide whether to populate the <code>path</code> field: If the <code>path</code> field is required
+          <li class="normal" id="section-11.2-17.3">Decide whether to populate the <code>path</code> field: If the <code>path</code> field is required
 based on the proposals that are in the commit (see above), then it MUST be
-populated.  Otherwise, the sender MAY omit the <code>path</code> field at its discretion.<a href="#section-11.2-16.3" class="pilcrow">¶</a>
+populated.  Otherwise, the sender MAY omit the <code>path</code> field at its discretion.<a href="#section-11.2-17.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-16.4">
-            <p id="section-11.2-16.4.1">If populating the <code>path</code> field: Create an UpdatePath using the provisional
+          <li class="normal" id="section-11.2-17.4">
+            <p id="section-11.2-17.4.1">If populating the <code>path</code> field: Create an UpdatePath using the provisional
 ratchet tree and GroupContext. Any new member (from an add proposal) MUST be
 exluded from the resolution during the computation of the UpdatePath.  The
 <code>leaf_key_package</code> for this UpdatePath must have a <code>parent_hash</code> extension.
 Note that the KeyPackage in the <code>UpdatePath</code> effectively updates an existing
 KeyPackage in the group and thus MUST adhere to the same restrictions as
-KeyPackages used in <code>Update</code> proposals.<a href="#section-11.2-16.4.1" class="pilcrow">¶</a></p>
+KeyPackages used in <code>Update</code> proposals.<a href="#section-11.2-17.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-16.4.2.1">Assign this UpdatePath to the <code>path</code> field in the Commit.<a href="#section-11.2-16.4.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2-17.4.2.1">Assign this UpdatePath to the <code>path</code> field in the Commit.<a href="#section-11.2-17.4.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.4.2.2">Apply the UpdatePath to the tree, as described in
+              <li class="normal" id="section-11.2-17.4.2.2">Apply the UpdatePath to the tree, as described in
 <a href="#synchronizing-views-of-the-tree" class="xref">Section 5.5</a>, creating the new ratchet tree. Define
 <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
-<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-16.4.2.2" class="pilcrow">¶</a>
+<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-17.4.2.2" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-11.2-16.5">If not populating the <code>path</code> field: Set the <code>path</code> field in the Commit to the
+          <li class="normal" id="section-11.2-17.5">If not populating the <code>path</code> field: Set the <code>path</code> field in the Commit to the
 null optional.  Define <code>commit_secret</code> as the all-zero vector of length
 <code>KDF.Nh</code> (the same length as a <code>path_secret</code> value would be).  In this case,
-the new ratchet tree is the same as the provisional ratchet tree.<a href="#section-11.2-16.5" class="pilcrow">¶</a>
+the new ratchet tree is the same as the provisional ratchet tree.<a href="#section-11.2-17.5" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-16.6">Derive the <code>psk_secret</code> as specified in <a href="#pre-shared-keys" class="xref">Section 8.2</a>, where the order
+          <li class="normal" id="section-11.2-17.6">Derive the <code>psk_secret</code> as specified in <a href="#pre-shared-keys" class="xref">Section 8.2</a>, where the order
 of PSKs in the derivation corresponds to the order of PreSharedKey proposals
-in the <code>proposals</code> vector.<a href="#section-11.2-16.6" class="pilcrow">¶</a>
+in the <code>proposals</code> vector.<a href="#section-11.2-17.6" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-16.7">
-            <p id="section-11.2-16.7.1">Construct an MLSPlaintext object containing the Commit object. Sign the
-MLSPlaintext using the old GroupContext as context.<a href="#section-11.2-16.7.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-11.2-17.7">
+            <p id="section-11.2-17.7.1">Construct an MLSPlaintext object containing the Commit object. Sign the
+MLSPlaintext using the old GroupContext as context.<a href="#section-11.2-17.7.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-16.7.2.1">Use the MLSPlaintext to update the confirmed transcript hash and generate
-the new GroupContext.<a href="#section-11.2-16.7.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2-17.7.2.1">Use the MLSPlaintext to update the confirmed transcript hash and generate
+the new GroupContext.<a href="#section-11.2-17.7.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.7.2.2">Use the <code>init_secret</code> from the previous epoch, the <code>commit_secret</code> and the
+              <li class="normal" id="section-11.2-17.7.2.2">Use the <code>init_secret</code> from the previous epoch, the <code>commit_secret</code> and the
 <code>psk_secret</code> as defined in the previous steps, and the new GroupContext to
 compute the new <code>joiner_secret</code>, <code>welcome_secret</code>, <code>epoch_secret</code>, and
-derived secrets for the new epoch.<a href="#section-11.2-16.7.2.2" class="pilcrow">¶</a>
+derived secrets for the new epoch.<a href="#section-11.2-17.7.2.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.7.2.3">Use the <code>confirmation_key</code> for the new epoch to compute the
+              <li class="normal" id="section-11.2-17.7.2.3">Use the <code>confirmation_key</code> for the new epoch to compute the
 <code>confirmation_tag</code> value, and the <code>membership_key</code> for the old epoch to
-compute the <code>membership_tag</code> value in the MLSPlaintext.<a href="#section-11.2-16.7.2.3" class="pilcrow">¶</a>
+compute the <code>membership_tag</code> value in the MLSPlaintext.<a href="#section-11.2-17.7.2.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.7.2.4">Calculate the interim transcript hash using the new confirmed transcript
-hash and the <code>confirmation_tag</code> from the MLSPlaintext.<a href="#section-11.2-16.7.2.4" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.7.2.4">Calculate the interim transcript hash using the new confirmed transcript
+hash and the <code>confirmation_tag</code> from the MLSPlaintext.<a href="#section-11.2-17.7.2.4" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-11.2-16.8">
-            <p id="section-11.2-16.8.1">Construct a GroupInfo reflecting the new state:<a href="#section-11.2-16.8.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-11.2-17.8">
+            <p id="section-11.2-17.8.1">Construct a GroupInfo reflecting the new state:<a href="#section-11.2-17.8.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-16.8.2.1">Group ID, epoch, tree, confirmed transcript hash, interim transcript
-hash, and group context extensions from the new state<a href="#section-11.2-16.8.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2-17.8.2.1">Group ID, epoch, tree, confirmed transcript hash, interim transcript
+hash, and group context extensions from the new state<a href="#section-11.2-17.8.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.8.2.2">The confirmation_tag from the MLSPlaintext object<a href="#section-11.2-16.8.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.8.2.2">The confirmation_tag from the MLSPlaintext object<a href="#section-11.2-17.8.2.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.8.2.3">Other extensions as defined by the application<a href="#section-11.2-16.8.2.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.8.2.3">Other extensions as defined by the application<a href="#section-11.2-17.8.2.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.8.2.4">Sign the GroupInfo using the member's private signing key<a href="#section-11.2-16.8.2.4" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.8.2.4">Sign the GroupInfo using the member's private signing key<a href="#section-11.2-17.8.2.4" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.8.2.5">Encrypt the GroupInfo using the key and nonce derived from the <code>joiner_secret</code>
-for the new epoch (see <a href="#welcoming-new-members" class="xref">Section 11.2.2</a>)<a href="#section-11.2-16.8.2.5" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.8.2.5">Encrypt the GroupInfo using the key and nonce derived from the <code>joiner_secret</code>
+for the new epoch (see <a href="#welcoming-new-members" class="xref">Section 11.2.2</a>)<a href="#section-11.2-17.8.2.5" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-11.2-16.9">
-            <p id="section-11.2-16.9.1">For each new member in the group:<a href="#section-11.2-16.9.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-11.2-17.9">
+            <p id="section-11.2-17.9.1">For each new member in the group:<a href="#section-11.2-17.9.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-16.9.2.1">Identify the lowest common ancestor in the tree of the new member's
-leaf node and the member sending the Commit<a href="#section-11.2-16.9.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2-17.9.2.1">Identify the lowest common ancestor in the tree of the new member's
+leaf node and the member sending the Commit<a href="#section-11.2-17.9.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.9.2.2">If the <code>path</code> field was populated above: Compute the path secret
-corresponding to the common ancestor node<a href="#section-11.2-16.9.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.9.2.2">If the <code>path</code> field was populated above: Compute the path secret
+corresponding to the common ancestor node<a href="#section-11.2-17.9.2.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-16.9.2.3">Compute an EncryptedGroupSecrets object that encapsulates the <code>init_secret</code>
-for the current epoch and the path secret (if present).<a href="#section-11.2-16.9.2.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-17.9.2.3">Compute an EncryptedGroupSecrets object that encapsulates the <code>init_secret</code>
+for the current epoch and the path secret (if present).<a href="#section-11.2-17.9.2.3" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-11.2-16.10">Construct a Welcome message from the encrypted GroupInfo object, the encrypted
+          <li class="normal" id="section-11.2-17.10">Construct a Welcome message from the encrypted GroupInfo object, the encrypted
 key packages, and any PSKs for which a proposal was included in the Commit. The
 order of the <code>psks</code> MUST be the same as the order of PreSharedKey proposals in the
-<code>proposals</code> vector.<a href="#section-11.2-16.10" class="pilcrow">¶</a>
+<code>proposals</code> vector.<a href="#section-11.2-17.10" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-16.11">If a ReInit proposal was part of the Commit, the committer MUST create a new
+          <li class="normal" id="section-11.2-17.11">If a ReInit proposal was part of the Commit, the committer MUST create a new
 group with the parameters specified in the ReInit proposal,
 and with the same members as the original group.
 The Welcome message MUST include a <code>PreSharedKeyID</code> with <code>psktype</code>
             <code>reinit</code> and with <code>psk_group_id</code> and <code>psk_epoch</code> corresponding to the current
-group and the epoch after the commit was processed.<a href="#section-11.2-16.11" class="pilcrow">¶</a>
+group and the epoch after the commit was processed.<a href="#section-11.2-17.11" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-11.2-17">A member of the group applies a Commit message by taking the following steps:<a href="#section-11.2-17" class="pilcrow">¶</a></p>
+<p id="section-11.2-18">A member of the group applies a Commit message by taking the following steps:<a href="#section-11.2-18" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-18.1">Verify that the <code>epoch</code> field of the enclosing MLSPlaintext message is equal
-to the <code>epoch</code> field of the current GroupContext object<a href="#section-11.2-18.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2-19.1">Verify that the <code>epoch</code> field of the enclosing MLSPlaintext message is equal
+to the <code>epoch</code> field of the current GroupContext object<a href="#section-11.2-19.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.2">Verify that the signature on the MLSPlaintext message verifies using the
+          <li class="normal" id="section-11.2-19.2">Verify that the signature on the MLSPlaintext message verifies using the
 public key from the credential stored at the leaf in the tree indicated by
-the <code>sender</code> field.<a href="#section-11.2-18.2" class="pilcrow">¶</a>
+the <code>sender</code> field.<a href="#section-11.2-19.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.3">Verify that all PSKs specified in any PreSharedKey proposals in the <code>proposals</code> vector
-are available.<a href="#section-11.2-18.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.2-19.3">Verify that all PSKs specified in any PreSharedKey proposals in the <code>proposals</code> vector
+are available.<a href="#section-11.2-19.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.4">
-            <p id="section-11.2-18.4.1">Generate the provisional ratchet tree and GroupContext by applying the proposals
+          <li class="normal" id="section-11.2-19.4">
+            <p id="section-11.2-19.4.1">Generate the provisional ratchet tree and GroupContext by applying the proposals
 referenced in the initial Commit object, as described in <a href="#proposals" class="xref">Section 11.1</a>. Update
 proposals are applied first, followed by Remove proposals, and then finally
 Add proposals. Add proposals are applied in the order listed in the
 <code>proposals</code> vector, and always to the leftmost unoccupied leaf in the tree, or
-the right edge of the tree if all leaves are occupied.<a href="#section-11.2-18.4.1" class="pilcrow">¶</a></p>
+the right edge of the tree if all leaves are occupied.<a href="#section-11.2-19.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-18.4.2.1">Note that the order in which different types of proposals are applied should
+<li class="normal" id="section-11.2-19.4.2.1">Note that the order in which different types of proposals are applied should
 be updated by the implementation to include any new proposals added by
-negotiated group extensions.<a href="#section-11.2-18.4.2.1" class="pilcrow">¶</a>
+negotiated group extensions.<a href="#section-11.2-19.4.2.1" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-11.2-18.5">Verify that the <code>path</code> value is populated if the <code>proposals</code> vector contains
+          <li class="normal" id="section-11.2-19.5">Verify that the <code>path</code> value is populated if the <code>proposals</code> vector contains
 any Update or Remove proposals, or if it's empty. Otherwise, the <code>path</code> value
-MAY be omitted.<a href="#section-11.2-18.5" class="pilcrow">¶</a>
+MAY be omitted.<a href="#section-11.2-19.5" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.6">
-            <p id="section-11.2-18.6.1">If the <code>path</code> value is populated: Process the <code>path</code> value using the
+          <li class="normal" id="section-11.2-19.6">
+            <p id="section-11.2-19.6.1">If the <code>path</code> value is populated: Process the <code>path</code> value using the
 provisional ratchet tree and GroupContext, to generate the new ratchet tree
-and the <code>commit_secret</code>:<a href="#section-11.2-18.6.1" class="pilcrow">¶</a></p>
+and the <code>commit_secret</code>:<a href="#section-11.2-19.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-18.6.2.1">Apply the UpdatePath to the tree, as described in
+<li class="normal" id="section-11.2-19.6.2.1">Apply the UpdatePath to the tree, as described in
 <a href="#synchronizing-views-of-the-tree" class="xref">Section 5.5</a>, and store <code>leaf_key_package</code> at the
-Committer's leaf.<a href="#section-11.2-18.6.2.1" class="pilcrow">¶</a>
+Committer's leaf.<a href="#section-11.2-19.6.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-18.6.2.2">Verify that the KeyPackage has a <code>parent_hash</code> extension and that its value
-matches the new parent of the sender's leaf node.<a href="#section-11.2-18.6.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-19.6.2.2">Verify that the KeyPackage has a <code>parent_hash</code> extension and that its value
+matches the new parent of the sender's leaf node.<a href="#section-11.2-19.6.2.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-18.6.2.3">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
-<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-18.6.2.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-19.6.2.3">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
+<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-19.6.2.3" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-11.2-18.7">If the <code>path</code> value is not populated: Define <code>commit_secret</code> as the all-zero
-vector of length <code>KDF.Nh</code> (the same length as a <code>path_secret</code> value would be).<a href="#section-11.2-18.7" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.2-19.7">If the <code>path</code> value is not populated: Define <code>commit_secret</code> as the all-zero
+vector of length <code>KDF.Nh</code> (the same length as a <code>path_secret</code> value would be).<a href="#section-11.2-19.7" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.8">Update the confirmed and interim transcript hashes using the new Commit, and
-generate the new GroupContext.<a href="#section-11.2-18.8" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.2-19.8">Update the confirmed and interim transcript hashes using the new Commit, and
+generate the new GroupContext.<a href="#section-11.2-19.8" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.9">Derive the <code>psk_secret</code> as specified in <a href="#pre-shared-keys" class="xref">Section 8.2</a>, where the order
+          <li class="normal" id="section-11.2-19.9">Derive the <code>psk_secret</code> as specified in <a href="#pre-shared-keys" class="xref">Section 8.2</a>, where the order
 of PSKs in the derivation corresponds to the order of PreSharedKey proposals
-in the <code>proposals</code> vector.<a href="#section-11.2-18.9" class="pilcrow">¶</a>
+in the <code>proposals</code> vector.<a href="#section-11.2-19.9" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.10">Use the <code>init_secret</code> from the previous epoch, the <code>commit_secret</code> and the
+          <li class="normal" id="section-11.2-19.10">Use the <code>init_secret</code> from the previous epoch, the <code>commit_secret</code> and the
 <code>psk_secret</code> as defined in the previous steps, and the new GroupContext to
 compute the new <code>joiner_secret</code>, <code>welcome_secret</code>, <code>epoch_secret</code>, and
-derived secrets for the new epoch.<a href="#section-11.2-18.10" class="pilcrow">¶</a>
+derived secrets for the new epoch.<a href="#section-11.2-19.10" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.11">Use the <code>confirmation_key</code> for the new epoch to compute the confirmation tag
+          <li class="normal" id="section-11.2-19.11">Use the <code>confirmation_key</code> for the new epoch to compute the confirmation tag
 for this message, as described below, and verify that it is the same as the
-<code>confirmation_tag</code> field in the MLSPlaintext object.<a href="#section-11.2-18.11" class="pilcrow">¶</a>
+<code>confirmation_tag</code> field in the MLSPlaintext object.<a href="#section-11.2-19.11" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.12">If the above checks are successful, consider the new GroupContext object
-as the current state of the group.<a href="#section-11.2-18.12" class="pilcrow">¶</a>
+          <li class="normal" id="section-11.2-19.12">If the above checks are successful, consider the new GroupContext object
+as the current state of the group.<a href="#section-11.2-19.12" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-11.2-18.13">
-            <p id="section-11.2-18.13.1">If the Commit included a ReInit proposal, the client MUST NOT use the group to
+          <li class="normal" id="section-11.2-19.13">
+            <p id="section-11.2-19.13.1">If the Commit included a ReInit proposal, the client MUST NOT use the group to
 send messages anymore. Instead, it MUST wait for a Welcome message from the committer
-and check that<a href="#section-11.2-18.13.1" class="pilcrow">¶</a></p>
+and check that<a href="#section-11.2-19.13.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-18.13.2.1">The <code>version</code>, <code>cipher_suite</code> and <code>extensions</code> fields of the new group
+<li class="normal" id="section-11.2-19.13.2.1">The <code>version</code>, <code>cipher_suite</code> and <code>extensions</code> fields of the new group
 corresponds to the ones in the <code>ReInit</code> proposal, and that the <code>version</code>
-is greater than or equal to that of the original group.<a href="#section-11.2-18.13.2.1" class="pilcrow">¶</a>
+is greater than or equal to that of the original group.<a href="#section-11.2-19.13.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-18.13.2.2">The <code>psks</code> field in the Welcome message includes a <code>PreSharedKeyID</code> with
+              <li class="normal" id="section-11.2-19.13.2.2">The <code>psks</code> field in the Welcome message includes a <code>PreSharedKeyID</code> with
 <code>psktype</code> = <code>reinit</code>, and <code>psk_epoch</code> and <code>psk_group_id</code> equal to the epoch
-and group ID of the original group after processing the Commit.<a href="#section-11.2-18.13.2.2" class="pilcrow">¶</a>
+and group ID of the original group after processing the Commit.<a href="#section-11.2-19.13.2.2" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
         </ul>
-<p id="section-11.2-19">The confirmation tag value confirms that the members of the group have arrived
-at the same state of the group:<a href="#section-11.2-19" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-11.2-20">
+<p id="section-11.2-20">The confirmation tag value confirms that the members of the group have arrived
+at the same state of the group:<a href="#section-11.2-20" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-11.2-21">
 <pre>
 MLSPlaintext.confirmation_tag =
     MAC(confirmation_key, GroupContext.confirmed_transcript_hash)
-</pre><a href="#section-11.2-20" class="pilcrow">¶</a>
+</pre><a href="#section-11.2-21" class="pilcrow">¶</a>
 </div>
 <div id="external-commits">
 <section id="section-11.2.1">
