@@ -1992,8 +1992,21 @@ A              B     ...      Z          Directory       Channel
       <h2 id="name-ratchet-trees">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-ratchet-trees" class="section-name selfRef">Ratchet Trees</a>
       </h2>
-<p id="section-5-1">The protocol uses "ratchet trees" for deriving shared secrets among
-a group of clients.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">The protocol uses "ratchet trees" for deriving shared secrets among a group of
+clients.  A ratchet tree is an arrangement of secrets and key pairs among the
+members of a group in a way that allows for secrets to be efficiently updated to
+reflect changes in the group.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">The unique power of a ratchet tree is that it allows a group to efficiently
+remove a member, because it allows a group member to efficiently encrypt new
+entropy to a subset of the group.  A ratchet tree assigns shared keys to
+subgroups of the overall group, so that, for example, encrypting to all but one
+member of the group requires only log(N) encryptions, instead of the N-1
+encryptions that would be needed to encrypt to each participant individually
+(where N is the number of members in the group).<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">This remove operation allows MLS to efficiently achieve
+post-compromise security.  In an Update proposal or a full Commit message, an old, possibly
+compromised representation of a member is effeciently removed from the group and
+replaced with a freshly generated instance.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <div id="tree-computation-terminology">
 <section id="section-5.1">
         <h3 id="name-tree-computation-terminolog">
@@ -2124,10 +2137,11 @@ node was changed (see <a href="#parent-hash" class="xref">Section 7.4</a>).<a hr
         </ul>
 <p id="section-5.2-5">The conditions under which each of these values must or must not be
 present are laid out in <a href="#views" class="xref">Section 5.3</a>.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
-<p id="section-5.2-6">A node in the tree may also be <em>blank</em>, indicating that no value is
-present at that node.  The <em>resolution</em> of a node is an ordered list
-of non-blank nodes that collectively cover all non-blank descendants
-of the node.<a href="#section-5.2-6" class="pilcrow">¶</a></p>
+<p id="section-5.2-6">A node in the tree may also be <em>blank</em>, indicating that no value is present at
+that node.  The <em>resolution</em> of a node is an ordered list of non-blank nodes
+that collectively cover all non-blank descendants of the node.  The resolution
+of a node is effectively a depth-first, left-first enumeration of the nearest
+non-blank nodes below the node:<a href="#section-5.2-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.2-7.1">The resolution of a non-blank node comprises the node itself,
 followed by its list of unmerged leaves, if any<a href="#section-5.2-7.1" class="pilcrow">¶</a>
@@ -2202,6 +2216,34 @@ unmerged when it is first added, because the process of adding the leaf does not
 give it access to all of the nodes above it in the tree.  Leaves are "merged" as
 they receive the private keys for nodes, as described in
 <a href="#ratchet-tree-evolution" class="xref">Section 5.4</a>.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.3-7">For example, consider a four-member group (A, B, C, D) where the node above the
+right two members is blank.  (This is what it would look like if A created a
+group with B, C, and D.)  Then the public state of the tree and the views of the
+private keys of the tree held by each participant would be as follows, where <code>_</code>
+represents a blank node, <code>?</code> represents an unknown private key, and <code>pk(X)</code>
+represents the public key corresponding to the private key <code>X</code>:<a href="#section-5.3-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3-8">
+<pre>
+         Public Tree
+============================
+            pk(ABCD)
+          /          \
+    pk(AB)            _
+     / \             / \
+pk(A)   pk(B)   pk(C)   pk(D)
+
+
+ Private @ A       Private @ B       Private @ C       Private @ D
+=============     =============     =============     =============
+     ABCD              ABCD              ABCD              ABCD
+    /   \             /   \             /   \             /   \
+  AB      _         AB      _         ?       _         ?       _
+ / \     / \       / \     / \       / \     / \       / \     / \
+A   ?   ?   ?     ?   B   ?   ?     ?   ?   C   ?     ?   ?   ?   D
+</pre><a href="#section-5.3-8" class="pilcrow">¶</a>
+</div>
+<p id="section-5.3-9">Note how the tree invariant applies: Each member knows only their own leaf, and
+the private key AB is known only to A and B.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ratchet-tree-evolution">
@@ -2241,9 +2283,12 @@ leaf_priv, leaf_pub = KEM.DeriveKeyPair(leaf_node_secret)
 node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
 </pre><a href="#section-5.4-4" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-5">For example, suppose there is a group with four members, with C an unmerged leaf
-at node 5:<a href="#section-5.4-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.4-6">
+<p id="section-5.4-5">The node secret is derived as a temporary intermediate secret so that each
+secret is only used with one algorithm: The path secret is used as an input to
+DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
+<p id="section-5.4-6">For example, suppose there is a group with four members, with C an unmerged leaf
+at node 5:<a href="#section-5.4-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.4-7">
 <pre>
       3
     __|__
@@ -2253,12 +2298,12 @@ at node 5:<a href="#section-5.4-5" class="pilcrow">¶</a></p>
 A   B   C   D
 
 0 1 2 3 4 5 6
-</pre><a href="#section-5.4-6" class="pilcrow">¶</a>
+</pre><a href="#section-5.4-7" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-7">If member B subsequently generates an UpdatePath based on a secret
+<p id="section-5.4-8">If member B subsequently generates an UpdatePath based on a secret
 "leaf_secret", then it would generate the following sequence
-of path secrets:<a href="#section-5.4-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.4-8">
+of path secrets:<a href="#section-5.4-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.4-9">
 <pre>
 path_secret[1] --&gt; node_secret[1] --&gt; node_priv[1], node_pub[1]
      ^
@@ -2268,12 +2313,12 @@ path_secret[0] --&gt; node_secret[0] --&gt; node_priv[0], node_pub[0]
      |
 leaf_secret    --&gt; leaf_node_secret --&gt; leaf_priv, leaf_pub
                                      ~&gt; leaf_key_package
-</pre><a href="#section-5.4-8" class="pilcrow">¶</a>
+</pre><a href="#section-5.4-9" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-9">After applying the UpdatePath, the tree will have the following structure, where
+<p id="section-5.4-10">After applying the UpdatePath, the tree will have the following structure, where
 <code>lp</code> and <code>np[i]</code> represent the leaf_priv and node_priv values generated as
-described above:<a href="#section-5.4-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.4-10">
+described above:<a href="#section-5.4-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.4-11">
 <pre>
     np[1] -&gt; 3
            __|__
@@ -2286,10 +2331,10 @@ np[0] -&gt; 1       5[C]
            lp
 
        0 1 2 3 4 5 6
-</pre><a href="#section-5.4-10" class="pilcrow">¶</a>
+</pre><a href="#section-5.4-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-11">After performing these operations, the generator of the UpdatePath MUST
-delete the leaf_secret.<a href="#section-5.4-11" class="pilcrow">¶</a></p>
+<p id="section-5.4-12">After performing these operations, the generator of the UpdatePath MUST
+delete the leaf_secret.<a href="#section-5.4-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="synchronizing-views-of-the-tree">
@@ -2439,9 +2484,11 @@ following primitives to be used in group key computations:<a href="#section-6.1-
           <li class="normal" id="section-6.1-2.4">A signature algorithm<a href="#section-6.1-2.4" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-6.1-3">MLS uses HPKE for public-key encryption <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span>.
-The <code>DeriveKeyPair</code> function associated to the KEM for the ciphersuite maps
-octet strings to HPKE key pairs.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">MLS uses HPKE for public-key encryption <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span>.  The
+<code>DeriveKeyPair</code> function associated to the KEM for the ciphersuite maps octet
+strings to HPKE key pairs.  As in HPKE, MLS assumes that an AEAD algorithm
+produces a single ciphertext output from AEAD encryption (aligning with
+<span>[<a href="#RFC5116" class="xref">RFC5116</a>]</span>), as opposed to a separate ciphertext and tag.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <p id="section-6.1-4">Ciphersuites are represented with the CipherSuite type. HPKE public keys
 are opaque values in a format defined by the underlying
 protocol (see the Cryptographic Dependencies section of the HPKE specification for more
@@ -4122,7 +4169,8 @@ Let <code>removed_index</code> be the node index of this leaf node.<a href="#sec
 </li>
             <li class="normal" id="section-11.1.3-4.3">Blank the intermediate nodes along the path from <code>removed_index</code> to the root<a href="#section-11.1.3-4.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.1.3-4.4">Truncate the tree by reducing the size of tree until the rightmost non-blank leaf node<a href="#section-11.1.3-4.4" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.3-4.4">Truncate the tree by removing leaves from the right side of the tree until the
+rightmost leaf node is not blank.<a href="#section-11.1.3-4.4" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -6073,6 +6121,10 @@ thyla.van.der@merwe.tech<a href="#section-17-1.12" class="pilcrow">¶</a>
 <dt id="I-D.ietf-trans-rfc6962-bis">[I-D.ietf-trans-rfc6962-bis]</dt>
         <dd>
 <span class="refAuthor">Laurie, B.</span>, <span class="refAuthor">Langley, A.</span>, <span class="refAuthor">Kasper, E.</span>, <span class="refAuthor">Messeri, E.</span>, and <span class="refAuthor">R. Stradling</span>, <span class="refTitle">"Certificate Transparency Version 2.0"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-trans-rfc6962-bis-42</span>, <time datetime="2021-08-31" class="refDate">31 August 2021</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-trans-rfc6962-bis-42">https://datatracker.ietf.org/doc/html/draft-ietf-trans-rfc6962-bis-42</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5116">[RFC5116]</dt>
+        <dd>
+<span class="refAuthor">McGrew, D.</span>, <span class="refTitle">"An Interface and Algorithms for Authenticated Encryption"</span>, <span class="seriesInfo">RFC 5116</span>, <span class="seriesInfo">DOI 10.17487/RFC5116</span>, <time datetime="2008-01" class="refDate">January 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5116">https://www.rfc-editor.org/rfc/rfc5116</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8032">[RFC8032]</dt>
         <dd>
