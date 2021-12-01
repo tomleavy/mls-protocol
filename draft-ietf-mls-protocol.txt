@@ -87,18 +87,18 @@ Table of Contents
      5.5.  Synchronizing Views of the Tree
    6.  Cryptographic Objects
      6.1.  Ciphersuites
-     6.2.  Credentials
+     6.2.  Hash-Based Identifiers
+     6.3.  Credentials
    7.  Key Packages
-     7.1.  Key Package IDs
-     7.2.  Client Capabilities
-     7.3.  Lifetime
-     7.4.  KeyPackage Identifiers
-     7.5.  Parent Hash
-       7.5.1.  Using Parent Hashes
-       7.5.2.  Verifying Parent Hashes
-     7.6.  Tree Hashes
-     7.7.  Group State
-     7.8.  Update Paths
+     7.1.  Client Capabilities
+     7.2.  Lifetime
+     7.3.  KeyPackage Identifiers
+     7.4.  Parent Hash
+       7.4.1.  Using Parent Hashes
+       7.4.2.  Verifying Parent Hashes
+     7.5.  Tree Hashes
+     7.6.  Group State
+     7.7.  Update Paths
    8.  Key Schedule
      8.1.  External Initialization
      8.2.  Pre-Shared Keys
@@ -789,7 +789,7 @@ Table of Contents
    *  A credential (only for leaf nodes)
 
    *  A hash of certain information about the node's parent, as of the
-      last time the node was changed (see Section 7.5).
+      last time the node was changed (see Section 7.4).
 
    The conditions under which each of these values must or must not be
    present are laid out in Section 5.3.
@@ -832,7 +832,7 @@ Table of Contents
    Every node, regardless of whether the node is blank or populated, has
    a corresponding _hash_ that summarizes the contents of the subtree
    below that node.  The rules for computing these hashes are described
-   in Section 7.6.
+   in Section 7.5.
 
 5.3.  Views of a Ratchet Tree
 
@@ -874,7 +874,7 @@ Table of Contents
    fresh key material to be added into the group's shared secret.  To do
    so, one member of the group generates fresh key material, applies it
    to their local tree state, and then sends this key material to other
-   members in the group via an UpdatePath message (see Section 7.8) .
+   members in the group via an UpdatePath message (see Section 7.7) .
    All other group members then apply the key material in the UpdatePath
    to their own local tree state to derive the group's now-updated
    shared secret.
@@ -1053,6 +1053,8 @@ Table of Contents
 
    *  A hash algorithm
 
+   *  A MAC algorithm
+
    *  A signature algorithm
 
    MLS uses HPKE for public-key encryption [I-D.irtf-cfrg-hpke].  The
@@ -1074,7 +1076,26 @@ Table of Contents
 
    The ciphersuites are defined in section Section 16.1.
 
-6.2.  Credentials
+6.2.  Hash-Based Identifiers
+
+   Some MLS messages refer to other MLS objects by hash.  For example,
+   Welcome messages refer to KeyPackages for the members being welcomed,
+   and Commits refer to Proposals they cover.  These identifiers are
+   computed as follows:
+
+opaque HashReference[16];
+
+MakeHashRef(value) = KDF.expand(KDF.extract("", value), "MLS 1.0 ref", 16)
+
+HashReference KeyPackageRef;
+HashReference ProposalRef;
+
+   For a KeyPackageRef, the value input is the encoded KeyPackage, and
+   the ciphersuite specified in the KeyPackage determines the KDF used.
+   For a ProposalRef, the value input is the MLSPlaintext carrying the
+   proposal, and the KDF is determined by the group's ciphersuite.
+
+6.3.  Credentials
 
    A member of a group authenticates the identities of other
    participants by means of credentials issued by some authentication
@@ -1215,22 +1236,7 @@ Table of Contents
    KeyPackage at any time and in particular in the case of a newcomer
    joining the group.
 
-7.1.  Key Package IDs
-
-   When it is necessary to refer to a specific KeyPackage, protocol
-   messages incorporate a KeyPackageID:
-
-   struct { opaque key_package_hash<0..255>; } KeyPackageID
-
-   This value is the hash of the KeyPackage, using the hash indicated by
-   the cipher_suite field.  KeyPackage hashes are used in a Welcome
-   message to indicate which KeyPackage is being used to include the new
-   member.  Since members of a group are uniquely identified by their
-   leaf KeyPackages, messages within a group use the hash of this key
-   package to refer to group members, e.g., to specify the target of a
-   Remove proposal or the signer of an MLSPlaintext.
-
-7.2.  Client Capabilities
+7.1.  Client Capabilities
 
    The capabilities extension indicates what protocol versions,
    ciphersuites, protocol extensions, and non-default proposal types are
@@ -1248,7 +1254,7 @@ Table of Contents
    that appear in the extensions field of a KeyPackage MUST be included
    in the extensions field of the capabilities extension.
 
-7.3.  Lifetime
+7.2.  Lifetime
 
    The lifetime extension represents the times between which clients
    will consider a KeyPackage valid.  This time is represented as an
@@ -1266,7 +1272,7 @@ Table of Contents
 
    This extension MUST always be present in a KeyPackage.
 
-7.4.  KeyPackage Identifiers
+7.3.  KeyPackage Identifiers
 
    Within MLS, a KeyPackage is identified by its hash (see, e.g.,
    Section 11.2.2).  The external_key_id extension allows applications
@@ -1274,7 +1280,7 @@ Table of Contents
 
    opaque external_key_id<0..2^16-1>;
 
-7.5.  Parent Hash
+7.4.  Parent Hash
 
    The parent_hash extension carries information to authenticate the
    structure of the tree, as described below.
@@ -1314,7 +1320,7 @@ Table of Contents
    Meanwhile, the ParentHashInput of node 5 with co-path child 6 has an
    array with one element in it: the HPKE public key of 6.
 
-7.5.1.  Using Parent Hashes
+7.4.1.  Using Parent Hashes
 
    The Parent Hash of P appears in three types of structs.  If V is
    itself a parent node then P's Parent Hash is stored in the
@@ -1335,7 +1341,7 @@ Table of Contents
    the insider isn't assigned a leaf in the subtree rooted at V.
    Indeed, such a ratchet tree would violate the tree invariant.)
 
-7.5.2.  Verifying Parent Hashes
+7.4.2.  Verifying Parent Hashes
 
    To this end, when processing a Commit message clients MUST recompute
    the expected value of parent_hash for the committer's new leaf and
@@ -1364,7 +1370,7 @@ Table of Contents
    can cause blank nodes to be interposed between a parent node and its
    right child.
 
-7.6.  Tree Hashes
+7.5.  Tree Hashes
 
    To allow group members to verify that they agree on the public
    cryptographic state of the group, this section defines a scheme for
@@ -1413,7 +1419,7 @@ Table of Contents
    The left_hash and right_hash fields hold the tree hashes of the
    node's left and right children, respectively.
 
-7.7.  Group State
+7.6.  Group State
 
    Each member of the group maintains a GroupContext object that
    summarizes the state of the group:
@@ -1435,7 +1441,7 @@ Table of Contents
 
    *  The tree_hash field contains a commitment to the contents of the
       group's ratchet tree and the credentials for the members of the
-      group, as described in Section 7.6.
+      group, as described in Section 7.5.
 
    *  The confirmed_transcript_hash field contains a running hash over
       the messages that led to this state.
@@ -1498,7 +1504,7 @@ Table of Contents
    As shown above, when a new group is created, the
    interim_transcript_hash field is set to the zero-length octet string.
 
-7.8.  Update Paths
+7.7.  Update Paths
 
    As described in Section 11.2, each MLS Commit message may optionally
    transmit a KeyPackage leaf and node values along its direct path.
@@ -2050,7 +2056,7 @@ psk_[n] --> KDF.Extract --> ExpandWithLabel --> KDF.Extract = psk_secret_[n]
    struct {
        SenderType sender_type;
        switch (sender_type) {
-           case member:        KeyPackageID member;
+           case member:        KeyPackageRef member;
            case preconfigured: opaque external_key_id<0..255>;
            case new_member:    struct{};
        }
@@ -2269,7 +2275,7 @@ psk_[n] --> KDF.Extract --> ExpandWithLabel --> KDF.Extract = psk_secret_[n]
    object of the following form:
 
    struct {
-       KeyPackageID sender;
+       KeyPackageRef sender;
        uint32 generation;
        opaque reuse_guard[4];
    } MLSSenderData;
@@ -2304,7 +2310,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    } MLSSenderDataAAD;
 
    When parsing a SenderData struct as part of message decryption, the
-   recipient MUST verify that the KeyPackageID indicated in the sender
+   recipient MUST verify that the KeyPackageRef indicated in the sender
    field identifies a member of the group.
 
 10.  Group Creation
@@ -2542,11 +2548,11 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 
 11.1.3.  Remove
 
-   A Remove proposal requests that the member with KeyPackageID removed
+   A Remove proposal requests that the member with KeyPackageRef removed
    be removed from the group.
 
    struct {
-       KeyPackageID removed;
+       KeyPackageRef removed;
    } Remove;
 
    A member of the group applies a Remove message by taking the
@@ -2637,7 +2643,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    group's transcript by being included in Commit messages.
 
    struct {
-       KeyPackageID sender;
+       KeyPackageRef sender;
        uint32 first_generation;
        uint32 last_generation;
    } MessageRange;
@@ -2761,11 +2767,11 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    value, which identifies the proposal to be applied by value or by
    reference.  Proposals supplied by value are included directly in the
    Commit object.  Proposals supplied by reference are specified by
-   including the hash of the MLSPlaintext in which the Proposal was
-   sent, using the hash function from the group's ciphersuite.  For
-   proposals supplied by value, the sender of the proposal is the same
-   as the sender of the Commit.  Conversely, proposals sent by people
-   other than the committer MUST be included by reference.
+   including the hash of the MLSPlaintext in which the Proposal was sent
+   (see Section 6.2).  For proposals supplied by value, the sender of
+   the proposal is the same as the sender of the Commit.  Conversely,
+   proposals sent by people other than the committer MUST be included by
+   reference.
 
    enum {
      reserved(0),
@@ -2778,7 +2784,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
      ProposalOrRefType type;
      select (ProposalOrRef.type) {
        case proposal:  Proposal proposal;
-       case reference: opaque hash<0..255>;
+       case reference: ProposalRef reference;
      }
    } ProposalOrRef;
 
@@ -3128,7 +3134,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
        Extension group_context_extensions<0..2^32-1>;
        Extension other_extensions<0..2^32-1>;
        HPKEPublicKey external_pub;
-       KeyPackageID signer;
+       KeyPackageRef signer;
        opaque signature<0..2^16-1>;
    } PublicGroupState;
 
@@ -3137,7 +3143,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    extension Section 11.3.
 
    The signature MUST verify using the public key taken from the
-   credential in the leaf node of the member with KeyPackageID signer.
+   credential in the leaf node of the member with KeyPackageRef signer.
    The signature covers the following structure, comprising all the
    fields in the PublicGroupState above signature:
 
@@ -3151,7 +3157,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
        Extension group_context_extensions<0..2^32-1>;
        Extension other_extensions<0..2^32-1>;
        HPKEPublicKey external_pub;
-       KeyPackageID signer;
+       KeyPackageRef signer;
    } PublicGroupStateTBS;
 
    This signature authenticates the HPKE public key, so that the joiner
@@ -3250,7 +3256,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
      Extension group_context_extensions<0..2^32-1>;
      Extension other_extensions<0..2^32-1>;
      MAC confirmation_tag;
-     KeyPackageID signer;
+     KeyPackageRef signer;
      opaque signature<0..2^16-1>;
    } GroupInfo;
 
@@ -3265,7 +3271,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    } GroupSecrets;
 
    struct {
-     KeyPackageID new_member<1..255>;
+     KeyPackageRef new_member<1..255>;
      HPKECiphertext encrypted_group_secrets;
    } EncryptedGroupSecrets;
 
@@ -3309,7 +3315,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
    *  Verify the signature on the GroupInfo object.  The signature input
       comprises all of the fields in the GroupInfo object except the
       signature field.  The public key and algorithm are taken from the
-      credential in the leaf node of the member with KeyPackageID
+      credential in the leaf node of the member with KeyPackageRef
       signer.  If there is no matching leaf node, or if signature
       verification fails, return an error.
 
@@ -3350,7 +3356,7 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
 
       -  If the path_secret value is set in the GroupSecrets object:
          Identify the lowest common ancestor of the node index index and
-         of the node index of the member with KeyPackageID
+         of the node index of the member with KeyPackageRef
          GroupInfo.signer.  Set the private key for this node to the
          private key derived from the path_secret.
 
