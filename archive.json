@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-12-02T01:03:32.183364+00:00",
+  "timestamp": "2021-12-05T01:08:48.431857+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -37004,7 +37004,7 @@
       "labels": [],
       "body": "Filing this on behalf of @TWal after discussions with @kkohbrok and @karthikbhargavan.\r\n\r\nThe idea behind it is that the array representation is only one possible implementation for the tree. This PR removes the reliance on nodes indices to address nodes in the tree.\r\n\r\nI'll leave it to @TWal to write a more detailed description.",
       "createdAt": "2021-11-15T13:20:37Z",
-      "updatedAt": "2021-12-02T00:49:52Z",
+      "updatedAt": "2021-12-03T14:23:07Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
@@ -37071,6 +37071,27 @@
           "body": "OK, to build some intuition here, I tried implementing a non-array-based variant tree structure that maintained the right structure.  [Quick draft in Go](https://go.dev/play/p/d6MW1vlc0oa).\r\n\r\nThe bad news is: I'm pretty convinced that there's no intuitive way to just say \"make the unique left-balanced tree with these contents\".  At best, we would need some way to define \"Corresponding nodes\" so that things could be copied over, which ultimately just turns into reinventing node indices.\r\n\r\nThe good news is: The above Go code validates two algorithms for extending and truncating the tree by one node, and they're pretty simple.  The add algorithm is effectively what @TWal proposed; the remove algorithm just excises and patches around the rightmost leaf's parent node.\r\n\r\nIt seems like we need to either add the algorithms or give up and close the PR.\r\n\r\n@TWal @franziskuskiefer -- preferences between those two options?\r\n\r\n",
           "createdAt": "2021-12-02T00:49:52Z",
           "updatedAt": "2021-12-02T00:49:52Z"
+        },
+        {
+          "author": "franziskuskiefer",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> It seems like we need to either add the algorithms or give up and close the PR.\r\n\r\nI'm not entirely decided on this. I agree with @TWal that the array representation isn't very intuitive for new readers and it's an implementation detail that's not good for the readability of the spec.\r\nOn the other hand do the algorithms get a pretty unwieldy and I'm not sure if they're really easier to understand than the array representation. And with the algorithms in the spec they aren't much better than the array representation in telling implementations what to do.\r\n\r\nIn an implementation of MLS that doesn't use the array representation underneath it is pretty easy to compute leaf indices for the few places they are needed.  So maybe another option is to leave the array representation in and only take the changes from this PR that remove the node index.\r\nIf the spec makes clear that the array representation is only one way of implementing the tree we could get the best of both worlds, a simple description of the left balanced tree without telling everyone what to implement as well as algorithms that only require leaf indices that can be easily retrieved from other implementations.\r\n",
+          "createdAt": "2021-12-02T08:50:01Z",
+          "updatedAt": "2021-12-02T08:50:01Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I propose the following definition for \"correspond\":\r\n\r\n    A node n1 in a tree t1 corresponds to a node n2 in a tree t2\r\n    iff. the index of their leftmost leaf is the same, and they have the same height\r\n\r\nThis definition seems simple enough, while exactly capturing what nodes \"are the same\" in t1 and t2. It introduces the concept of \"height\" which is not currently defined in MLS, but I think it's fine.\r\nAlso, we can easily see that with this definition, two nodes \"correspond\" iff. they have the same node index in the array representation.\r\n\r\nIn fact, we can have the following alternate definition:\r\n\r\n    A node n1 in a tree t1 corresponds to a node n2 in a tree t2\r\n    iff. they have the same position in the in-order traversal\r\n\r\nThis is somewhat equivalent to re-introducing node-indexes, but in any case I find this definition less easy to understand than the first one.\r\n\r\nMy preferences are the following:\r\n1. Only give a declarative description for Add and Remove, introducing the previous definition, and maybe put the algorithms in the implementation document.\r\n2. Give the declarative description in a non-formal way (e.g. without defining \"corresponds\") and say afterward in the appendix \"okay, here is the real algorithm which is the ground truth about what you should do\".\r\n3. Franziskus' proposition.\r\n\r\nI prefer the first option, because then the intuition of the readers would actually be what is the ground truth. People working with trees are happy because they can work with a simple description on trees, and people working with arrays are happy because the \"corresponds\" definition is equivalent to \"n1 corresponds to n2 iff. they have the same node index\".\r\n\r\nThen I prefer the second option, because I still think the tree algorithms are easier to understand than the bit-tricks used in tree math. With this option, the readers could gain an intuition about what happens to the tree using the declarative description, then read the \"ground truth\" algorithms and convince themselves that they indeed do what their intuition said. This option is great for people working with trees, but is a bit disappointing for people working with arrays.\r\n\r\nThen the third option keep things as they are now, but implementations are not forced to implement tree math if they want to use another tree representation. This option is great for people working with arrays, but is a disappointing for people working with trees.\r\n\r\nI'd like to go with the first option, since it is the only one where tree people and array people are happy. What do you think? @franziskuskiefer @bifurcation ",
+          "createdAt": "2021-12-02T15:57:53Z",
+          "updatedAt": "2021-12-02T15:57:53Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think @franziskuskiefer is on the right track here -- let's phrase the structure of the tree in terms of node indices but be really clear that nodes don't have to use an array implementation.  So we would do something like:\r\n\r\n* Keep node indices\r\n* Truncate algorithm (in {{remove}}):\r\n    * Identify the rightmost non-blank leaf node\r\n    * Remove all nodes from the tree with an index higher than the rightmost non-blank leaf\r\n* Extend algorithm (in {{add}}):\r\n    * Let `n` be the index of the rightmost leaf node\r\n    * Add a blank parent node with index `n+1` and a blank leaf node with index `n+2`\r\n    * As a result, node `n+1` will have node `n+2` as its right child, and its left child and parent will be defined by the left-balanced binary tree structure.\r\n\r\n@TWal - Could you live with that?  It's sort of implicitly declarative, since node indexing encodes the left-balanced binary tree structure.\r\n\r\nNow that we have the tree-wise algorithms, it actually seems like a fine idea to add them in an appendix, parallel to the tree math appendix.  Then we could have a note in the Ratchet Tree section that says \"if you want to use node indices to compute relations, see that appendix for some helpful detail; if you want to use pointers, see the other one\".  That would make it abundantly clear that indices don't prescribe implementation.  I'll write a PR for that.",
+          "createdAt": "2021-12-03T14:21:59Z",
+          "updatedAt": "2021-12-03T14:23:07Z"
         }
       ],
       "reviews": [
@@ -38016,6 +38037,40 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 521,
+      "id": "PR_kwDOBoyH6c4vXl8j",
+      "title": "Add algorithms for link-based trees",
+      "url": "https://github.com/mlswg/mls-protocol/pull/521",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As discussed in #507, having algorithms for a \"link-based\" representation of the tree would help emphasize that the array-based tree representation is not required.  This PR adds them in an appendix.",
+      "createdAt": "2021-12-03T15:58:09Z",
+      "updatedAt": "2021-12-03T15:58:25Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "algo",
+      "headRefOid": "919234f014a9fd611eb643d058d07e8fd3e8c0a9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @TWal @franziskuskiefer ",
+          "createdAt": "2021-12-03T15:58:25Z",
+          "updatedAt": "2021-12-03T15:58:25Z"
+        }
+      ],
       "reviews": []
     }
   ]
