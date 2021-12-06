@@ -600,8 +600,23 @@ A              B     ...      Z          Directory       Channel
 
 # Ratchet Trees
 
-The protocol uses "ratchet trees" for deriving shared secrets among
-a group of clients.
+The protocol uses "ratchet trees" for deriving shared secrets among a group of
+clients.  A ratchet tree is an arrangement of secrets and key pairs among the
+members of a group in a way that allows for secrets to be efficiently updated to
+reflect changes in the group.
+
+The unique power of a ratchet tree is that it allows a group to efficiently
+remove a member, because it allows a group member to efficiently encrypt new
+entropy to a subset of the group.  A ratchet tree assigns shared keys to
+subgroups of the overall group, so that, for example, encrypting to all but one
+member of the group requires only log(N) encryptions, instead of the N-1
+encryptions that would be needed to encrypt to each participant individually
+(where N is the number of members in the group).
+
+This remove operation allows MLS to efficiently achieve
+post-compromise security.  In an Update proposal or a full Commit message, an old, possibly
+compromised representation of a member is effeciently removed from the group and
+replaced with a freshly generated instance.
 
 ## Tree Computation Terminology
 
@@ -709,10 +724,11 @@ Each node in a ratchet tree contains up to five values:
 The conditions under which each of these values must or must not be
 present are laid out in {{views}}.
 
-A node in the tree may also be _blank_, indicating that no value is
-present at that node.  The _resolution_ of a node is an ordered list
-of non-blank nodes that collectively cover all non-blank descendants
-of the node.
+A node in the tree may also be _blank_, indicating that no value is present at
+that node.  The _resolution_ of a node is an ordered list of non-blank nodes
+that collectively cover all non-blank descendants of the node.  The resolution
+of a node is effectively a depth-first, left-first enumeration of the nearest
+non-blank nodes below the node:
 
 * The resolution of a non-blank node comprises the node itself,
   followed by its list of unmerged leaves, if any
@@ -779,6 +795,35 @@ give it access to all of the nodes above it in the tree.  Leaves are "merged" as
 they receive the private keys for nodes, as described in
 {{ratchet-tree-evolution}}.
 
+For example, consider a four-member group (A, B, C, D) where the node above the
+right two members is blank.  (This is what it would look like if A created a
+group with B, C, and D.)  Then the public state of the tree and the views of the
+private keys of the tree held by each participant would be as follows, where `_`
+represents a blank node, `?` represents an unknown private key, and `pk(X)`
+represents the public key corresponding to the private key `X`:
+
+~~~~~
+         Public Tree
+============================
+            pk(ABCD)
+          /          \
+    pk(AB)            _
+     / \             / \
+pk(A)   pk(B)   pk(C)   pk(D)
+
+
+ Private @ A       Private @ B       Private @ C       Private @ D
+=============     =============     =============     =============
+     ABCD              ABCD              ABCD              ABCD
+    /   \             /   \             /   \             /   \
+  AB      _         AB      _         ?       _         ?       _
+ / \     / \       / \     / \       / \     / \       / \     / \
+A   ?   ?   ?     ?   B   ?   ?     ?   ?   C   ?     ?   ?   ?   D
+~~~~~
+
+Note how the tree invariant applies: Each member knows only their own leaf, and
+the private key AB is known only to A and B.
+
 ## Ratchet Tree Evolution
 
 A member of an MLS group advances the key schedule to provide forward secrecy
@@ -814,6 +859,10 @@ node_secret[n] = DeriveSecret(path_secret[n], "node")
 leaf_priv, leaf_pub = KEM.DeriveKeyPair(leaf_node_secret)
 node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
 ~~~~~
+
+The node secret is derived as a temporary intermediate secret so that each
+secret is only used with one algorithm: The path secret is used as an input to
+DeriveSecret and the node secret is used as an input to DeriveKeyPair.
 
 For example, suppose there is a group with four members, with C an unmerged leaf
 at node 5:
@@ -952,11 +1001,14 @@ following primitives to be used in group key computations:
   * A Key Derivation Function (KDF)
   * An AEAD encryption algorithm
 * A hash algorithm
+* A MAC algorithm
 * A signature algorithm
 
-MLS uses draft-08 of HPKE {{I-D.irtf-cfrg-hpke}} for public-key encryption.
-The `DeriveKeyPair` function associated to the KEM for the ciphersuite maps
-octet strings to HPKE key pairs.
+MLS uses HPKE for public-key encryption {{I-D.irtf-cfrg-hpke}}.  The
+`DeriveKeyPair` function associated to the KEM for the ciphersuite maps octet
+strings to HPKE key pairs.  As in HPKE, MLS assumes that an AEAD algorithm
+produces a single ciphertext output from AEAD encryption (aligning with
+{{?RFC5116}}), as opposed to a separate ciphertext and tag.
 
 Ciphersuites are represented with the CipherSuite type. HPKE public keys
 are opaque values in a format defined by the underlying
@@ -974,6 +1026,26 @@ KeyPackage objects in the leaves of the tree (including the InitKeys
 used to add new members).
 
 The ciphersuites are defined in section {{mls-ciphersuites}}.
+
+## Hash-Based Identifiers
+
+Some MLS messages refer to other MLS objects by hash.  For example, Welcome
+messages refer to KeyPackages for the members being welcomed, and Commits refer
+to Proposals they cover.  These identifiers are computed as follows:
+
+~~~~~
+opaque HashReference[16];
+
+MakeHashRef(value) = KDF.expand(KDF.extract("", value), "MLS 1.0 ref", 16)
+
+HashReference KeyPackageRef;
+HashReference ProposalRef;
+~~~~~
+
+For a KeyPackageRef, the `value` input is the encoded KeyPackage, and the
+ciphersuite specified in the KeyPackage determines the KDF used.  For a
+ProposalRef, the `value` input is the MLSPlaintext carrying the proposal, and
+the KDF is determined by the group's ciphersuite.
 
 ## Credentials
 
@@ -1121,24 +1193,6 @@ Tree and updated depending on the evolution of this tree, each
 modification of its content MUST be reflected by a change of its
 signature. This allow other members to control the validity of the KeyPackage
 at any time and in particular in the case of a newcomer joining the group.
-
-## Key Package IDs
-
-When it is necessary to refer to a specific KeyPackage, protocol messages
-incorporate a KeyPackageID:
-
-```
-struct {
-    opaque key_package_hash<0..255>;
-} KeyPackageID
-```
-
-This value is the hash of the KeyPackage, using the hash indicated by the
-`cipher_suite` field. KeyPackage hashes are used in a Welcome message to
-indicate which KeyPackage is being used to include the new member. Since members
-of a group are uniquely identified by their leaf KeyPackages, messages within a
-group use the hash of this key package to refer to group members, e.g., to
-specify the target of a Remove proposal or the signer of an MLSPlaintext.
 
 ## Client Capabilities
 
@@ -1942,7 +1996,7 @@ enum {
 struct {
     SenderType sender_type;
     switch (sender_type) {
-        case member:        KeyPackageID member;
+        case member:        KeyPackageRef member;
         case preconfigured: opaque external_key_id<0..255>;
         case new_member:    struct{};
     }
@@ -2165,7 +2219,7 @@ encrypted, the sender data is encoded as an object of the following form:
 
 ~~~~~
 struct {
-    KeyPackageID sender;
+    KeyPackageRef sender;
     uint32 generation;
     opaque reuse_guard[4];
 } MLSSenderData;
@@ -2202,7 +2256,7 @@ struct {
 ~~~~~
 
 When parsing a SenderData struct as part of message decryption, the recipient
-MUST verify that the KeyPackageID indicated in the `sender` field identifies a
+MUST verify that the KeyPackageRef indicated in the `sender` field identifies a
 member of the group.
 
 # Group Creation
@@ -2436,12 +2490,12 @@ A member of the group applies an Update message by taking the following steps:
 
 ### Remove
 
-A Remove proposal requests that the member with KeyPackageID `removed` be removed
+A Remove proposal requests that the member with KeyPackageRef `removed` be removed
 from the group.
 
 ~~~~~
 struct {
-    KeyPackageID removed;
+    KeyPackageRef removed;
 } Remove;
 ~~~~~
 
@@ -2457,7 +2511,8 @@ A member of the group applies a Remove message by taking the following steps:
 
 * Blank the intermediate nodes along the path from `removed_index` to the root
 
-* Truncate the tree by reducing the size of tree until the rightmost non-blank leaf node
+* Truncate the tree by removing leaves from the right side of the tree until the
+  rightmost leaf node is not blank.
 
 ### PreSharedKey
 
@@ -2531,7 +2586,7 @@ included in Commit messages.
 
 ~~~~~
 struct {
-    KeyPackageID sender;
+    KeyPackageRef sender;
     uint32 first_generation;
     uint32 last_generation;
 } MessageRange;
@@ -2646,10 +2701,10 @@ Each proposal covered by the Commit is included by a ProposalOrRef value, which
 identifies the proposal to be applied by value or by reference.  Proposals
 supplied by value are included directly in the Commit object.  Proposals
 supplied by reference are specified by including the hash of the MLSPlaintext in
-which the Proposal was sent, using the hash function from the group's
-ciphersuite.  For proposals supplied by value, the sender of the proposal is the
-same as the sender of the Commit.  Conversely, proposals sent by people other
-than the committer MUST be included by reference.
+which the Proposal was sent (see {{hash-based-identifiers}}).  For proposals
+supplied by value, the sender of the proposal is the same as the sender of the
+Commit.  Conversely, proposals sent by people other than the committer MUST be
+included by reference.
 
 ~~~~~
 enum {
@@ -2663,7 +2718,7 @@ struct {
   ProposalOrRefType type;
   select (ProposalOrRef.type) {
     case proposal:  Proposal proposal;
-    case reference: opaque hash<0..255>;
+    case reference: ProposalRef reference;
   }
 } ProposalOrRef;
 
@@ -2689,7 +2744,9 @@ the Commit).
 
 If there are multiple proposals that apply to the same leaf, the committer
 chooses one and includes only that one in the Commit, considering the rest
-invalid. The committer MUST prefer any Remove received, or the most recent
+invalid.  The committer MUST NOT include any Update proposals generated by the
+committer, since they would be duplicative with the `path` field in the Commit.
+The committer MUST prefer any Remove received, or the most recent
 Update for the leaf if there are no Removes. The comitter MUST consider invalid
 any Add or Update proposal if the Credential in the contained KeyPackage shares
 the same signature key with a Credential in any leaf of the group, or indeed if
@@ -2959,6 +3016,7 @@ This information is aggregated in a `PublicGroupState` object as follows:
 
 ~~~
 struct {
+    ProtocolVersion version = mls10;
     CipherSuite cipher_suite;
     opaque group_id<0..255>;
     uint64 epoch;
@@ -2967,7 +3025,7 @@ struct {
     Extension group_context_extensions<0..2^32-1>;
     Extension other_extensions<0..2^32-1>;
     HPKEPublicKey external_pub;
-    KeyPackageID signer;
+    KeyPackageRef signer;
     opaque signature<0..2^16-1>;
 } PublicGroupState;
 ~~~
@@ -2977,12 +3035,14 @@ The full tree can be included via the `ratchet_tree` extension
 {{ratchet-tree-extension}}.
 
 The signature MUST verify using the public key taken from the credential in the
-leaf node of the member with KeyPackageID `signer`. The signature covers the
+leaf node of the member with KeyPackageRef `signer`. The signature covers the
 following structure, comprising all the fields in the PublicGroupState above
 `signature`:
 
 ~~~~~
 struct {
+    ProtocolVersion version = mls10;
+    CipherSuite cipher_suite;
     opaque group_id<0..255>;
     uint64 epoch;
     opaque tree_hash<0..255>;
@@ -2990,7 +3050,7 @@ struct {
     Extension group_context_extensions<0..2^32-1>;
     Extension other_extensions<0..2^32-1>;
     HPKEPublicKey external_pub;
-    KeyPackageID signer;
+    KeyPackageRef signer;
 } PublicGroupStateTBS;
 ~~~~~
 
@@ -3008,8 +3068,6 @@ External Commits work like regular Commits, with a few differences:
 
 * The proposals included by value in an External Commit MUST meet the following
   conditions:
-  * There MUST be a single Add proposal that adds the new issuing new member to
-    the group
   * There MUST be a single ExternalInit proposal
   * There MUST NOT be any Update proposals
   * If a Remove proposal is present, then the `credential` of the Add KeyPackage
@@ -3019,7 +3077,9 @@ External Commits work like regular Commits, with a few differences:
   conditions:
   * There MUST NOT be any ExternalInit proposals
 * External Commits MUST contain a `path` field (and is therefore a "full"
-  Commit)
+  Commit).  The joiner is added at the leftmost free leaf node (just as if they
+  were added with an Add proposal), and the path is calculated relative to that
+  leaf node.
 * External Commits MUST be signed by the new member.  In particular, the
   signature on the enclosing MLSPlaintext MUST verify using the public key for
   the credential in the `leaf_key_package` of the `path` field.
@@ -3075,7 +3135,7 @@ struct {
   Extension group_context_extensions<0..2^32-1>;
   Extension other_extensions<0..2^32-1>;
   MAC confirmation_tag;
-  KeyPackageID signer;
+  KeyPackageRef signer;
   opaque signature<0..2^16-1>;
 } GroupInfo;
 
@@ -3090,7 +3150,7 @@ struct {
 } GroupSecrets;
 
 struct {
-  KeyPackageID new_member<1..255>;
+  KeyPackageRef new_member<1..255>;
   HPKECiphertext encrypted_group_secrets;
 } EncryptedGroupSecrets;
 
@@ -3134,7 +3194,7 @@ welcome_key = KDF.Expand(welcome_secret, "key", AEAD.Nk)
 * Verify the signature on the GroupInfo object. The signature input comprises
   all of the fields in the GroupInfo object except the signature field. The
   public key and algorithm are taken from the credential in the leaf node of the
-  member with KeyPackageID `signer`. If there is no matching leaf node, or if
+  member with KeyPackageRef `signer`. If there is no matching leaf node, or if
   signature verification fails, return an error.
 
 * Verify the integrity of the ratchet tree.
@@ -3169,7 +3229,7 @@ welcome_key = KDF.Expand(welcome_secret, "key", AEAD.Nk)
 
     * If the `path_secret` value is set in the GroupSecrets object: Identify the
       lowest common ancestor of the node index `index` and of the node index of
-      the member with KeyPackageID `GroupInfo.signer`. Set the private key for
+      the member with KeyPackageRef `GroupInfo.signer`. Set the private key for
       this node to the private key derived from the `path_secret`.
 
     * For each parent of the common ancestor, up to the root of the tree, derive
@@ -3643,6 +3703,7 @@ Initial contents:
 | 0x0004          | MLS10_256_DHKEMX448_AES256GCM_SHA512_Ed448            | Y           | RFC XXXX  |
 | 0x0005          | MLS10_256_DHKEMP521_AES256GCM_SHA512_P521             | Y           | RFC XXXX  |
 | 0x0006          | MLS10_256_DHKEMX448_CHACHA20POLY1305_SHA512_Ed448     | Y           | RFC XXXX  |
+| 0x0007          | MLS10_256_DHKEMP384_AES256GCM_SHA384_P384.            | Y           | RFC XXXX  |
 | 0xff00 - 0xffff | Reserved for Private Use                              | N/A         | RFC XXXX  |
 
 All of these ciphersuites use HMAC {{!RFC2104}} as their MAC function, with
@@ -3658,14 +3719,16 @@ primitives, HMAC hash functions, and TLS signature schemes is as follows
 | 0x0004 | 0x0021 | 0x0003 | 0x0002 | SHA512 | ed448                  |
 | 0x0005 | 0x0012 | 0x0003 | 0x0002 | SHA512 | ecdsa_secp521r1_sha512 |
 | 0x0006 | 0x0021 | 0x0003 | 0x0003 | SHA512 | ed448                  |
+| 0x0007 | 0x0011 | 0x0002 | 0x0002 | SHA384 | ecdsa_secp384r1_sha384 |
+
 
 The hash used for the MLS transcript hash is the one referenced in the
-ciphersuite name.  In the ciphersuites defined above, "SHA256" and "SHA512"
-refer to the SHA-256 and SHA-512 functions defined in {{SHS}}.
+ciphersuite name.  In the ciphersuites defined above, "SHA256", "SHA384", and "SHA512"
+refer to the SHA-256, SHA-384, and SHA-512 functions defined in {{SHS}}.
 
 It is advisable to keep the number of ciphersuites low to increase the chances
 clients can interoperate in a federated environment, therefore the ciphersuites
-only inlcude modern, yet well-established algorithms.  Depending on their
+only include modern, yet well-established algorithms.  Depending on their
 requirements, clients can choose between two security levels (roughly 128-bit
 and 256-bit). Within the security levels clients can choose between faster
 X25519/X448 curves and FIPS 140-2 compliant curves for Diffie-Hellman key
@@ -3723,6 +3786,7 @@ Initial contents:
 | 0x0003           | external_key_id          | KP         | Y           | RFC XXXX  |
 | 0x0004           | parent_hash              | KP         | Y           | RFC XXXX  |
 | 0x0005           | ratchet_tree             | GI         | Y           | RFC XXXX  |
+| 0x0006           | required_capabilities    | GC         | Y           | RFC XXXX  |
 | 0xff00  - 0xffff | Reserved for Private Use | N/A        | N/A         | RFC XXXX  |
 
 ## MLS Proposal Types
