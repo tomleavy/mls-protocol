@@ -28,7 +28,7 @@ in size ranging from two to thousands.
 <meta content="draft-ietf-mls-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.11.1
-    Python 3.9.5
+    Python 3.9.7
     appdirs 1.4.4
     ConfigArgParse 1.3
     google-i18n-address 2.5.0
@@ -36,13 +36,13 @@ in size ranging from two to thousands.
     intervaltree 3.1.0
     Jinja2 2.11.3
     kitchen 1.2.6
-    lxml 4.6.3
+    lxml 4.6.4
     pycountry 20.7.3
-    pyflakes 2.3.0
+    pyflakes 2.3.1
     PyYAML 5.4.1
-    requests 2.25.1
+    requests 2.26.0
     setuptools 52.0.0
-    six 1.15.0
+    six 1.16.0
 -->
 <link href="draft-ietf-mls-protocol.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -646,36 +646,8 @@ hr {
 }
 
 /* index */
-.index ul {
-  margin: 0 0 0 1em;
-  padding: 0;
-  list-style: none;
-}
-.index ul ul {
-  margin: 0;
-}
-.index li {
-  margin: 0;
-  text-indent: -2em;
-  padding-left: 2em;
-  padding-bottom: 5px;
-}
-.indexIndex {
-  margin: 0.5em 0 1em;
-}
-.index a {
-  font-weight: 700;
-}
-/* make the index two-column on all but the smallest screens */
-@media (min-width: 500px) {
-  .index ul {
-    column-count: 2;
-    column-gap: 20px;
-  }
-  .index ul ul {
-    column-count: 1;
-    column-gap: 0;
-  }
+#rfc\.index\.index + ul {
+  margin-left: 0;
 }
 
 /* authors */
@@ -1054,11 +1026,11 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">MLS</td>
-<td class="right">November 2021</td>
+<td class="right">December 2021</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 20 May 2022</td>
+<td class="center">Expires 9 June 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2021-11-16" class="published">16 November 2021</time>
+<time datetime="2021-12-06" class="published">6 December 2021</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-05-20">20 May 2022</time></dd>
+<dd class="expires"><time datetime="2022-06-09">9 June 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1146,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 May 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 June 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1219,7 +1191,10 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
                 <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="xref">6.1</a>.  <a href="#name-ciphersuites" class="xref">Ciphersuites</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
-                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="xref">6.2</a>.  <a href="#name-credentials" class="xref">Credentials</a></p>
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="xref">6.2</a>.  <a href="#name-hash-based-identifiers" class="xref">Hash-Based Identifiers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="xref">6.3</a>.  <a href="#name-credentials" class="xref">Credentials</a></p>
 </li>
             </ul>
 </li>
@@ -1227,7 +1202,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
             <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-key-packages" class="xref">Key Packages</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
-                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-key-package-ids" class="xref">Key Package IDs</a></p>
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-compatibility-with-a-group" class="xref">Compatibility with a Group</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
                 <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-client-capabilities" class="xref">Client Capabilities</a></p>
@@ -2020,8 +1995,21 @@ A              B     ...      Z          Directory       Channel
       <h2 id="name-ratchet-trees">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-ratchet-trees" class="section-name selfRef">Ratchet Trees</a>
       </h2>
-<p id="section-5-1">The protocol uses "ratchet trees" for deriving shared secrets among
-a group of clients.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">The protocol uses "ratchet trees" for deriving shared secrets among a group of
+clients.  A ratchet tree is an arrangement of secrets and key pairs among the
+members of a group in a way that allows for secrets to be efficiently updated to
+reflect changes in the group.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">The unique power of a ratchet tree is that it allows a group to efficiently
+remove a member, because it allows a group member to efficiently encrypt new
+entropy to a subset of the group.  A ratchet tree assigns shared keys to
+subgroups of the overall group, so that, for example, encrypting to all but one
+member of the group requires only log(N) encryptions, instead of the N-1
+encryptions that would be needed to encrypt to each participant individually
+(where N is the number of members in the group).<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">This remove operation allows MLS to efficiently achieve
+post-compromise security.  In an Update proposal or a full Commit message, an old, possibly
+compromised representation of a member is effeciently removed from the group and
+replaced with a freshly generated instance.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <div id="tree-computation-terminology">
 <section id="section-5.1">
         <h3 id="name-tree-computation-terminolog">
@@ -2152,10 +2140,11 @@ node was changed (see <a href="#parent-hash" class="xref">Section 7.5</a>).<a hr
         </ul>
 <p id="section-5.2-5">The conditions under which each of these values must or must not be
 present are laid out in <a href="#views" class="xref">Section 5.3</a>.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
-<p id="section-5.2-6">A node in the tree may also be <em>blank</em>, indicating that no value is
-present at that node.  The <em>resolution</em> of a node is an ordered list
-of non-blank nodes that collectively cover all non-blank descendants
-of the node.<a href="#section-5.2-6" class="pilcrow">¶</a></p>
+<p id="section-5.2-6">A node in the tree may also be <em>blank</em>, indicating that no value is present at
+that node.  The <em>resolution</em> of a node is an ordered list of non-blank nodes
+that collectively cover all non-blank descendants of the node.  The resolution
+of a node is effectively a depth-first, left-first enumeration of the nearest
+non-blank nodes below the node:<a href="#section-5.2-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.2-7.1">The resolution of a non-blank node comprises the node itself,
 followed by its list of unmerged leaves, if any<a href="#section-5.2-7.1" class="pilcrow">¶</a>
@@ -2230,6 +2219,34 @@ unmerged when it is first added, because the process of adding the leaf does not
 give it access to all of the nodes above it in the tree.  Leaves are "merged" as
 they receive the private keys for nodes, as described in
 <a href="#ratchet-tree-evolution" class="xref">Section 5.4</a>.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.3-7">For example, consider a four-member group (A, B, C, D) where the node above the
+right two members is blank.  (This is what it would look like if A created a
+group with B, C, and D.)  Then the public state of the tree and the views of the
+private keys of the tree held by each participant would be as follows, where <code>_</code>
+represents a blank node, <code>?</code> represents an unknown private key, and <code>pk(X)</code>
+represents the public key corresponding to the private key <code>X</code>:<a href="#section-5.3-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.3-8">
+<pre>
+         Public Tree
+============================
+            pk(ABCD)
+          /          \
+    pk(AB)            _
+     / \             / \
+pk(A)   pk(B)   pk(C)   pk(D)
+
+
+ Private @ A       Private @ B       Private @ C       Private @ D
+=============     =============     =============     =============
+     ABCD              ABCD              ABCD              ABCD
+    /   \             /   \             /   \             /   \
+  AB      _         AB      _         ?       _         ?       _
+ / \     / \       / \     / \       / \     / \       / \     / \
+A   ?   ?   ?     ?   B   ?   ?     ?   ?   C   ?     ?   ?   ?   D
+</pre><a href="#section-5.3-8" class="pilcrow">¶</a>
+</div>
+<p id="section-5.3-9">Note how the tree invariant applies: Each member knows only their own leaf, and
+the private key AB is known only to A and B.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ratchet-tree-evolution">
@@ -2269,9 +2286,12 @@ leaf_priv, leaf_pub = KEM.DeriveKeyPair(leaf_node_secret)
 node_priv[n], node_pub[n] = KEM.DeriveKeyPair(node_secret[n])
 </pre><a href="#section-5.4-4" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-5">For example, suppose there is a group with four members, with C an unmerged leaf
-at node 5:<a href="#section-5.4-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.4-6">
+<p id="section-5.4-5">The node secret is derived as a temporary intermediate secret so that each
+secret is only used with one algorithm: The path secret is used as an input to
+DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
+<p id="section-5.4-6">For example, suppose there is a group with four members, with C an unmerged leaf
+at node 5:<a href="#section-5.4-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.4-7">
 <pre>
       3
     __|__
@@ -2281,12 +2301,12 @@ at node 5:<a href="#section-5.4-5" class="pilcrow">¶</a></p>
 A   B   C   D
 
 0 1 2 3 4 5 6
-</pre><a href="#section-5.4-6" class="pilcrow">¶</a>
+</pre><a href="#section-5.4-7" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-7">If member B subsequently generates an UpdatePath based on a secret
+<p id="section-5.4-8">If member B subsequently generates an UpdatePath based on a secret
 "leaf_secret", then it would generate the following sequence
-of path secrets:<a href="#section-5.4-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.4-8">
+of path secrets:<a href="#section-5.4-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.4-9">
 <pre>
 path_secret[1] --&gt; node_secret[1] --&gt; node_priv[1], node_pub[1]
      ^
@@ -2296,12 +2316,12 @@ path_secret[0] --&gt; node_secret[0] --&gt; node_priv[0], node_pub[0]
      |
 leaf_secret    --&gt; leaf_node_secret --&gt; leaf_priv, leaf_pub
                                      ~&gt; leaf_key_package
-</pre><a href="#section-5.4-8" class="pilcrow">¶</a>
+</pre><a href="#section-5.4-9" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-9">After applying the UpdatePath, the tree will have the following structure, where
+<p id="section-5.4-10">After applying the UpdatePath, the tree will have the following structure, where
 <code>lp</code> and <code>np[i]</code> represent the leaf_priv and node_priv values generated as
-described above:<a href="#section-5.4-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.4-10">
+described above:<a href="#section-5.4-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.4-11">
 <pre>
     np[1] -&gt; 3
            __|__
@@ -2314,10 +2334,10 @@ np[0] -&gt; 1       5[C]
            lp
 
        0 1 2 3 4 5 6
-</pre><a href="#section-5.4-10" class="pilcrow">¶</a>
+</pre><a href="#section-5.4-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5.4-11">After performing these operations, the generator of the UpdatePath MUST
-delete the leaf_secret.<a href="#section-5.4-11" class="pilcrow">¶</a></p>
+<p id="section-5.4-12">After performing these operations, the generator of the UpdatePath MUST
+delete the leaf_secret.<a href="#section-5.4-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="synchronizing-views-of-the-tree">
@@ -2462,12 +2482,16 @@ following primitives to be used in group key computations:<a href="#section-6.1-
 </li>
           <li class="normal" id="section-6.1-2.2">A hash algorithm<a href="#section-6.1-2.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-6.1-2.3">A signature algorithm<a href="#section-6.1-2.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-6.1-2.3">A MAC algorithm<a href="#section-6.1-2.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-6.1-2.4">A signature algorithm<a href="#section-6.1-2.4" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-6.1-3">MLS uses draft-08 of HPKE <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span> for public-key encryption.
-The <code>DeriveKeyPair</code> function associated to the KEM for the ciphersuite maps
-octet strings to HPKE key pairs.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">MLS uses HPKE for public-key encryption <span>[<a href="#I-D.irtf-cfrg-hpke" class="xref">I-D.irtf-cfrg-hpke</a>]</span>.  The
+<code>DeriveKeyPair</code> function associated to the KEM for the ciphersuite maps octet
+strings to HPKE key pairs.  As in HPKE, MLS assumes that an AEAD algorithm
+produces a single ciphertext output from AEAD encryption (aligning with
+<span>[<a href="#RFC5116" class="xref">RFC5116</a>]</span>), as opposed to a separate ciphertext and tag.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <p id="section-6.1-4">Ciphersuites are represented with the CipherSuite type. HPKE public keys
 are opaque values in a format defined by the underlying
 protocol (see the Cryptographic Dependencies section of the HPKE specification for more
@@ -2485,23 +2509,47 @@ used to add new members).<a href="#section-6.1-6" class="pilcrow">¶</a></p>
 <p id="section-6.1-7">The ciphersuites are defined in section <a href="#mls-ciphersuites" class="xref">Section 16.1</a>.<a href="#section-6.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="credentials">
+<div id="hash-based-identifiers">
 <section id="section-6.2">
-        <h3 id="name-credentials">
-<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-credentials" class="section-name selfRef">Credentials</a>
+        <h3 id="name-hash-based-identifiers">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-hash-based-identifiers" class="section-name selfRef">Hash-Based Identifiers</a>
         </h3>
-<p id="section-6.2-1">A member of a group authenticates the identities of other participants by means
+<p id="section-6.2-1">Some MLS messages refer to other MLS objects by hash.  For example, Welcome
+messages refer to KeyPackages for the members being welcomed, and Commits refer
+to Proposals they cover.  These identifiers are computed as follows:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.2-2">
+<pre>
+opaque HashReference[16];
+
+MakeHashRef(value) = KDF.expand(KDF.extract("", value), "MLS 1.0 ref", 16)
+
+HashReference KeyPackageRef;
+HashReference ProposalRef;
+</pre><a href="#section-6.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-6.2-3">For a KeyPackageRef, the <code>value</code> input is the encoded KeyPackage, and the
+ciphersuite specified in the KeyPackage determines the KDF used.  For a
+ProposalRef, the <code>value</code> input is the MLSPlaintext carrying the proposal, and
+the KDF is determined by the group's ciphersuite.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="credentials">
+<section id="section-6.3">
+        <h3 id="name-credentials">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-credentials" class="section-name selfRef">Credentials</a>
+        </h3>
+<p id="section-6.3-1">A member of a group authenticates the identities of other participants by means
 of credentials issued by some authentication system, like a PKI. Each type of
 credential MUST express the following data in the context of the group it is
-used with:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+used with:<a href="#section-6.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-6.2-2.1">The public key of a signature key pair matching the SignatureScheme specified
-by the CipherSuite of the group<a href="#section-6.2-2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-6.3-2.1">The public key of a signature key pair matching the SignatureScheme specified
+by the CipherSuite of the group<a href="#section-6.3-2.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-6.2-2.2">One or more identifiers of the holder of the private key<a href="#section-6.2-2.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-6.3-2.2">One or more identifiers of the holder of the private key<a href="#section-6.3-2.2" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-6.2-3">Note that a Credential can provide multiple identifiers for the client.  If an
+<p id="section-6.3-3">Note that a Credential can provide multiple identifiers for the client.  If an
 application wishes to decided whether a credential represents the correct
 identifier for a participant in a given context, it is up to the application to
 decide what the correct value is and compare it to the credential.  For example,
@@ -2511,12 +2559,12 @@ present all of these to a user, or if it knows a "desired" domain name or email
 address, it can check that the desired identifier is among those attested.
 Using the terminology from <span>[<a href="#RFC6125" class="xref">RFC6125</a>]</span>, a Credential provides "presented
 identifiers", and it is up to the application to supply a "reference identifier"
-for the authenticated client, if any.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
-<p id="section-6.2-4">Credentials MAY also include information that allows a relying party
-to verify the identity / signing key binding.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
-<p id="section-6.2-5">Additionally, Credentials SHOULD specify the signature scheme corresponding to
-each contained public key.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-6.2-6">
+for the authenticated client, if any.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">Credentials MAY also include information that allows a relying party
+to verify the identity / signing key binding.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
+<p id="section-6.3-5">Additionally, Credentials SHOULD specify the signature scheme corresponding to
+each contained public key.<a href="#section-6.3-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-6.3-6">
 <pre>
 // See RFC 8446 and the IANA TLS SignatureScheme registry
 uint16 SignatureScheme;
@@ -2544,28 +2592,28 @@ struct {
             Certificate chain&lt;1..2^32-1&gt;;
     };
 } Credential;
-</pre><a href="#section-6.2-6" class="pilcrow">¶</a>
+</pre><a href="#section-6.3-6" class="pilcrow">¶</a>
 </div>
-<p id="section-6.2-7">A BasicCredential is a raw, unauthenticated assertion of an identity/key
+<p id="section-6.3-7">A BasicCredential is a raw, unauthenticated assertion of an identity/key
 binding. The format of the key in the <code>public_key</code> field is defined by the
 relevant ciphersuite: the group ciphersuite for a credential in a ratchet tree,
 the KeyPackage ciphersuite for a credential in a KeyPackage object.
 For ciphersuites using Ed25519 or Ed448 signature schemes, the public key is in
 the format specified <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span>.  For ciphersuites using ECDSA with the NIST
 curves P-256 or P-521, the public key is the output of the uncompressed
-Elliptic-Curve-Point-to-Octet-String conversion according to <span>[<a href="#SECG" class="xref">SECG</a>]</span>.<a href="#section-6.2-7" class="pilcrow">¶</a></p>
-<p id="section-6.2-8">For X509Credential, each entry in the chain represents a single DER-encoded
+Elliptic-Curve-Point-to-Octet-String conversion according to <span>[<a href="#SECG" class="xref">SECG</a>]</span>.<a href="#section-6.3-7" class="pilcrow">¶</a></p>
+<p id="section-6.3-8">For X509Credential, each entry in the chain represents a single DER-encoded
 X509 certificate. The chain is ordered such that the first entry (chain[0])
 is the end-entity certificate and each subsequent certificate in the chain
 MUST be the issuer of the previous certificate. The algorithm for the
 <code>public_key</code> in the end-entity certificate MUST match the relevant
-ciphersuite.<a href="#section-6.2-8" class="pilcrow">¶</a></p>
-<p id="section-6.2-9">The signatures used in this document are encoded as specified in <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>.
+ciphersuite.<a href="#section-6.3-8" class="pilcrow">¶</a></p>
+<p id="section-6.3-9">The signatures used in this document are encoded as specified in <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span>.
 In particular, ECDSA signatures are DER-encoded and EdDSA signatures are defined
-as the concatenation of <code>r</code> and <code>s</code> as specified in <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span>.<a href="#section-6.2-9" class="pilcrow">¶</a></p>
-<p id="section-6.2-10">Note that each new credential that has not already been validated
+as the concatenation of <code>r</code> and <code>s</code> as specified in <span>[<a href="#RFC8032" class="xref">RFC8032</a>]</span>.<a href="#section-6.3-9" class="pilcrow">¶</a></p>
+<p id="section-6.3-10">Note that each new credential that has not already been validated
 by the application MUST be validated against the Authentication
-Service.<a href="#section-6.2-10" class="pilcrow">¶</a></p>
+Service.<a href="#section-6.3-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2589,13 +2637,14 @@ support multiple ciphersuites.<a href="#section-7-3" class="pilcrow">¶</a></p>
 <p id="section-7-4">KeyPackages contain a public key chosen by the client, which the
 client MUST ensure uniquely identifies a given KeyPackage object
 among the set of KeyPackages created by this client.<a href="#section-7-4" class="pilcrow">¶</a></p>
-<p id="section-7-5">The value for hpke_init_key MUST be a public key for the asymmetric
-encryption scheme defined by cipher_suite. The whole structure
-is signed using the client's signature key. A KeyPackage object
-with an invalid signature field MUST be considered malformed.
-The input to the signature computation comprises all of the fields
-except for the signature field.<a href="#section-7-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7-6">
+<p id="section-7-5">The value for <code>hpke_init_key</code> MUST be a public key for the asymmetric encryption
+scheme defined by <code>cipher_suite</code>.  The <code>endpoint_id</code> is an application-provided
+value that MUST uniquely identify the client in the scope of this group.<a href="#section-7-5" class="pilcrow">¶</a></p>
+<p id="section-7-6">The whole structure is signed using the client's signature key. A KeyPackage
+object with an invalid signature field MUST be considered malformed.  The input
+to the signature computation comprises all of the fields except for the
+signature field.<a href="#section-7-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7-7">
 <pre>
 enum {
     reserved(0),
@@ -2615,41 +2664,58 @@ struct {
     ProtocolVersion version;
     CipherSuite cipher_suite;
     HPKEPublicKey hpke_init_key;
+    opaque endpoint_id&lt;0..255&gt;;
     Credential credential;
     Extension extensions&lt;8..2^32-1&gt;;
     opaque signature&lt;0..2^16-1&gt;;
 } KeyPackage;
-</pre><a href="#section-7-6" class="pilcrow">¶</a>
+</pre><a href="#section-7-7" class="pilcrow">¶</a>
 </div>
-<p id="section-7-7">KeyPackage objects MUST contain at least two extensions, one of type
+<p id="section-7-8">KeyPackage objects MUST contain at least two extensions, one of type
 <code>capabilities</code>, and one of
 type <code>lifetime</code>.  The <code>capabilities</code> extension
 allow MLS session establishment to be safe from downgrade attacks on the
 parameters described (as discussed in <a href="#group-creation" class="xref">Section 10</a>), while still only advertising
-one version / ciphersuite per KeyPackage.<a href="#section-7-7" class="pilcrow">¶</a></p>
-<p id="section-7-8">As the <code>KeyPackage</code> is a structure which is stored in the Ratchet
+one version / ciphersuite per KeyPackage.<a href="#section-7-8" class="pilcrow">¶</a></p>
+<p id="section-7-9">As the <code>KeyPackage</code> is a structure which is stored in the Ratchet
 Tree and updated depending on the evolution of this tree, each
 modification of its content MUST be reflected by a change of its
 signature. This allow other members to control the validity of the KeyPackage
-at any time and in particular in the case of a newcomer joining the group.<a href="#section-7-8" class="pilcrow">¶</a></p>
-<div id="key-package-ids">
+at any time and in particular in the case of a newcomer joining the group.<a href="#section-7-9" class="pilcrow">¶</a></p>
+<div id="compatibility-with-a-group">
 <section id="section-7.1">
-        <h3 id="name-key-package-ids">
-<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-key-package-ids" class="section-name selfRef">Key Package IDs</a>
+        <h3 id="name-compatibility-with-a-group">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-compatibility-with-a-group" class="section-name selfRef">Compatibility with a Group</a>
         </h3>
-<p id="section-7.1-1">When it is necessary to refer to a specific KeyPackage, protocol messages
-incorporate a KeyPackageID:<a href="#section-7.1-1" class="pilcrow">¶</a></p>
-<p id="section-7.1-2"><code>
-struct {
-    opaque key_package_hash&lt;0..255&gt;;
-} KeyPackageID
-</code><a href="#section-7.1-2" class="pilcrow">¶</a></p>
-<p id="section-7.1-3">This value is the hash of the KeyPackage, using the hash indicated by the
-<code>cipher_suite</code> field. KeyPackage hashes are used in a Welcome message to
-indicate which KeyPackage is being used to include the new member. Since members
-of a group are uniquely identified by their leaf KeyPackages, messages within a
-group use the hash of this key package to refer to group members, e.g., to
-specify the target of a Remove proposal or the signer of an MLSPlaintext.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.1-1">When a KeyPackage is introduced as a leaf in a group's ratchet tree (e.g., via
+an Add or Update proposal, or a Commit with an update path), it MUST be
+compatible with the group to which it is being added:<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1-2.1">The signature on the KeyPackage MUST valid using the public key in the
+KeyPackage's credential<a href="#section-7.1-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.1-2.2">
+            <p id="section-7.1-2.2.1">The following fields in the KeyPackage are unique among the members of the
+group (including any other KeyPackages introduced in the same Commit):<a href="#section-7.1-2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1-2.2.2.1">
+                <code>credential.signature_key</code><a href="#section-7.1-2.2.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-7.1-2.2.2.2">
+                <code>hpke_init_key</code><a href="#section-7.1-2.2.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-7.1-2.2.2.3">
+                <code>endpoint_id</code><a href="#section-7.1-2.2.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-7.1-2.3">The capabilities expressed in the KeyPackage is compatible with the group's
+parameters.  The ciphersuite and protocol version of the KeyPackage must match
+those in use in the group.  If the GroupContext has a <code>required_capabilities</code>
+extension, then the required extensions and proposals MUST be listed in the
+KeyPackage's <code>capabilities</code> extension.<a href="#section-7.1-2.3" class="pilcrow">¶</a>
+</li>
+        </ul>
 </section>
 </div>
 <div id="client-capabilities">
@@ -3589,7 +3655,7 @@ enum {
 struct {
     SenderType sender_type;
     switch (sender_type) {
-        case member:        KeyPackageID member;
+        case member:        KeyPackageRef member;
         case preconfigured: opaque external_key_id&lt;0..255&gt;;
         case new_member:    struct{};
     }
@@ -3819,7 +3885,7 @@ encrypted, the sender data is encoded as an object of the following form:<a href
 <div class="alignLeft art-text artwork" id="section-9.3-2">
 <pre>
 struct {
-    KeyPackageID sender;
+    KeyPackageRef sender;
     uint32 generation;
     opaque reuse_guard[4];
 } MLSSenderData;
@@ -3854,7 +3920,7 @@ struct {
 </pre><a href="#section-9.3-8" class="pilcrow">¶</a>
 </div>
 <p id="section-9.3-9">When parsing a SenderData struct as part of message decryption, the recipient
-MUST verify that the KeyPackageID indicated in the <code>sender</code> field identifies a
+MUST verify that the KeyPackageRef indicated in the <code>sender</code> field identifies a
 member of the group.<a href="#section-9.3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -4051,32 +4117,8 @@ where the new member will be added.  For the first Add in the Commit, <code>inde
 the leftmost empty leaf in the tree, for the second Add, the next empty leaf to
 the right, etc.<a href="#section-11.1.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1.1-5.1">
-              <p id="section-11.1.1-5.1.1">Validate the KeyPackage:<a href="#section-11.1.1-5.1.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1.1-5.1.2.1">Verify that the signature on the KeyPackage is valid using the public key
-in the KeyPackage's credential<a href="#section-11.1.1-5.1.2.1" class="pilcrow">¶</a>
-</li>
-                <li class="normal" id="section-11.1.1-5.1.2.2">
-                  <p id="section-11.1.1-5.1.2.2.1">Verify that the following fields in the KeyPackage are unique among the
-members of the group (including any other members added in the same
-Commit):<a href="#section-11.1.1-5.1.2.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1.1-5.1.2.2.2.1">
-                      <code>credential.signature_key</code><a href="#section-11.1.1-5.1.2.2.2.1" class="pilcrow">¶</a>
-</li>
-                    <li class="normal" id="section-11.1.1-5.1.2.2.2.2">
-                      <code>hpke_init_key</code><a href="#section-11.1.1-5.1.2.2.2.2" class="pilcrow">¶</a>
-</li>
-                  </ul>
-</li>
-                <li class="normal" id="section-11.1.1-5.1.2.3">Verify that the KeyPackage is compatible with the group's parameters.  The
-ciphersuite and protocol version of the KeyPackage must match those in
-use in the group.  If the GroupContext has a <code>required_capabilities</code>
-extension, then the required extensions and proposals MUST be listed in
-the KeyPackage's <code>capabilities</code> extension.<a href="#section-11.1.1-5.1.2.3" class="pilcrow">¶</a>
-</li>
-              </ul>
+<li class="normal" id="section-11.1.1-5.1">Verify that the KeyPackage is compatible with the group (see
+<a href="#compatibility-with-a-group" class="xref">Section 7.1</a>)<a href="#section-11.1.1-5.1" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-11.1.1-5.2">If necessary, extend the tree to the right until it has at least index + 1
 leaves<a href="#section-11.1.1-5.2" class="pilcrow">¶</a>
@@ -4108,49 +4150,22 @@ struct {
 </div>
 <p id="section-11.1.2-3">A member of the group applies an Update message by taking the following steps:<a href="#section-11.1.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1.2-4.1">
-              <p id="section-11.1.2-4.1.1">Validate the KeyPackage:<a href="#section-11.1.2-4.1.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1.2-4.1.2.1">Verify that the signature on the KeyPackage is valid using the public key
-in the KeyPackage's credential<a href="#section-11.1.2-4.1.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.1.2-4.1">Verify that the KeyPackage is compatible with the group (see
+<a href="#compatibility-with-a-group" class="xref">Section 7.1</a>), ignoring the leaf being replaced.<a href="#section-11.1.2-4.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.1.2-4.1.2.2">
-                  <p id="section-11.1.2-4.1.2.2.1">Verify that the following fields in the KeyPackage are unique among the
-members of the group (including any other members added in the same
-Commit):<a href="#section-11.1.2-4.1.2.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1.2-4.1.2.2.2.1">
-                      <code>credential.signature_key</code><a href="#section-11.1.2-4.1.2.2.2.1" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.2-4.2">Verify that the <code>hpke_init_key</code> value is different from the corresponding
+field in the KeyPackage being replaced.<a href="#section-11.1.2-4.2" class="pilcrow">¶</a>
 </li>
-                    <li class="normal" id="section-11.1.2-4.1.2.2.2.2">
-                      <code>hpke_init_key</code><a href="#section-11.1.2-4.1.2.2.2.2" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.2-4.3">Verify that the <code>endpoint_id</code> of the new KeyPackage is the same as the
+KeyPackage being replaced.<a href="#section-11.1.2-4.3" class="pilcrow">¶</a>
 </li>
-                  </ul>
+            <li class="normal" id="section-11.1.2-4.4">Verify that the set of identities attested by the credential is acceptable
+to the application for the participant being updated.<a href="#section-11.1.2-4.4" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.1.2-4.1.2.3">
-                  <p id="section-11.1.2-4.1.2.3.1">Verify that the following fields in the new KeyPackage are the same as the
-one being replaced:<a href="#section-11.1.2-4.1.2.3.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.1.2-4.1.2.3.2.1">
-                      <code>version</code><a href="#section-11.1.2-4.1.2.3.2.1" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.2-4.5">Replace the sender's leaf KeyPackage with the one contained in
+the Update proposal<a href="#section-11.1.2-4.5" class="pilcrow">¶</a>
 </li>
-                    <li class="normal" id="section-11.1.2-4.1.2.3.2.2">
-                      <code>cipher_suite</code><a href="#section-11.1.2-4.1.2.3.2.2" class="pilcrow">¶</a>
-</li>
-                  </ul>
-</li>
-                <li class="normal" id="section-11.1.2-4.1.2.4">Verify that the <code>hpke_init_key</code> value is different from the corresponding
-field in the KeyPackage being replaced.<a href="#section-11.1.2-4.1.2.4" class="pilcrow">¶</a>
-</li>
-                <li class="normal" id="section-11.1.2-4.1.2.5">Verify that the set of identities attested by the credential is acceptable
-to the application for the participant being updated.<a href="#section-11.1.2-4.1.2.5" class="pilcrow">¶</a>
-</li>
-              </ul>
-</li>
-            <li class="normal" id="section-11.1.2-4.2">Replace the sender's leaf KeyPackage with the one contained in
-the Update proposal<a href="#section-11.1.2-4.2" class="pilcrow">¶</a>
-</li>
-            <li class="normal" id="section-11.1.2-4.3">Blank the intermediate nodes along the path from the sender's leaf to the root<a href="#section-11.1.2-4.3" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.2-4.6">Blank the intermediate nodes along the path from the sender's leaf to the root<a href="#section-11.1.2-4.6" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -4160,12 +4175,12 @@ the Update proposal<a href="#section-11.1.2-4.2" class="pilcrow">¶</a>
           <h4 id="name-remove">
 <a href="#section-11.1.3" class="section-number selfRef">11.1.3. </a><a href="#name-remove" class="section-name selfRef">Remove</a>
           </h4>
-<p id="section-11.1.3-1">A Remove proposal requests that the member with KeyPackageID <code>removed</code> be removed
+<p id="section-11.1.3-1">A Remove proposal requests that the member with KeyPackageRef <code>removed</code> be removed
 from the group.<a href="#section-11.1.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.1.3-2">
 <pre>
 struct {
-    KeyPackageID removed;
+    KeyPackageRef removed;
 } Remove;
 </pre><a href="#section-11.1.3-2" class="pilcrow">¶</a>
 </div>
@@ -4181,7 +4196,8 @@ Let <code>removed_index</code> be the node index of this leaf node.<a href="#sec
 </li>
             <li class="normal" id="section-11.1.3-4.3">Blank the intermediate nodes along the path from <code>removed_index</code> to the root<a href="#section-11.1.3-4.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.1.3-4.4">Truncate the tree by reducing the size of tree until the rightmost non-blank leaf node<a href="#section-11.1.3-4.4" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.3-4.4">Truncate the tree by removing leaves from the right side of the tree until the
+rightmost leaf node is not blank.<a href="#section-11.1.3-4.4" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -4272,7 +4288,7 @@ included in Commit messages.<a href="#section-11.1.7-1" class="pilcrow">¶</a></
 <div class="alignLeft art-text artwork" id="section-11.1.7-2">
 <pre>
 struct {
-    KeyPackageID sender;
+    KeyPackageRef sender;
     uint32 first_generation;
     uint32 last_generation;
 } MessageRange;
@@ -4394,10 +4410,10 @@ state of the group by applying the proposals and advancing the key schedule.<a h
 identifies the proposal to be applied by value or by reference.  Proposals
 supplied by value are included directly in the Commit object.  Proposals
 supplied by reference are specified by including the hash of the MLSPlaintext in
-which the Proposal was sent, using the hash function from the group's
-ciphersuite.  For proposals supplied by value, the sender of the proposal is the
-same as the sender of the Commit.  Conversely, proposals sent by people other
-than the committer MUST be included by reference.<a href="#section-11.2-2" class="pilcrow">¶</a></p>
+which the Proposal was sent (see <a href="#hash-based-identifiers" class="xref">Section 6.2</a>).  For proposals
+supplied by value, the sender of the proposal is the same as the sender of the
+Commit.  Conversely, proposals sent by people other than the committer MUST be
+included by reference.<a href="#section-11.2-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.2-3">
 <pre>
 enum {
@@ -4411,7 +4427,7 @@ struct {
   ProposalOrRefType type;
   select (ProposalOrRef.type) {
     case proposal:  Proposal proposal;
-    case reference: opaque hash&lt;0..255&gt;;
+    case reference: ProposalRef reference;
   }
 } ProposalOrRef;
 
@@ -4435,12 +4451,12 @@ process the Commit (i.e., not including any members being added or removed by
 the Commit).<a href="#section-11.2-5" class="pilcrow">¶</a></p>
 <p id="section-11.2-6">If there are multiple proposals that apply to the same leaf, the committer
 chooses one and includes only that one in the Commit, considering the rest
-invalid. The committer MUST prefer any Remove received, or the most recent
+invalid.  The committer MUST NOT include any Update proposals generated by the
+committer, since they would be duplicative with the <code>path</code> field in the Commit.
+The committer MUST prefer any Remove received, or the most recent
 Update for the leaf if there are no Removes. The comitter MUST consider invalid
-any Add or Update proposal if the Credential in the contained KeyPackage shares
-the same signature key with a Credential in any leaf of the group, or indeed if
-the KeyPackage shares the same <code>hpke_init_key</code> with another KeyPackage in the
-group.<a href="#section-11.2-6" class="pilcrow">¶</a></p>
+any Add or Update proposal if the KeyPackage included in the proposal does not
+meet the validation criteria for these proposals (see <a href="#add" class="xref">Section 11.1.1</a> and <a href="#update" class="xref">Section 11.1.2</a>).<a href="#section-11.2-6" class="pilcrow">¶</a></p>
 <p id="section-11.2-7">The Commit MUST NOT combine proposals sent within different epochs. In the event
 that a valid proposal is omitted from the next Commit, the sender of the
 proposal SHOULD retransmit it in the new epoch.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
@@ -4662,15 +4678,18 @@ MAY be omitted.<a href="#section-11.2-18.5" class="pilcrow">¶</a>
 provisional ratchet tree and GroupContext, to generate the new ratchet tree
 and the <code>commit_secret</code>:<a href="#section-11.2-18.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2-18.6.2.1">Apply the UpdatePath to the tree, as described in
+<li class="normal" id="section-11.2-18.6.2.1">Verify that the leaf KeyPackage meets the same validation criteria as an
+Update KeyPackage (see <a href="#update" class="xref">Section 11.1.2</a>).<a href="#section-11.2-18.6.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-11.2-18.6.2.2">Apply the UpdatePath to the tree, as described in
 <a href="#synchronizing-views-of-the-tree" class="xref">Section 5.5</a>, and store <code>leaf_key_package</code> at the
-Committer's leaf.<a href="#section-11.2-18.6.2.1" class="pilcrow">¶</a>
+Committer's leaf.<a href="#section-11.2-18.6.2.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-18.6.2.2">Verify that the KeyPackage has a <code>parent_hash</code> extension and that its value
-matches the new parent of the sender's leaf node.<a href="#section-11.2-18.6.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-18.6.2.3">Verify that the KeyPackage has a <code>parent_hash</code> extension and that its value
+matches the new parent of the sender's leaf node.<a href="#section-11.2-18.6.2.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-11.2-18.6.2.3">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
-<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-18.6.2.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-11.2-18.6.2.4">Define <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
+<code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-18.6.2.4" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
@@ -4753,6 +4772,7 @@ following information for the group's current epoch:<a href="#section-11.2.1-3" 
 <div class="alignLeft art-text artwork" id="section-11.2.1-6">
 <pre>
 struct {
+    ProtocolVersion version = mls10;
     CipherSuite cipher_suite;
     opaque group_id&lt;0..255&gt;;
     uint64 epoch;
@@ -4761,7 +4781,7 @@ struct {
     Extension group_context_extensions&lt;0..2^32-1&gt;;
     Extension other_extensions&lt;0..2^32-1&gt;;
     HPKEPublicKey external_pub;
-    KeyPackageID signer;
+    KeyPackageRef signer;
     opaque signature&lt;0..2^16-1&gt;;
 } PublicGroupState;
 </pre><a href="#section-11.2.1-6" class="pilcrow">¶</a>
@@ -4770,12 +4790,14 @@ struct {
 The full tree can be included via the <code>ratchet_tree</code> extension
 <a href="#ratchet-tree-extension" class="xref">Section 11.3</a>.<a href="#section-11.2.1-7" class="pilcrow">¶</a></p>
 <p id="section-11.2.1-8">The signature MUST verify using the public key taken from the credential in the
-leaf node of the member with KeyPackageID <code>signer</code>. The signature covers the
+leaf node of the member with KeyPackageRef <code>signer</code>. The signature covers the
 following structure, comprising all the fields in the PublicGroupState above
 <code>signature</code>:<a href="#section-11.2.1-8" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-11.2.1-9">
 <pre>
 struct {
+    ProtocolVersion version = mls10;
+    CipherSuite cipher_suite;
     opaque group_id&lt;0..255&gt;;
     uint64 epoch;
     opaque tree_hash&lt;0..255&gt;;
@@ -4783,7 +4805,7 @@ struct {
     Extension group_context_extensions&lt;0..2^32-1&gt;;
     Extension other_extensions&lt;0..2^32-1&gt;;
     HPKEPublicKey external_pub;
-    KeyPackageID signer;
+    KeyPackageRef signer;
 } PublicGroupStateTBS;
 </pre><a href="#section-11.2.1-9" class="pilcrow">¶</a>
 </div>
@@ -4801,16 +4823,14 @@ External Commits.<a href="#section-11.2.1-11" class="pilcrow">¶</a></p>
               <p id="section-11.2.1-13.1.1">The proposals included by value in an External Commit MUST meet the following
 conditions:<a href="#section-11.2.1-13.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.2.1-13.1.2.1">There MUST be a single Add proposal that adds the new issuing new member to
-the group<a href="#section-11.2.1-13.1.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.2.1-13.1.2.1">There MUST be a single ExternalInit proposal<a href="#section-11.2.1-13.1.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.2.1-13.1.2.2">There MUST be a single ExternalInit proposal<a href="#section-11.2.1-13.1.2.2" class="pilcrow">¶</a>
+                <li class="normal" id="section-11.2.1-13.1.2.2">There MUST NOT be any Update proposals<a href="#section-11.2.1-13.1.2.2" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.2.1-13.1.2.3">There MUST NOT be any Update proposals<a href="#section-11.2.1-13.1.2.3" class="pilcrow">¶</a>
-</li>
-                <li class="normal" id="section-11.2.1-13.1.2.4">If a Remove proposal is present, then the <code>credential</code> of the Add KeyPackage
+                <li class="normal" id="section-11.2.1-13.1.2.3">If a Remove proposal is present, then the <code>credential</code> of the Add KeyPackage
 MUST present a set of identifiers that is acceptable to the application for
-the removed participant (as if this were an Update for that participant).<a href="#section-11.2.1-13.1.2.4" class="pilcrow">¶</a>
+the removed participant (as if this were an Update for that participant).
+The Add KeyPackage and the removed leaf MUST have the same <code>endpoint_id</code>.<a href="#section-11.2.1-13.1.2.3" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
@@ -4823,7 +4843,9 @@ conditions:<a href="#section-11.2.1-13.2.1" class="pilcrow">¶</a></p>
               </ul>
 </li>
             <li class="normal" id="section-11.2.1-13.3">External Commits MUST contain a <code>path</code> field (and is therefore a "full"
-Commit)<a href="#section-11.2.1-13.3" class="pilcrow">¶</a>
+Commit).  The joiner is added at the leftmost free leaf node (just as if they
+were added with an Add proposal), and the path is calculated relative to that
+leaf node.<a href="#section-11.2.1-13.3" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-11.2.1-13.4">External Commits MUST be signed by the new member.  In particular, the
 signature on the enclosing MLSPlaintext MUST verify using the public key for
@@ -4884,7 +4906,7 @@ struct {
   Extension group_context_extensions&lt;0..2^32-1&gt;;
   Extension other_extensions&lt;0..2^32-1&gt;;
   MAC confirmation_tag;
-  KeyPackageID signer;
+  KeyPackageRef signer;
   opaque signature&lt;0..2^16-1&gt;;
 } GroupInfo;
 
@@ -4899,7 +4921,7 @@ struct {
 } GroupSecrets;
 
 struct {
-  KeyPackageID new_member&lt;1..255&gt;;
+  KeyPackageRef new_member&lt;1..255&gt;;
   HPKECiphertext encrypted_group_secrets;
 } EncryptedGroupSecrets;
 
@@ -4945,7 +4967,7 @@ welcome_key = KDF.Expand(welcome_secret, "key", AEAD.Nk)
 <li class="normal" id="section-11.2.2-9.1">Verify the signature on the GroupInfo object. The signature input comprises
 all of the fields in the GroupInfo object except the signature field. The
 public key and algorithm are taken from the credential in the leaf node of the
-member with KeyPackageID <code>signer</code>. If there is no matching leaf node, or if
+member with KeyPackageRef <code>signer</code>. If there is no matching leaf node, or if
 signature verification fails, return an error.<a href="#section-11.2.2-9.1" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-11.2.2-9.2">
@@ -4985,7 +5007,7 @@ public key in the node.<a href="#section-11.2.2-9.4.2.3" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-11.2.2-9.4.2.4">If the <code>path_secret</code> value is set in the GroupSecrets object: Identify the
 lowest common ancestor of the node index <code>index</code> and of the node index of
-the member with KeyPackageID <code>GroupInfo.signer</code>. Set the private key for
+the member with KeyPackageRef <code>GroupInfo.signer</code>. Set the private key for
 this node to the private key derived from the <code>path_secret</code>.<a href="#section-11.2.2-9.4.2.4" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-11.2.2-9.4.2.5">For each parent of the common ancestor, up to the root of the tree, derive
@@ -5583,6 +5605,12 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-16.1-8.3" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
             <tr>
+              <td class="text-left" rowspan="1" colspan="1">0x0007</td>
+              <td class="text-left" rowspan="1" colspan="1">MLS10_256_DHKEMP384_AES256GCM_SHA384_P384.</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
+            </tr>
+            <tr>
               <td class="text-left" rowspan="1" colspan="1">0xff00 - 0xffff</td>
               <td class="text-left" rowspan="1" colspan="1">Reserved for Private Use</td>
               <td class="text-left" rowspan="1" colspan="1">N/A</td>
@@ -5655,14 +5683,22 @@ primitives, HMAC hash functions, and TLS signature schemes is as follows
               <td class="text-left" rowspan="1" colspan="1">SHA512</td>
               <td class="text-left" rowspan="1" colspan="1">ed448</td>
             </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0x0007</td>
+              <td class="text-left" rowspan="1" colspan="1">0x0011</td>
+              <td class="text-left" rowspan="1" colspan="1">0x0002</td>
+              <td class="text-left" rowspan="1" colspan="1">0x0002</td>
+              <td class="text-left" rowspan="1" colspan="1">SHA384</td>
+              <td class="text-left" rowspan="1" colspan="1">ecdsa_secp384r1_sha384</td>
+            </tr>
           </tbody>
         </table>
 <p id="section-16.1-13">The hash used for the MLS transcript hash is the one referenced in the
-ciphersuite name.  In the ciphersuites defined above, "SHA256" and "SHA512"
-refer to the SHA-256 and SHA-512 functions defined in <span>[<a href="#SHS" class="xref">SHS</a>]</span>.<a href="#section-16.1-13" class="pilcrow">¶</a></p>
+ciphersuite name.  In the ciphersuites defined above, "SHA256", "SHA384", and "SHA512"
+refer to the SHA-256, SHA-384, and SHA-512 functions defined in <span>[<a href="#SHS" class="xref">SHS</a>]</span>.<a href="#section-16.1-13" class="pilcrow">¶</a></p>
 <p id="section-16.1-14">It is advisable to keep the number of ciphersuites low to increase the chances
 clients can interoperate in a federated environment, therefore the ciphersuites
-only inlcude modern, yet well-established algorithms.  Depending on their
+only include modern, yet well-established algorithms.  Depending on their
 requirements, clients can choose between two security levels (roughly 128-bit
 and 256-bit). Within the security levels clients can choose between faster
 X25519/X448 curves and FIPS 140-2 compliant curves for Diffie-Hellman key
@@ -5768,6 +5804,13 @@ is REQUIRED for a Y-&gt;N transition.<a href="#section-16.2-3.4" class="pilcrow"
               <td class="text-left" rowspan="1" colspan="1">0x0005</td>
               <td class="text-left" rowspan="1" colspan="1">ratchet_tree</td>
               <td class="text-left" rowspan="1" colspan="1">GI</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0x0006</td>
+              <td class="text-left" rowspan="1" colspan="1">required_capabilities</td>
+              <td class="text-left" rowspan="1" colspan="1">GC</td>
               <td class="text-left" rowspan="1" colspan="1">Y</td>
               <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
             </tr>
@@ -6103,6 +6146,10 @@ thyla.van.der@merwe.tech<a href="#section-17-1.12" class="pilcrow">¶</a>
 <dt id="I-D.ietf-trans-rfc6962-bis">[I-D.ietf-trans-rfc6962-bis]</dt>
         <dd>
 <span class="refAuthor">Laurie, B.</span>, <span class="refAuthor">Langley, A.</span>, <span class="refAuthor">Kasper, E.</span>, <span class="refAuthor">Messeri, E.</span>, and <span class="refAuthor">R. Stradling</span>, <span class="refTitle">"Certificate Transparency Version 2.0"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-trans-rfc6962-bis-42</span>, <time datetime="2021-08-31" class="refDate">31 August 2021</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-trans-rfc6962-bis-42">https://datatracker.ietf.org/doc/html/draft-ietf-trans-rfc6962-bis-42</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5116">[RFC5116]</dt>
+        <dd>
+<span class="refAuthor">McGrew, D.</span>, <span class="refTitle">"An Interface and Algorithms for Authenticated Encryption"</span>, <span class="seriesInfo">RFC 5116</span>, <span class="seriesInfo">DOI 10.17487/RFC5116</span>, <time datetime="2008-01" class="refDate">January 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5116">https://www.rfc-editor.org/rfc/rfc5116</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC6125">[RFC6125]</dt>
         <dd>
