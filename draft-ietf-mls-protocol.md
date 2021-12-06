@@ -1149,12 +1149,14 @@ KeyPackages contain a public key chosen by the client, which the
 client MUST ensure uniquely identifies a given KeyPackage object
 among the set of KeyPackages created by this client.
 
-The value for hpke\_init\_key MUST be a public key for the asymmetric
-encryption scheme defined by cipher\_suite. The whole structure
-is signed using the client's signature key. A KeyPackage object
-with an invalid signature field MUST be considered malformed.
-The input to the signature computation comprises all of the fields
-except for the signature field.
+The value for `hpke_init_key` MUST be a public key for the asymmetric encryption
+scheme defined by `cipher_suite`.  The `endpoint_id` is an application-provided
+value that MUST uniquely identify the client in the scope of this group.
+
+The whole structure is signed using the client's signature key. A KeyPackage
+object with an invalid signature field MUST be considered malformed.  The input
+to the signature computation comprises all of the fields except for the
+signature field.
 
 ~~~~~
 enum {
@@ -1175,6 +1177,7 @@ struct {
     ProtocolVersion version;
     CipherSuite cipher_suite;
     HPKEPublicKey hpke_init_key;
+    opaque endpoint_id<0..255>;
     Credential credential;
     Extension extensions<8..2^32-1>;
     opaque signature<0..2^16-1>;
@@ -1193,6 +1196,28 @@ Tree and updated depending on the evolution of this tree, each
 modification of its content MUST be reflected by a change of its
 signature. This allow other members to control the validity of the KeyPackage
 at any time and in particular in the case of a newcomer joining the group.
+
+## Compatibility with a Group
+
+When a KeyPackage is introduced as a leaf in a group's ratchet tree (e.g., via
+an Add or Update proposal, or a Commit with an update path), it MUST be
+compatible with the group to which it is being added:
+
+* The signature on the KeyPackage MUST valid using the public key in the
+  KeyPackage's credential
+
+* The following fields in the KeyPackage are unique among the members of the
+  group (including any other KeyPackages introduced in the same Commit):
+
+    * `credential.signature_key`
+    * `hpke_init_key`
+    * `endpoint_id`
+
+* The capabilities expressed in the KeyPackage is compatible with the group's
+  parameters.  The ciphersuite and protocol version of the KeyPackage must match
+  those in use in the group.  If the GroupContext has a `required_capabilities`
+  extension, then the required extensions and proposals MUST be listed in the
+  KeyPackage's `capabilities` extension.
 
 ## Client Capabilities
 
@@ -2417,23 +2442,8 @@ where the new member will be added.  For the first Add in the Commit, `index` is
 the leftmost empty leaf in the tree, for the second Add, the next empty leaf to
 the right, etc.
 
-* Validate the KeyPackage:
-
-    * Verify that the signature on the KeyPackage is valid using the public key
-      in the KeyPackage's credential
-
-    * Verify that the following fields in the KeyPackage are unique among the
-      members of the group (including any other members added in the same
-      Commit):
-
-        * `credential.signature_key`
-        * `hpke_init_key`
-
-    * Verify that the KeyPackage is compatible with the group's parameters.  The
-      ciphersuite and protocol version of the KeyPackage must match those in
-      use in the group.  If the GroupContext has a `required_capabilities`
-      extension, then the required extensions and proposals MUST be listed in
-      the KeyPackage's `capabilities` extension.
+* Verify that the KeyPackage is compatible with the group (see
+  {{compatibility-with-a-group}})
 
 * If necessary, extend the tree to the right until it has at least index + 1
   leaves
@@ -2459,29 +2469,17 @@ struct {
 
 A member of the group applies an Update message by taking the following steps:
 
-* Validate the KeyPackage:
+* Verify that the KeyPackage is compatible with the group (see
+  {{compatibility-with-a-group}}), ignoring the leaf being replaced.
 
-    * Verify that the signature on the KeyPackage is valid using the public key
-      in the KeyPackage's credential
+* Verify that the `hpke_init_key` value is different from the corresponding
+  field in the KeyPackage being replaced.
 
-    * Verify that the following fields in the KeyPackage are unique among the
-      members of the group (including any other members added in the same
-      Commit):
+* Verify that the `endpoint_id` of the new KeyPackage is the same as the
+  KeyPackage being replaced.
 
-        * `credential.signature_key`
-        * `hpke_init_key`
-
-    * Verify that the following fields in the new KeyPackage are the same as the
-      one being replaced:
-
-        * `version`
-        * `cipher_suite`
-
-    * Verify that the `hpke_init_key` value is different from the corresponding
-      field in the KeyPackage being replaced.
-
-    * Verify that the set of identities attested by the credential is acceptable
-      to the application for the participant being updated.
+* Verify that the set of identities attested by the credential is acceptable
+  to the application for the participant being updated.
 
 * Replace the sender's leaf KeyPackage with the one contained in
   the Update proposal
@@ -2748,10 +2746,8 @@ invalid.  The committer MUST NOT include any Update proposals generated by the
 committer, since they would be duplicative with the `path` field in the Commit.
 The committer MUST prefer any Remove received, or the most recent
 Update for the leaf if there are no Removes. The comitter MUST consider invalid
-any Add or Update proposal if the Credential in the contained KeyPackage shares
-the same signature key with a Credential in any leaf of the group, or indeed if
-the KeyPackage shares the same `hpke_init_key` with another KeyPackage in the
-group.
+any Add or Update proposal if the KeyPackage included in the proposal does not
+meet the validation criteria for these proposals (see {{add}} and {{update}}).
 
 The Commit MUST NOT combine proposals sent within different epochs. In the event
 that a valid proposal is omitted from the next Commit, the sender of the
@@ -2940,6 +2936,9 @@ A member of the group applies a Commit message by taking the following steps:
   provisional ratchet tree and GroupContext, to generate the new ratchet tree
   and the `commit_secret`:
 
+  * Verify that the leaf KeyPackage meets the same validation criteria as an
+    Update KeyPackage (see {{update}}).
+
   * Apply the UpdatePath to the tree, as described in
     {{synchronizing-views-of-the-tree}}, and store `leaf_key_package` at the
     Committer's leaf.
@@ -3073,6 +3072,7 @@ External Commits work like regular Commits, with a few differences:
   * If a Remove proposal is present, then the `credential` of the Add KeyPackage
     MUST present a set of identifiers that is acceptable to the application for
     the removed participant (as if this were an Update for that participant).
+    The Add KeyPackage and the removed leaf MUST have the same `endpoint_id`.
 * The proposals included by reference in an External Commit MUST meet the following
   conditions:
   * There MUST NOT be any ExternalInit proposals
