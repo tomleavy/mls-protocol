@@ -2272,10 +2272,10 @@ DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#
 at node 5:<a href="#section-5.4-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.4-7">
 <pre>
-      3
+      Y
     __|__
    /     \
-  1       5[C]
+  X       Z[C]
  / \     / \
 A   B   C   D
 
@@ -2302,10 +2302,10 @@ leaf_secret    --&gt; leaf_node_secret --&gt; leaf_priv, leaf_pub
 described above:<a href="#section-5.4-10" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.4-11">
 <pre>
-    np[1] -&gt; 3
+    np[1] -&gt; Y'
            __|__
           /     \
-np[0] -&gt; 1       5[C]
+np[0] -&gt; X'      Z[C]
         / \     / \
        A   B   C   D
            ^
