@@ -2369,10 +2369,11 @@ A   B   C   D &lt;-- remove leaf        A   B   C
 A   B   C &lt;-- remove leaf        A   B
 </pre><a href="#section-5.5-5" class="pilcrow">¶</a>
 </div>
-<p id="section-5.5-6">Concrete algorithms for these operations on array-based and link-based trees are
+<p id="section-5.5-6">Note: in the rest of the protocol, the rightmost leaf will be removed only when it is blank.<a href="#section-5.5-6" class="pilcrow">¶</a></p>
+<p id="section-5.5-7">Concrete algorithms for these operations on array-based and link-based trees are
 provided in <a href="#array-based-trees" class="xref">Appendix A</a> and <a href="#link-based-trees" class="xref">Appendix B</a>.  The concrete
 algorithms are non-normative.  An implementation MAY use any algorithm that
-produces the correct tree in its internal representation.<a href="#section-5.5-6" class="pilcrow">¶</a></p>
+produces the correct tree in its internal representation.<a href="#section-5.5-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="synchronizing-views-of-the-tree">
@@ -5102,10 +5103,13 @@ def subtree_root(nodes):
 <p id="section-11.3-7">(Note that this is the same ordering of nodes as in the array-based tree representation
 described in <a href="#array-based-trees" class="xref">Appendix A</a>.  The algorithms in that section may be used to 
 simplify decoding this extension into other representations.)<a href="#section-11.3-7" class="pilcrow">¶</a></p>
-<p id="section-11.3-8">The example tree in <a href="#tree-computation-terminology" class="xref">Section 5.1</a> would be represented as an
+<p id="section-11.3-8">(Note that this is the same ordering of nodes as in the array-based tree representation
+described in <a href="#array-based-trees" class="xref">Appendix A</a>.  The algorithms in that section may be used to 
+simplify decoding this extension into other representations.)<a href="#section-11.3-8" class="pilcrow">¶</a></p>
+<p id="section-11.3-9">The example tree in <a href="#tree-computation-terminology" class="xref">Section 5.1</a> would be represented as an
 array of nodes in the following form, where R represents the "subtree root" for
-a given subarray of the node array:<a href="#section-11.3-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-11.3-9">
+a given subarray of the node array:<a href="#section-11.3-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-11.3-10">
 <pre>
               X
         ______|______
@@ -5122,21 +5126,21 @@ A   B   C   D   E   F   G
 &lt;-----------&gt; R &lt;-------&gt;
 &lt;---&gt; R &lt;---&gt;   &lt;---&gt; R -
 - R -   - R -   - R -
-</pre><a href="#section-11.3-9" class="pilcrow">¶</a>
+</pre><a href="#section-11.3-10" class="pilcrow">¶</a>
 </div>
-<p id="section-11.3-10">The presence of a <code>ratchet_tree</code> extension in a GroupInfo message does not
+<p id="section-11.3-11">The presence of a <code>ratchet_tree</code> extension in a GroupInfo message does not
 result in any changes to the GroupContext extensions for the group.  The ratchet
-tree provided is simply stored by the client and used for MLS operations.<a href="#section-11.3-10" class="pilcrow">¶</a></p>
-<p id="section-11.3-11">If this extension is not provided in a Welcome message, then the client will
+tree provided is simply stored by the client and used for MLS operations.<a href="#section-11.3-11" class="pilcrow">¶</a></p>
+<p id="section-11.3-12">If this extension is not provided in a Welcome message, then the client will
 need to fetch the ratchet tree over some other channel before it can generate or
 process Commit messages.  Applications should ensure that this out-of-band
 channel is provided with security protections equivalent to the protections that
 are afforded to Proposal and Commit messages.  For example, an application that
 encrypts Proposal and Commit messages might distribute ratchet trees encrypted
-using a key exchanged over the MLS channel.<a href="#section-11.3-11" class="pilcrow">¶</a></p>
-<p id="section-11.3-12">Regardless of how the client obtains the tree, the client MUST verify that the
+using a key exchanged over the MLS channel.<a href="#section-11.3-12" class="pilcrow">¶</a></p>
+<p id="section-11.3-13">Regardless of how the client obtains the tree, the client MUST verify that the
 root hash of the ratchet tree matches the <code>tree_hash</code> of the GroupContext before
-using the tree for MLS operations.<a href="#section-11.3-12" class="pilcrow">¶</a></p>
+using the tree for MLS operations.<a href="#section-11.3-13" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
