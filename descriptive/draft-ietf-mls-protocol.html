@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 9 June 2022</td>
+<td class="center">Expires 10 June 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2021-12-06" class="published">6 December 2021</time>
+<time datetime="2021-12-07" class="published">7 December 2021</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-06-09">9 June 2022</time></dd>
+<dd class="expires"><time datetime="2022-06-10">10 June 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 9 June 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 10 June 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2156,7 +2156,7 @@ A   _   C   D
 </li>
           <li class="normal" id="section-5.2-11.2">The resolution of leaf 1 is the empty list []<a href="#section-5.2-11.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.2-11.3">The resolution of root node is the list [A, CD, C]<a href="#section-5.2-11.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.2-11.3">The resolution of root node is the list [A, Z, C]<a href="#section-5.2-11.3" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-5.2-12">Every node, regardless of whether the node is blank or populated, has
@@ -2325,17 +2325,18 @@ delete the leaf_secret.<a href="#section-5.4-12" class="pilcrow">¶</a></p>
 <a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-adding-and-removing-leaves" class="section-name selfRef">Adding and Removing Leaves</a>
         </h3>
 <p id="section-5.5-1">In addition to the path-based updates to the tree described above, it is also
-necessary to add and remove leaves of the tree in order to reflect members being
-added to or removed from the group.  Leaves are always added and removed at the
+necessary to add and remove leaves of the tree in order to reflect changes to the
+membership of the group (see <a href="#add" class="xref">Section 11.1.1</a> and <a href="#remove" class="xref">Section 11.1.3</a>).  Leaves are always added and removed at the
 right edge of the tree: Either a new rightmost leaf is added, or the rightmost
 leaf is removed.  Nodes' parent/child node relationships are then updated to
 maintain the tree's left-balanced structure.  These operations are also known as
 <em>extending</em> and <em>truncating</em> the tree.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
-<p id="section-5.5-2">To add a new leaf: Add leaf as the new rightmost leaf of the tree.  Add a blank
-parent node whose right child is the new leaf.  The parent is attached to the
-tree as the right child of the appropriate node to make the updated tree
-left-balanced (or set as a new root).  The former right child of the parent's
-parent becomes the parent's left child (or the old root becomes the left child).<a href="#section-5.5-2" class="pilcrow">¶</a></p>
+<p id="section-5.5-2">To add a new leaf: Add leaf L as the new rightmost leaf of the tree.  Add
+a blank parent node P whose right child is L.  P is attached to the
+tree as the right child of the only appropriate node to make the updated tree
+left-balanced (or set it as a new root).  The former right child of the P's
+parent becomes P's left child (or the old root becomes the P's left child if
+P is the new root).<a href="#section-5.5-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5-3">
 <pre>
                    _ &lt;-- new parent              _
@@ -2346,10 +2347,10 @@ parent becomes the parent's left child (or the old root becomes the left child).
 A   B        A   B   C &lt;-- new leaf        A   B   C   D &lt;-- new leaf
 </pre><a href="#section-5.5-3" class="pilcrow">¶</a>
 </div>
-<p id="section-5.5-4">To remove the rightmost leaf: Remove the rightmost leaf node and its parent
-node.  If the parent node was the root of the tree, the parent node's left child
-is now the root of the tree.  Otherwise, set the right child of the parent's parent
-(formerly the parent itself) to be the parent's left child.<a href="#section-5.5-4" class="pilcrow">¶</a></p>
+<p id="section-5.5-4">To remove the rightmost leaf: Remove the rightmost leaf node L and its parent
+node P.  If P was the root of the tree, P's left child
+is now the root of the tree.  Otherwise, set the right child of P's parent
+to be the P's left child.<a href="#section-5.5-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.5-5">
 <pre>
       Y                                    Y
@@ -4086,7 +4087,7 @@ struct {
 Add in the list of proposals determines the leaf node where the new member will
 be added.  For the first Add in the Commit, the corresponding new member will be
 placed in the leftmost empty leaf in the tree, for the second Add, the next
-empty leaf to the right, etc. If not empty leaf exists, the tree is extended to
+empty leaf to the right, etc. If no empty leaf exists, the tree is extended to
 the right.<a href="#section-11.1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.1.1-4.1">
@@ -5004,7 +5005,7 @@ public key in the node.<a href="#section-11.2.2-9.4.2.3" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-11.2.2-9.4.2.4">If the <code>path_secret</code> value is set in the GroupSecrets object: Identify the
 lowest common ancestor of the leaf node <code>my_leaf</code> and of the node of
-the member with KeyPackageID <code>GroupInfo.signer</code>. Set the private key for
+the member with KeyPackageRef <code>GroupInfo.signer</code>. Set the private key for
 this node to the private key derived from the <code>path_secret</code>.<a href="#section-11.2.2-9.4.2.4" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-11.2.2-9.4.2.5">For each parent of the common ancestor, up to the root of the tree, derive
@@ -5098,10 +5099,13 @@ def subtree_root(nodes):
     return root
 </pre><a href="#section-11.3-6" class="pilcrow">¶</a>
 </div>
-<p id="section-11.3-7">The example tree in <a href="#tree-computation-terminology" class="xref">Section 5.1</a> would be represented as an
+<p id="section-11.3-7">(Note that this is the same ordering of nodes as in the array-based tree representation
+described in <a href="#array-based-trees" class="xref">Appendix A</a>.  The algorithms in that section may be used to 
+simplify decoding this extension into other representations.)<a href="#section-11.3-7" class="pilcrow">¶</a></p>
+<p id="section-11.3-8">The example tree in <a href="#tree-computation-terminology" class="xref">Section 5.1</a> would be represented as an
 array of nodes in the following form, where R represents the "subtree root" for
-a given subarray of the node array:<a href="#section-11.3-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-11.3-8">
+a given subarray of the node array:<a href="#section-11.3-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-11.3-9">
 <pre>
               X
         ______|______
@@ -5118,21 +5122,21 @@ A   B   C   D   E   F   G
 &lt;-----------&gt; R &lt;-------&gt;
 &lt;---&gt; R &lt;---&gt;   &lt;---&gt; R -
 - R -   - R -   - R -
-</pre><a href="#section-11.3-8" class="pilcrow">¶</a>
+</pre><a href="#section-11.3-9" class="pilcrow">¶</a>
 </div>
-<p id="section-11.3-9">The presence of a <code>ratchet_tree</code> extension in a GroupInfo message does not
+<p id="section-11.3-10">The presence of a <code>ratchet_tree</code> extension in a GroupInfo message does not
 result in any changes to the GroupContext extensions for the group.  The ratchet
-tree provided is simply stored by the client and used for MLS operations.<a href="#section-11.3-9" class="pilcrow">¶</a></p>
-<p id="section-11.3-10">If this extension is not provided in a Welcome message, then the client will
+tree provided is simply stored by the client and used for MLS operations.<a href="#section-11.3-10" class="pilcrow">¶</a></p>
+<p id="section-11.3-11">If this extension is not provided in a Welcome message, then the client will
 need to fetch the ratchet tree over some other channel before it can generate or
 process Commit messages.  Applications should ensure that this out-of-band
 channel is provided with security protections equivalent to the protections that
 are afforded to Proposal and Commit messages.  For example, an application that
 encrypts Proposal and Commit messages might distribute ratchet trees encrypted
-using a key exchanged over the MLS channel.<a href="#section-11.3-10" class="pilcrow">¶</a></p>
-<p id="section-11.3-11">Regardless of how the client obtains the tree, the client MUST verify that the
+using a key exchanged over the MLS channel.<a href="#section-11.3-11" class="pilcrow">¶</a></p>
+<p id="section-11.3-12">Regardless of how the client obtains the tree, the client MUST verify that the
 root hash of the ratchet tree matches the <code>tree_hash</code> of the GroupContext before
-using the tree for MLS operations.<a href="#section-11.3-11" class="pilcrow">¶</a></p>
+using the tree for MLS operations.<a href="#section-11.3-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
