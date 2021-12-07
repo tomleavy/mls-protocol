@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-12-05T01:08:48.431857+00:00",
+  "timestamp": "2021-12-07T01:07:03.725055+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4981,7 +4981,7 @@
       "labels": [],
       "body": "Right now, we treat the re-init and branch PSK cases as distinct cases, as opposed to just having a general \"export PSK from one group+epoch, insert it into another\" function.  What I would call a \"resumption PSK\", following TLS.   Even though we have the distinction, the content of the PSK itself is the same: (group ID, epoch, resumption secret).  So the only difference is that the PreSharedKeyID has a bit that signals the intent of injecting this resumption PSK.\r\n\r\nDo we really need that bit?  If there's not a compelling need, it would streamline the API and allow for more flexibility if we just had the notion of a resumption PSK.",
       "createdAt": "2021-11-04T14:47:01Z",
-      "updatedAt": "2021-12-01T15:02:06Z",
+      "updatedAt": "2021-12-06T18:47:09Z",
       "closedAt": null,
       "comments": [
         {
@@ -5039,6 +5039,13 @@
           "body": "I understand the concern from a cryptographic standpoint, it's nice to have a type that indicates that the group should be shut down.\r\nFrom an engineering perspective, this all feels pretty vague. It's not clear at all how exactly a group will be shut down and a new one will be created, the protocol doesn't give any specific guidance. I don't think this is a huge concern, as long as we don't paint ourselves in a corner when we want to upgrade groups to newer MLS versions in the future.",
           "createdAt": "2021-12-01T15:02:06Z",
           "updatedAt": "2021-12-01T15:02:06Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Even if we want to have everyone agree that the group should be shut down, the ReInit proposal provides that.  Committing the ReInit puts it in the transcript, which means everyone agrees on it.  So everyone who exports a PSK from that epoch should know it's a \"dead epoch\".  In fact, the `branch` vs. `reinit` distinction seems duplicative here, since you shouldn't be able to get a `reinit` PSK from a \"live\" epoch or a `branch` PSK from a dead one.  `branch` iff live; `reinit` iff dead.\r\n\r\nNow, there may be other sub-cases within live or dead; as noted, not all resumption PSK cases map clearly to `branch` or `reinit`.  But it seems premature to put in stub functionality without some taxonomy and requirements.\r\n\r\nI would propose we do #518 for now, and if there turns out to be a need to be PSK use cases that really need segregating, it should be straightforward extension to add another PSKType.",
+          "createdAt": "2021-12-06T18:47:09Z",
+          "updatedAt": "2021-12-06T18:47:09Z"
         }
       ]
     },
@@ -37004,7 +37011,7 @@
       "labels": [],
       "body": "Filing this on behalf of @TWal after discussions with @kkohbrok and @karthikbhargavan.\r\n\r\nThe idea behind it is that the array representation is only one possible implementation for the tree. This PR removes the reliance on nodes indices to address nodes in the tree.\r\n\r\nI'll leave it to @TWal to write a more detailed description.",
       "createdAt": "2021-11-15T13:20:37Z",
-      "updatedAt": "2021-12-03T14:23:07Z",
+      "updatedAt": "2021-12-06T14:39:48Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
@@ -37092,6 +37099,20 @@
           "body": "I think @franziskuskiefer is on the right track here -- let's phrase the structure of the tree in terms of node indices but be really clear that nodes don't have to use an array implementation.  So we would do something like:\r\n\r\n* Keep node indices\r\n* Truncate algorithm (in {{remove}}):\r\n    * Identify the rightmost non-blank leaf node\r\n    * Remove all nodes from the tree with an index higher than the rightmost non-blank leaf\r\n* Extend algorithm (in {{add}}):\r\n    * Let `n` be the index of the rightmost leaf node\r\n    * Add a blank parent node with index `n+1` and a blank leaf node with index `n+2`\r\n    * As a result, node `n+1` will have node `n+2` as its right child, and its left child and parent will be defined by the left-balanced binary tree structure.\r\n\r\n@TWal - Could you live with that?  It's sort of implicitly declarative, since node indexing encodes the left-balanced binary tree structure.\r\n\r\nNow that we have the tree-wise algorithms, it actually seems like a fine idea to add them in an appendix, parallel to the tree math appendix.  Then we could have a note in the Ratchet Tree section that says \"if you want to use node indices to compute relations, see that appendix for some helpful detail; if you want to use pointers, see the other one\".  That would make it abundantly clear that indices don't prescribe implementation.  I'll write a PR for that.",
           "createdAt": "2021-12-03T14:21:59Z",
           "updatedAt": "2021-12-03T14:23:07Z"
+        },
+        {
+          "author": "franziskuskiefer",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Getting the link based description in is a great first step.\r\nThe other change that's uncontroversial I think is to make clear throughout the spec that there are two different (obvious) ways of implementing the tree.\r\n\r\nThen I we are left with one more question\r\n> Keep node indices\r\n\r\nWith the two changes mentioned above I don't have strong feelings on this. Either way is fine with me. Only working with leaf indices instead of node indices is the more generic description, but also creates some churn in the algorithms that is also security relevant.",
+          "createdAt": "2021-12-06T10:31:27Z",
+          "updatedAt": "2021-12-06T10:31:27Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Right, that's why I'm inclined to keep node indices -- Avoid churning the algorithms (since they seem to have been clear enough for at least two interoperable implementations), while making clear that any algorithm that produces the same tree is acceptable.",
+          "createdAt": "2021-12-06T14:39:48Z",
+          "updatedAt": "2021-12-06T14:39:48Z"
         }
       ],
       "reviews": [
@@ -37401,13 +37422,13 @@
       "labels": [],
       "body": "The specification currently assumes that a Credential provides a singular identity for a client, when in reality that is not the case.  For example, X509Credential can provide a whole collection of identities, and it's up to the application to decide if its preferred identity is among them.  Just like in TLS, a server can send a cert with 100 domains, but the TLS client knows which one it's looking for.\r\n\r\nThis PR refactors the parts of the spec that refer to identity to be consistent with this idea.  The main impacts are to processing of Update and Remove-within-External-Commit, both cases in which you want the new KeyPackage to logically represent the same identity as the old one.\r\n\r\nThis PR also removes the `endpoint_id` field from KeyPackage.  Since we now reference KeyPackages by KeyPackageID, there's no longer a need for a separate identifier.  (Unless we want an identifier that's stable across epochs, but (a) it's not clear to me that that is needed in general and (b) it can easily be added in an extension, as in fact we have done in Webex.)",
       "createdAt": "2021-11-16T22:20:20Z",
-      "updatedAt": "2021-12-01T20:20:43Z",
+      "updatedAt": "2021-12-06T17:01:34Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
+      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "ref-id",
-      "headRefOid": "df8706804602235d7e44b1674d5b8d9980e1a982",
+      "headRefOid": "ee54cbd5a57945416dc73248694b1f318977ab6e",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -37447,6 +37468,13 @@
           "body": "It's stable across epochs until you remove the party in that leaf and add another one into it. \r\n\r\nThe options that have been suggested are the following:\r\n- leaf index: is not tied to any particular identity/key package\r\n- key package (id/hash): potentially changes across epochs\r\n- identity in the credential: not unique per group \r\n\r\nNone of these variables/indices/identifiers really does the trick of uniquely and consistently (across epochs) identifying a client in a group. The endpoint id/identity tuple does all of the above. We don't have to use it in message structs, where the key package ids are just fine, as messages are tied to an epoch anyway. I'm just in favor of keeping the endpoint id so it can serve as a consistent identifier for group members for use by the application.",
           "createdAt": "2021-12-01T20:20:43Z",
           "updatedAt": "2021-12-01T20:20:43Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@kkohbrok - I can live with re-adding `endpoint_id`.  I can imagine scenarios where it would be troublesome, but in the worst case, you just fill in some long random junk there.  I have re-added.\r\n\r\nAny other issues, or are we good to merge?",
+          "createdAt": "2021-12-06T17:01:33Z",
+          "updatedAt": "2021-12-06T17:01:33Z"
         }
       ],
       "reviews": []
@@ -38044,21 +38072,21 @@
       "id": "PR_kwDOBoyH6c4vXl8j",
       "title": "Add algorithms for link-based trees",
       "url": "https://github.com/mlswg/mls-protocol/pull/521",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "As discussed in #507, having algorithms for a \"link-based\" representation of the tree would help emphasize that the array-based tree representation is not required.  This PR adds them in an appendix.",
       "createdAt": "2021-12-03T15:58:09Z",
-      "updatedAt": "2021-12-03T15:58:25Z",
+      "updatedAt": "2021-12-06T16:39:27Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "algo",
       "headRefOid": "919234f014a9fd611eb643d058d07e8fd3e8c0a9",
-      "closedAt": null,
+      "closedAt": "2021-12-06T16:39:27Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -38069,8 +38097,62 @@
           "body": "cc @TWal @franziskuskiefer ",
           "createdAt": "2021-12-03T15:58:25Z",
           "updatedAt": "2021-12-03T15:58:25Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Subsumed by #522 ",
+          "createdAt": "2021-12-06T16:39:27Z",
+          "updatedAt": "2021-12-06T16:39:27Z"
         }
       ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4xGcb3",
+          "commit": {
+            "abbreviatedOid": "919234f"
+          },
+          "author": "franziskuskiefer",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "lgtm",
+          "createdAt": "2021-12-06T10:23:41Z",
+          "updatedAt": "2021-12-06T10:24:18Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "Do we need both, pseudo code and python code? I'd be fine with the python code only and some of this as comments if you feel like it.",
+              "createdAt": "2021-12-06T10:23:41Z",
+              "updatedAt": "2021-12-06T10:24:18Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 522,
+      "id": "PR_kwDOBoyH6c4vctWX",
+      "title": "Generalize tree extend/truncate algorithms",
+      "url": "https://github.com/mlswg/mls-protocol/pull/522",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR builds on #507 and #521.  It adds the following:\r\n\r\n* An explicit note in `Ratchet Tree Terminology` that implementations may use any representation\r\n* A general description of how nodes are added to / removed from the tree\r\n* Specific algorithms for \"array-based trees\" and \"link-based trees\"\r\n\r\n(I also made a few minor editorial revisions.)\r\n\r\n@TWal @franziskuskiefer - I think this hits the right balance of specificity and generality.  Interested in your thoughts here.",
+      "createdAt": "2021-12-06T16:30:14Z",
+      "updatedAt": "2021-12-06T16:30:14Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "descriptive",
+      "headRefOid": "3533678eab0ec14a1bf2e02d5671777610cf9ef9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]
