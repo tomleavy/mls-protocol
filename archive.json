@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-12-07T01:07:03.725055+00:00",
+  "timestamp": "2021-12-09T01:04:40.113948+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4981,7 +4981,7 @@
       "labels": [],
       "body": "Right now, we treat the re-init and branch PSK cases as distinct cases, as opposed to just having a general \"export PSK from one group+epoch, insert it into another\" function.  What I would call a \"resumption PSK\", following TLS.   Even though we have the distinction, the content of the PSK itself is the same: (group ID, epoch, resumption secret).  So the only difference is that the PreSharedKeyID has a bit that signals the intent of injecting this resumption PSK.\r\n\r\nDo we really need that bit?  If there's not a compelling need, it would streamline the API and allow for more flexibility if we just had the notion of a resumption PSK.",
       "createdAt": "2021-11-04T14:47:01Z",
-      "updatedAt": "2021-12-06T18:47:09Z",
+      "updatedAt": "2021-12-07T07:34:22Z",
       "closedAt": null,
       "comments": [
         {
@@ -5046,6 +5046,20 @@
           "body": "Even if we want to have everyone agree that the group should be shut down, the ReInit proposal provides that.  Committing the ReInit puts it in the transcript, which means everyone agrees on it.  So everyone who exports a PSK from that epoch should know it's a \"dead epoch\".  In fact, the `branch` vs. `reinit` distinction seems duplicative here, since you shouldn't be able to get a `reinit` PSK from a \"live\" epoch or a `branch` PSK from a dead one.  `branch` iff live; `reinit` iff dead.\r\n\r\nNow, there may be other sub-cases within live or dead; as noted, not all resumption PSK cases map clearly to `branch` or `reinit`.  But it seems premature to put in stub functionality without some taxonomy and requirements.\r\n\r\nI would propose we do #518 for now, and if there turns out to be a need to be PSK use cases that really need segregating, it should be straightforward extension to add another PSKType.",
           "createdAt": "2021-12-06T18:47:09Z",
           "updatedAt": "2021-12-06T18:47:09Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Fair enough. I see that the trade-off is probably ok. I'd be ok with merging #518.\r\n\r\nThe proposal should indeed ensure that the streams don't get crossed, so that all that remains would be ease of provability at that point. I still feel uncomfortable about not properly separating keys, though.\r\n\r\nRegarding the last two arguments:\r\n- the \"for now\" solution is a bit moot, since with the WGLC at hand, it's almost certainly not going to change until then\r\n- the extension argument goes the other way as well, as you could just as easily have an extension that implements #518 and gets rid of the need for the distinction between resumption PSKs. If anything, we should opt to be conservative in the spec and allow users to loosen the key separation via an extension at their own risk.",
+          "createdAt": "2021-12-07T07:23:01Z",
+          "updatedAt": "2021-12-07T07:23:01Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> I understand the concern from a cryptographic standpoint, it's nice to have a type that indicates that the group should be shut down. From an engineering perspective, this all feels pretty vague. It's not clear at all how exactly a group will be shut down and a new one will be created, the protocol doesn't give any specific guidance. I don't think this is a huge concern, as long as we don't paint ourselves in a corner when we want to upgrade groups to newer MLS versions in the future.\r\n\r\nI understand that it's unclear how the linking of groups is going to take place in a practical setting, but I don't see that that's an argument to weaken the cryptographic basis of the mechanism. If we don't figure out how to do it in practice, then that's fine, as we can just ignore that part of the protocol. If we do, however, we will want to get proper security guarantees whenever we link two groups in this way.\r\n\r\nAgain, I think #518 is ok. But it's because we probably get good enough guarentees and not because the whole mechanism is a secondary concern due to there being unsolved higher level engineering challenges.",
+          "createdAt": "2021-12-07T07:34:22Z",
+          "updatedAt": "2021-12-07T07:34:22Z"
         }
       ]
     },
@@ -37004,21 +37018,21 @@
       "id": "PR_kwDOBoyH6c4uiF4t",
       "title": "Getting rid of the array representation",
       "url": "https://github.com/mlswg/mls-protocol/pull/507",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "franziskuskiefer",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Filing this on behalf of @TWal after discussions with @kkohbrok and @karthikbhargavan.\r\n\r\nThe idea behind it is that the array representation is only one possible implementation for the tree. This PR removes the reliance on nodes indices to address nodes in the tree.\r\n\r\nI'll leave it to @TWal to write a more detailed description.",
       "createdAt": "2021-11-15T13:20:37Z",
-      "updatedAt": "2021-12-06T14:39:48Z",
+      "updatedAt": "2021-12-07T14:51:39Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "fefeaf0a5ae3c4daebcacf8ac752aefebf867842",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_tree_math",
       "headRefOid": "7b4704ef4b79ec7e80f5ebc690620eadcad32723",
-      "closedAt": null,
+      "closedAt": "2021-12-07T14:49:31Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -37113,6 +37127,13 @@
           "body": "Right, that's why I'm inclined to keep node indices -- Avoid churning the algorithms (since they seem to have been clear enough for at least two interoperable implementations), while making clear that any algorithm that produces the same tree is acceptable.",
           "createdAt": "2021-12-06T14:39:48Z",
           "updatedAt": "2021-12-06T14:39:48Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing this since we seem to be converging on #522.",
+          "createdAt": "2021-12-07T14:49:31Z",
+          "updatedAt": "2021-12-07T14:49:31Z"
         }
       ],
       "reviews": [
@@ -37422,7 +37443,7 @@
       "labels": [],
       "body": "The specification currently assumes that a Credential provides a singular identity for a client, when in reality that is not the case.  For example, X509Credential can provide a whole collection of identities, and it's up to the application to decide if its preferred identity is among them.  Just like in TLS, a server can send a cert with 100 domains, but the TLS client knows which one it's looking for.\r\n\r\nThis PR refactors the parts of the spec that refer to identity to be consistent with this idea.  The main impacts are to processing of Update and Remove-within-External-Commit, both cases in which you want the new KeyPackage to logically represent the same identity as the old one.\r\n\r\nThis PR also removes the `endpoint_id` field from KeyPackage.  Since we now reference KeyPackages by KeyPackageID, there's no longer a need for a separate identifier.  (Unless we want an identifier that's stable across epochs, but (a) it's not clear to me that that is needed in general and (b) it can easily be added in an extension, as in fact we have done in Webex.)",
       "createdAt": "2021-11-16T22:20:20Z",
-      "updatedAt": "2021-12-06T17:01:34Z",
+      "updatedAt": "2021-12-07T15:21:01Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
@@ -37475,6 +37496,34 @@
           "body": "@kkohbrok - I can live with re-adding `endpoint_id`.  I can imagine scenarios where it would be troublesome, but in the worst case, you just fill in some long random junk there.  I have re-added.\r\n\r\nAny other issues, or are we good to merge?",
           "createdAt": "2021-12-06T17:01:33Z",
           "updatedAt": "2021-12-06T17:01:33Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I'm ok with this approach, but I think this changes the concept of identity enought that we should not merge this without previous discussion either in a meeting or on the mailing list. Is there an interim planned before the WGLC?",
+          "createdAt": "2021-12-07T13:48:55Z",
+          "updatedAt": "2021-12-07T13:50:02Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There is no interim planned.  I'll send a ping to the mailing list.",
+          "createdAt": "2021-12-07T14:28:40Z",
+          "updatedAt": "2021-12-07T14:28:40Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I thought about this some more and I managed to convince myself that the `endpoint_id` is not strictly needed. Not having it however puts a higher burden on either the implementation or on the AS to track changes across epochs in order to ensure continuity. \r\nIn practical terms, the only constant thing about member X is that it occupies leaf node i between the time it was added and removed (regardless of updates during that time). If however X gets removed and a new member Y gets added at the same leaf node, i now references Y and not X, which makes leaf node indices useless across epochs.\r\n\r\nFor me this means one of the following two things must be true:\r\n\r\n a) Implementations emulate the concept of an `endpoint_id`. They assign it to a member at the point in time when the member gets added and delete it when the member gets removed. In between the two events, this `endpoint_id` is used as the only unique identifier for a member.\r\n \r\n b) We put more load on the AS and mandate the AS must be able to correlate two KeyPackages from two different epochs to ascertain the two KeyPackages belong to the same user. For example, member X gets added in epoch A, and updates its KeyPackage (including its credential, HPKE init key, and signature key) in epoch B. The AS must then be able to tell in epoch C whether it's still the same member X or a new member Y, just by looking at the two KeyPackages.",
+          "createdAt": "2021-12-07T15:08:24Z",
+          "updatedAt": "2021-12-07T15:08:24Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@raphaelrobert Yeah, I think I'm about in the same place as you.  As I think I've said before, to use MLS in Webex, we needed to add a KeyPackage extension for the application unique identifer anyway.  With `endpoint_id`, we could have just used that field.\r\n\r\nBut note that the PR has already been updated to re-add `endpoint_id`.  So are you good with the PR in its current state?",
+          "createdAt": "2021-12-07T15:21:00Z",
+          "updatedAt": "2021-12-07T15:21:00Z"
         }
       ],
       "reviews": []
@@ -38053,7 +38102,7 @@
       "labels": [],
       "body": "First part of fixing #409 ",
       "createdAt": "2021-12-01T17:06:11Z",
-      "updatedAt": "2021-12-01T17:58:21Z",
+      "updatedAt": "2021-12-08T12:26:38Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "22511303091bc68165a5208686ad252837f96b3e",
@@ -38141,13 +38190,316 @@
       "labels": [],
       "body": "This PR builds on #507 and #521.  It adds the following:\r\n\r\n* An explicit note in `Ratchet Tree Terminology` that implementations may use any representation\r\n* A general description of how nodes are added to / removed from the tree\r\n* Specific algorithms for \"array-based trees\" and \"link-based trees\"\r\n\r\n(I also made a few minor editorial revisions.)\r\n\r\n@TWal @franziskuskiefer - I think this hits the right balance of specificity and generality.  Interested in your thoughts here.",
       "createdAt": "2021-12-06T16:30:14Z",
-      "updatedAt": "2021-12-06T16:30:14Z",
+      "updatedAt": "2021-12-08T08:06:21Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "descriptive",
-      "headRefOid": "3533678eab0ec14a1bf2e02d5671777610cf9ef9",
+      "headRefOid": "05fdeee5ad6cd808d774b7ccd46e77d46284d8a2",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "This looks good!\r\n\r\nIf I am understanding everything well, the normative description for extention / truncation is the section \"Adding and Removing Leaves\", which is a tree-based description?\r\n",
+          "createdAt": "2021-12-07T11:45:04Z",
+          "updatedAt": "2021-12-07T11:45:04Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4xKryF",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-12-07T07:41:33Z",
+          "updatedAt": "2021-12-07T07:41:33Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xLu0X",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T11:38:59Z",
+          "updatedAt": "2021-12-07T11:39:00Z",
+          "comments": [
+            {
+              "originalPosition": 348,
+              "body": "```suggestion\r\nempty leaf to the right, etc. If no empty leaf exists, the tree is extended to\r\n```",
+              "createdAt": "2021-12-07T11:38:59Z",
+              "updatedAt": "2021-12-07T11:39:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xK6nu",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "franziskuskiefer",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T08:35:46Z",
+          "updatedAt": "2021-12-07T11:39:16Z",
+          "comments": [
+            {
+              "originalPosition": 97,
+              "body": "`CD` -> `Z`?",
+              "createdAt": "2021-12-07T08:35:47Z",
+              "updatedAt": "2021-12-07T11:39:16Z"
+            },
+            {
+              "originalPosition": 135,
+              "body": "I think this description can lead to confusion. This reads as if only the right most member in the tree could be removed from the group, i.e. removing a member from a group is equal to truncating the tree.",
+              "createdAt": "2021-12-07T08:39:06Z",
+              "updatedAt": "2021-12-07T11:39:16Z"
+            },
+            {
+              "originalPosition": 348,
+              "body": "\"If no empty leaf exists\"",
+              "createdAt": "2021-12-07T09:37:37Z",
+              "updatedAt": "2021-12-07T11:39:16Z"
+            },
+            {
+              "originalPosition": 417,
+              "body": "KeyPackageRef",
+              "createdAt": "2021-12-07T11:33:33Z",
+              "updatedAt": "2021-12-07T11:39:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMNye",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T13:39:08Z",
+          "updatedAt": "2021-12-07T14:28:31Z",
+          "comments": [
+            {
+              "originalPosition": 167,
+              "body": "It is a bit weird because it is not clear that `D` is a blank leaf. But then we also have to blank Z and Y if we really want to represent what happens in the protocol. And in the example afterward we would also need to blank C.\r\n\r\nI'm not sure what is the best thing to do here, but there can definitely be a confusion here (somehow the same as the one pointed by @franziskuskiefer)",
+              "createdAt": "2021-12-07T13:39:08Z",
+              "updatedAt": "2021-12-07T14:28:31Z"
+            },
+            {
+              "originalPosition": 632,
+              "body": "```suggestion\r\n        X = self.root.rightmost_leaf()\r\n        assert(X.value == \"_\") # We can only truncate blank leaves\r\n```",
+              "createdAt": "2021-12-07T13:53:55Z",
+              "updatedAt": "2021-12-07T14:28:31Z"
+            },
+            {
+              "originalPosition": 145,
+              "body": "I suggest giving names to make it easier to read. Also add emphasis that there is a unique way to incorporate the new parent in the tree that keeps it left-balanced (-> \" [\u2026] as the only appropriate node [\u2026]\").\r\n\r\n```suggestion\r\nTo add a new leaf: Add leaf L as the new rightmost leaf of the tree.  Add\r\na blank parent node P whose right child is L.  P is attached to the\r\ntree as the right child of the only appropriate node to make the updated tree\r\nleft-balanced (or set it as a new root).  The former right child of the P's\r\nparent becomes P's left child (or the old root becomes the P's left child if\r\nP is the new root).\r\n```",
+              "createdAt": "2021-12-07T14:10:47Z",
+              "updatedAt": "2021-12-07T14:28:31Z"
+            },
+            {
+              "originalPosition": 159,
+              "body": "I also suggest giving names to nodes. Also removing \"(formerly the parent itself)\" because I don't see what that means.\r\nIn the first example, the leaf is D, the parent is Z, the parent's parent is Y, so the sentence says that Y's right child is now Z's left child (so C). I don't get what \"former parent\" means here.\r\n```suggestion\r\nTo remove the rightmost leaf: Remove the rightmost leaf node L and its parent\r\nnode P.  If P was the root of the tree, P's left child\r\nis now the root of the tree.  Otherwise, set the right child of P's parent\r\nto be the P's left child.\r\n```",
+              "createdAt": "2021-12-07T14:26:44Z",
+              "updatedAt": "2021-12-07T14:28:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMfqA",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T14:32:51Z",
+          "updatedAt": "2021-12-07T14:32:52Z",
+          "comments": [
+            {
+              "originalPosition": 97,
+              "body": "```suggestion\r\n* The resolution of root node is the list \\[A, Z, C\\]\r\n```",
+              "createdAt": "2021-12-07T14:32:51Z",
+              "updatedAt": "2021-12-07T14:32:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMgJw",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T14:34:22Z",
+          "updatedAt": "2021-12-07T14:34:24Z",
+          "comments": [
+            {
+              "originalPosition": 135,
+              "body": "```suggestion\r\nnecessary to add and remove leaves of the tree in order to reflect changes to the\r\nmembership of the group (see {{add}} and {{remove}}).  Leaves are always added and removed at the\r\n```",
+              "createdAt": "2021-12-07T14:34:23Z",
+              "updatedAt": "2021-12-07T14:34:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMhXi",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T14:37:59Z",
+          "updatedAt": "2021-12-07T14:38:00Z",
+          "comments": [
+            {
+              "originalPosition": 167,
+              "body": "`D` isn't necessarily a blank leaf.   In principle, one can remove the rightmost leaf even if it's populated.  This section is just describing the structure modifications; the later sections deal with what's in the tree when it gets update.",
+              "createdAt": "2021-12-07T14:38:00Z",
+              "updatedAt": "2021-12-07T14:38:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMhqW",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T14:38:50Z",
+          "updatedAt": "2021-12-07T14:38:51Z",
+          "comments": [
+            {
+              "originalPosition": 417,
+              "body": "```suggestion\r\n      the member with KeyPackageRef `GroupInfo.signer`. Set the private key for\r\n```",
+              "createdAt": "2021-12-07T14:38:50Z",
+              "updatedAt": "2021-12-07T14:38:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMjFV",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T14:43:08Z",
+          "updatedAt": "2021-12-07T14:43:57Z",
+          "comments": [
+            {
+              "originalPosition": 458,
+              "body": "```suggestion\r\n\r\n(Note that this is the same ordering of nodes as in the array-based tree representation\r\ndescribed in {{array-based-trees}}.  The algorithms in that section may be used to \r\nsimplify decoding this extension into other representations.)\r\n\r\n```",
+              "createdAt": "2021-12-07T14:43:08Z",
+              "updatedAt": "2021-12-07T14:43:57Z"
+            },
+            {
+              "originalPosition": 458,
+              "body": "```suggestion\r\n\r\n(Note that this is the same ordering of nodes as in the array-based tree representation\r\ndescribed in {{array-based-trees}}.  The algorithms in that section may be used to \r\nsimplify decoding this extension into other representations.)\r\n\r\n```",
+              "createdAt": "2021-12-07T14:43:56Z",
+              "updatedAt": "2021-12-07T14:43:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMj2R",
+          "commit": {
+            "abbreviatedOid": "3533678"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T14:45:18Z",
+          "updatedAt": "2021-12-07T14:45:18Z",
+          "comments": [
+            {
+              "originalPosition": 632,
+              "body": "As above, not true that we can only truncate blank leaves.",
+              "createdAt": "2021-12-07T14:45:18Z",
+              "updatedAt": "2021-12-07T14:45:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xMqd8",
+          "commit": {
+            "abbreviatedOid": "3925732"
+          },
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-07T15:04:49Z",
+          "updatedAt": "2021-12-07T15:04:58Z",
+          "comments": [
+            {
+              "originalPosition": 178,
+              "body": "Even if this only describe the structure modification, I think it is valuable to give hints to the reader that in practice only blank leaves will be removed. If here the reader thinks that we can truncate any leaf and only afterward the reader discovers that only blank leaves can be truncated, I think it can be confusing.\r\nAlso it might look like a violation of the tree invariant, since in the second tree, D knows Y's secret without being its descendant.\r\n\r\n```suggestion\r\n\r\nNote: in the rest of the protocol, the rightmost leaf will be removed only when it is blank.\r\n\r\n```",
+              "createdAt": "2021-12-07T15:04:49Z",
+              "updatedAt": "2021-12-07T15:04:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xPYM-",
+          "commit": {
+            "abbreviatedOid": "05fdeee"
+          },
+          "author": "franziskuskiefer",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Thanks lgtm now",
+          "createdAt": "2021-12-08T08:06:21Z",
+          "updatedAt": "2021-12-08T08:06:21Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 523,
+      "id": "PR_kwDOBoyH6c4vgvGO",
+      "title": "Move `wire_format` to a separate tagged-union structure MLSMessage",
+      "url": "https://github.com/mlswg/mls-protocol/pull/523",
+      "state": "OPEN",
+      "author": "TWal",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The current use of `wire_format` is a bit weird to me: it is the first value of both `MLSPlaintext` and `MLSCiphertext` which allows the implementations to differentiate between them. Then it looks like it should be implemented as a regular tagged union, which is what this pull request does.\r\n\r\nThis does not imply any changes to existing implementations.\r\n\r\nOne thing that this pull-request changes is that `MLSPlaintext` is forced to have `wire_format = mls_plaintext`, but I don't see why it would have any other values in this case?",
+      "createdAt": "2021-12-07T16:50:20Z",
+      "updatedAt": "2021-12-07T16:50:20Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "headRepository": "TWal/mls-protocol",
+      "headRefName": "twal_wire_format",
+      "headRefOid": "1a9b8c3ac11a4a6ef3834ab827429ec65984d814",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
