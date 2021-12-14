@@ -4169,10 +4169,16 @@ Let <code>removed_index</code> be the node index of this leaf node.<a href="#sec
 </li>
             <li class="normal" id="section-11.1.3-4.3">Blank the intermediate nodes along the path from <code>removed_index</code> to the root<a href="#section-11.1.3-4.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.1.3-4.4">Truncate the tree by removing leaves from the right side of the tree until
-either the rightmost leaf node is not blank or the parent of the rightmost
-leaf node is not blank.  (If the parent node is not blank, then it is needed
-to verify parent hashes in the truncated tree.)<a href="#section-11.1.3-4.4" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.3-4.4">
+              <p id="section-11.1.3-4.4.1">Truncate the tree by removing leaves from the right side of the tree as long
+as the following conditions hold (since non-blank intermediate nodes hold
+information that is necessary for verifying parent hashes):<a href="#section-11.1.3-4.4.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-11.1.3-4.4.2.1">The rightmost leaf is blank<a href="#section-11.1.3-4.4.2.1" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-11.1.3-4.4.2.2">The parent of the rightmost leaf is either blank or the root of the tree<a href="#section-11.1.3-4.4.2.2" class="pilcrow">¶</a>
+</li>
+              </ul>
 </li>
           </ul>
 </section>
