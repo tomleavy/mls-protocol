@@ -1188,7 +1188,10 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
                 <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="xref">5.4</a>.  <a href="#name-ratchet-tree-evolution" class="xref">Ratchet Tree Evolution</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
-                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="xref">5.5</a>.  <a href="#name-synchronizing-views-of-the-" class="xref">Synchronizing Views of the Tree</a></p>
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="xref">5.5</a>.  <a href="#name-adding-and-removing-leaves" class="xref">Adding and Removing Leaves</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6">
+                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="xref">5.6</a>.  <a href="#name-synchronizing-views-of-the-" class="xref">Synchronizing Views of the Tree</a></p>
 </li>
             </ul>
 </li>
@@ -1433,10 +1436,13 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.19">
-            <p id="section-toc.1-1.19.1"><a href="#appendix-A" class="xref">Appendix A</a>.  <a href="#name-tree-math" class="xref">Tree Math</a></p>
+            <p id="section-toc.1-1.19.1"><a href="#appendix-A" class="xref">Appendix A</a>.  <a href="#name-array-based-trees" class="xref">Array-Based Trees</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.20">
-            <p id="section-toc.1-1.20.1"><a href="#appendix-B" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.20.1"><a href="#appendix-B" class="xref">Appendix B</a>.  <a href="#name-link-based-trees" class="xref">Link-Based Trees</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.21">
+            <p id="section-toc.1-1.21.1"><a href="#appendix-C" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -2192,63 +2198,39 @@ The <em>copath</em> of a node is the node's sibling concatenated with the list o
 siblings of all the nodes in its direct path, excluding the root.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
 <p id="section-5.1-7">For example, in the below tree:<a href="#section-5.1-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.1-8.1">The direct path of C is (CD, ABCD, ABCDEFG)<a href="#section-5.1-8.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.1-8.1">The direct path of C is (W, V, X)<a href="#section-5.1-8.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.1-8.2">The copath of C is (D, AB, EFG)<a href="#section-5.1-8.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.1-8.2">The copath of C is (D, U, Z)<a href="#section-5.1-8.2" class="pilcrow">¶</a>
 </li>
         </ul>
 <div class="alignLeft art-text artwork" id="section-5.1-9">
 <pre>
-              7 = root
+              X = root
         ______|______
        /             \
-      3              11
+      V               Z
     __|__           __|
    /     \         /   \
-  1       5       9     |
+  U       W       Y     |
  / \     / \     / \    |
 A   B   C   D   E   F   G
 
-                    1 1 1
-0 1 2 3 4 5 6 7 8 9 0 1 2
+0   1   2   3   4   5   6
 </pre><a href="#section-5.1-9" class="pilcrow">¶</a>
 </div>
-<p id="section-5.1-10">Each node in the tree is assigned an <em>index</em>, starting at zero and
-running from left to right.  A node is a leaf node if and only if it
-has an even index.  The node indices for the nodes in the above tree
-are as follows:<a href="#section-5.1-10" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.1-11.1">0 = A<a href="#section-5.1-11.1" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.2">1 = AB<a href="#section-5.1-11.2" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.3">2 = B<a href="#section-5.1-11.3" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.4">3 = ABCD<a href="#section-5.1-11.4" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.5">4 = C<a href="#section-5.1-11.5" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.6">5 = CD<a href="#section-5.1-11.6" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.7">6 = D<a href="#section-5.1-11.7" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.8">7 = ABCDEFG<a href="#section-5.1-11.8" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.9">8 = E<a href="#section-5.1-11.9" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.10">9 = EF<a href="#section-5.1-11.10" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.11">10 = F<a href="#section-5.1-11.11" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.12">11 = EFG<a href="#section-5.1-11.12" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-5.1-11.13">12 = G<a href="#section-5.1-11.13" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-5.1-12">A tree with <code>n</code> leaves has <code>2*n - 1</code> nodes.  For example, the above tree has 7
-leaves (A, B, C, D, E, F, G) and 13 nodes.  The root of a tree with <code>n</code> leaves
-is always the node with index <code>2^k - 1</code>, where <code>k</code> is the largest number such
-that <code>2^k &lt; n</code>.<a href="#section-5.1-12" class="pilcrow">¶</a></p>
+<p id="section-5.1-10">A tree with <code>n</code> leaves has <code>2*n - 1</code> nodes.  For example, the above tree has 7
+leaves (A, B, C, D, E, F, G) and 13 nodes.<a href="#section-5.1-10" class="pilcrow">¶</a></p>
+<p id="section-5.1-11">Each leaf is given an <em>index</em> (or <em>leaf index</em>), starting at <code>0</code> from the left to
+<code>n-1</code> at the right.<a href="#section-5.1-11" class="pilcrow">¶</a></p>
+<p id="section-5.1-12">There are multiple ways that an implementation might represent a ratchet tree in
+memory.  For example, left-balanced binary trees can be represented as an array
+of nodes, with node relationships computed based on nodes' indices in the array.
+Or a more traditional representation of linked node objects may be used.
+<a href="#array-based-trees" class="xref">Appendix A</a> and <a href="#link-based-trees" class="xref">Appendix B</a> provide some details on how to
+implement the tree operations required for MLS in these representations.
+MLS places no requirements on implementations' internal representations
+of ratchet trees.  An implementation MAY use any tree representation and
+associated algorithms, as long as they produce correct protocol messages.<a href="#section-5.1-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="resolution-example">
@@ -2273,7 +2255,7 @@ creates a key pair for the KEM from a symmetric secret<a href="#section-5.2-2.1"
 </li>
           <li class="normal" id="section-5.2-4.2">A public key<a href="#section-5.2-4.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.2-4.3">An ordered list of node indices for "unmerged" leaves (see
+          <li class="normal" id="section-5.2-4.3">An ordered list of leaf indices for "unmerged" leaves (see
 <a href="#views" class="xref">Section 5.3</a>)<a href="#section-5.2-4.3" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-5.2-4.4">A credential (only for leaf nodes)<a href="#section-5.2-4.4" class="pilcrow">¶</a>
@@ -2308,20 +2290,20 @@ brackets:<a href="#section-5.2-8" class="pilcrow">¶</a></p>
       _
     __|__
    /     \
-  _       5[C]
+  _       Z[C]
  / \     / \
 A   _   C   D
 
-0 1 2 3 4 5 6
+0   1   2   3
 </pre><a href="#section-5.2-9" class="pilcrow">¶</a>
 </div>
 <p id="section-5.2-10">In this tree, we can see all of the above rules in play:<a href="#section-5.2-10" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.2-11.1">The resolution of node 5 is the list [CD, C]<a href="#section-5.2-11.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.2-11.1">The resolution of node Z is the list [Z, C]<a href="#section-5.2-11.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.2-11.2">The resolution of node 2 is the empty list []<a href="#section-5.2-11.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.2-11.2">The resolution of leaf 1 is the empty list []<a href="#section-5.2-11.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.2-11.3">The resolution of node 3 is the list [A, CD, C]<a href="#section-5.2-11.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.2-11.3">The resolution of root node is the list [A, Z, C]<a href="#section-5.2-11.3" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-5.2-12">Every node, regardless of whether the node is blank or populated, has
@@ -2437,10 +2419,10 @@ DeriveSecret and the node secret is used as an input to DeriveKeyPair.<a href="#
 at node 5:<a href="#section-5.4-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.4-7">
 <pre>
-      3
+      Y
     __|__
    /     \
-  1       5[C]
+  X       Z[C]
  / \     / \
 A   B   C   D
 
@@ -2467,10 +2449,10 @@ leaf_secret    --&gt; leaf_node_secret --&gt; leaf_priv, leaf_pub
 described above:<a href="#section-5.4-10" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5.4-11">
 <pre>
-    np[1] -&gt; 3
+    np[1] -&gt; Y'
            __|__
           /     \
-np[0] -&gt; 1       5[C]
+np[0] -&gt; X'      Z[C]
         / \     / \
        A   B   C   D
            ^
@@ -2484,12 +2466,69 @@ np[0] -&gt; 1       5[C]
 delete the leaf_secret.<a href="#section-5.4-12" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="synchronizing-views-of-the-tree">
+<div id="adding-and-removing-leaves">
 <section id="section-5.5">
-        <h3 id="name-synchronizing-views-of-the-">
-<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-synchronizing-views-of-the-" class="section-name selfRef">Synchronizing Views of the Tree</a>
+        <h3 id="name-adding-and-removing-leaves">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-adding-and-removing-leaves" class="section-name selfRef">Adding and Removing Leaves</a>
         </h3>
-<p id="section-5.5-1">After generating fresh key material and applying it to ratchet forward their
+<p id="section-5.5-1">In addition to the path-based updates to the tree described above, it is also
+necessary to add and remove leaves of the tree in order to reflect changes to the
+membership of the group (see <a href="#add" class="xref">Section 11.1.1</a> and <a href="#remove" class="xref">Section 11.1.3</a>).  Leaves are always added and removed at the
+right edge of the tree: Either a new rightmost leaf is added, or the rightmost
+leaf is removed.  Nodes' parent/child node relationships are then updated to
+maintain the tree's left-balanced structure.  These operations are also known as
+<em>extending</em> and <em>truncating</em> the tree.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<p id="section-5.5-2">To add a new leaf: Add leaf L as the new rightmost leaf of the tree.  Add
+a blank parent node P whose right child is L.  P is attached to the
+tree as the right child of the only appropriate node to make the updated tree
+left-balanced (or set it as a new root).  The former right child of the P's
+parent becomes P's left child (or the old root becomes the P's left child if
+P is the new root).<a href="#section-5.5-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5-3">
+<pre>
+                   _ &lt;-- new parent              _
+                 __|_                          __|__
+                /    \                        /     \
+  X    ===&gt;    X     |               ===&gt;    X       _ &lt;-- new parent
+ / \          / \    |                      / \     / \
+A   B        A   B   C &lt;-- new leaf        A   B   C   D &lt;-- new leaf
+</pre><a href="#section-5.5-3" class="pilcrow">¶</a>
+</div>
+<p id="section-5.5-4">To remove the rightmost leaf: Remove the rightmost leaf node L and its parent
+node P.  If P was the root of the tree, P's left child
+is now the root of the tree.  Otherwise, set the right child of P's parent
+to be the P's left child.<a href="#section-5.5-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.5-5">
+<pre>
+      Y                                    Y
+    __|__                                __|_
+   /     \                              /    \
+  X       Z &lt;-- remove parent  ===&gt;    X     | &lt;-- reassign child
+ / \     / \                          / \    |
+A   B   C   D &lt;-- remove leaf        A   B   C
+
+
+      Y &lt;-- remove parent
+    __|_
+   /    \
+  X     |                  ===&gt;    X &lt;-- reassign root
+ / \    |                         / \
+A   B   C &lt;-- remove leaf        A   B
+</pre><a href="#section-5.5-5" class="pilcrow">¶</a>
+</div>
+<p id="section-5.5-6">Note: in the rest of the protocol, the rightmost leaf will be removed only when it is blank.<a href="#section-5.5-6" class="pilcrow">¶</a></p>
+<p id="section-5.5-7">Concrete algorithms for these operations on array-based and link-based trees are
+provided in <a href="#array-based-trees" class="xref">Appendix A</a> and <a href="#link-based-trees" class="xref">Appendix B</a>.  The concrete
+algorithms are non-normative.  An implementation MAY use any algorithm that
+produces the correct tree in its internal representation.<a href="#section-5.5-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="synchronizing-views-of-the-tree">
+<section id="section-5.6">
+        <h3 id="name-synchronizing-views-of-the-">
+<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-synchronizing-views-of-the-" class="section-name selfRef">Synchronizing Views of the Tree</a>
+        </h3>
+<p id="section-5.6-1">After generating fresh key material and applying it to ratchet forward their
 local tree state as described in the prior section, the generator must broadcast
 this update to other members of the group in a Commit message, who
 apply it to keep their local views of the tree in
@@ -2499,71 +2538,71 @@ containing a set of public keys and encrypted path secrets
 for intermediate nodes in the direct path of its leaf. The
 other members of the group use these values to update
 their view of the tree, aligning their copy of the tree to the
-sender's.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
-<p id="section-5.5-2">An UpdatePath contains
+sender's.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.6-2">An UpdatePath contains
 the following information for each node in the direct path of the
-sender's leaf, including the root:<a href="#section-5.5-2" class="pilcrow">¶</a></p>
+sender's leaf, including the root:<a href="#section-5.6-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.5-3.1">The public key for the node<a href="#section-5.5-3.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.6-3.1">The public key for the node<a href="#section-5.6-3.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.5-3.2">Zero or more encrypted copies of the path secret corresponding to
-the node<a href="#section-5.5-3.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.6-3.2">Zero or more encrypted copies of the path secret corresponding to
+the node<a href="#section-5.6-3.2" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-5.5-4">The path secret value for a given node is encrypted for the subtree
+<p id="section-5.6-4">The path secret value for a given node is encrypted for the subtree
 corresponding to the parent's non-updated child, that is, the child
 on the copath of the sender's leaf node.
 There is one encryption of the path secret to each public key in the resolution
-of the non-updated child.<a href="#section-5.5-4" class="pilcrow">¶</a></p>
-<p id="section-5.5-5">The recipient of an UpdatePath processes it with the following steps:<a href="#section-5.5-5" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-5.5-6">
-<li id="section-5.5-6.1">
-            <p id="section-5.5-6.1.1">Compute the updated path secrets.<a href="#section-5.5-6.1.1" class="pilcrow">¶</a></p>
+of the non-updated child.<a href="#section-5.6-4" class="pilcrow">¶</a></p>
+<p id="section-5.6-5">The recipient of an UpdatePath processes it with the following steps:<a href="#section-5.6-5" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-5.6-6">
+<li id="section-5.6-6.1">
+            <p id="section-5.6-6.1.1">Compute the updated path secrets.<a href="#section-5.6-6.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.5-6.1.2.1">Identify a node in the direct path for which the local member
-is in the subtree of the non-updated child.<a href="#section-5.5-6.1.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.6-6.1.2.1">Identify a node in the direct path for which the local member
+is in the subtree of the non-updated child.<a href="#section-5.6-6.1.2.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-5.5-6.1.2.2">Identify a node in the resolution of the copath node for
-which this node has a private key.<a href="#section-5.5-6.1.2.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-5.6-6.1.2.2">Identify a node in the resolution of the copath node for
+which this node has a private key.<a href="#section-5.6-6.1.2.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-5.5-6.1.2.3">Decrypt the path secret for the parent of the copath node using
-the private key from the resolution node.<a href="#section-5.5-6.1.2.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-5.6-6.1.2.3">Decrypt the path secret for the parent of the copath node using
+the private key from the resolution node.<a href="#section-5.6-6.1.2.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-5.5-6.1.2.4">Derive path secrets for ancestors of that node using the
-algorithm described above.<a href="#section-5.5-6.1.2.4" class="pilcrow">¶</a>
+              <li class="normal" id="section-5.6-6.1.2.4">Derive path secrets for ancestors of that node using the
+algorithm described above.<a href="#section-5.6-6.1.2.4" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-5.5-6.1.2.5">The recipient SHOULD verify that the received public keys agree
-with the public keys derived from the new path_secret values.<a href="#section-5.5-6.1.2.5" class="pilcrow">¶</a>
+              <li class="normal" id="section-5.6-6.1.2.5">The recipient SHOULD verify that the received public keys agree
+with the public keys derived from the new path_secret values.<a href="#section-5.6-6.1.2.5" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
-          <li id="section-5.5-6.2">
-            <p id="section-5.5-6.2.1">Merge the updated path secrets into the tree.<a href="#section-5.5-6.2.1" class="pilcrow">¶</a></p>
+          <li id="section-5.6-6.2">
+            <p id="section-5.6-6.2.1">Merge the updated path secrets into the tree.<a href="#section-5.6-6.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.5-6.2.2.1">
-                <p id="section-5.5-6.2.2.1.1">For all updated nodes,<a href="#section-5.5-6.2.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.6-6.2.2.1">
+                <p id="section-5.6-6.2.2.1.1">For all updated nodes,<a href="#section-5.6-6.2.2.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.5-6.2.2.1.2.1">Replace the public key for each node with the received public key.<a href="#section-5.5-6.2.2.1.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.6-6.2.2.1.2.1">Replace the public key for each node with the received public key.<a href="#section-5.6-6.2.2.1.2.1" class="pilcrow">¶</a>
 </li>
-                  <li class="normal" id="section-5.5-6.2.2.1.2.2">Set the list of unmerged leaves to the empty list.<a href="#section-5.5-6.2.2.1.2.2" class="pilcrow">¶</a>
+                  <li class="normal" id="section-5.6-6.2.2.1.2.2">Set the list of unmerged leaves to the empty list.<a href="#section-5.6-6.2.2.1.2.2" class="pilcrow">¶</a>
 </li>
-                  <li class="normal" id="section-5.5-6.2.2.1.2.3">Store the updated hash of the node's parent (represented as a ParentNode
+                  <li class="normal" id="section-5.6-6.2.2.1.2.3">Store the updated hash of the node's parent (represented as a ParentNode
 struct), going from root to leaf, so that each hash incorporates all the
 nodes above it. The root node always has a zero-length hash for this
-value.<a href="#section-5.5-6.2.2.1.2.3" class="pilcrow">¶</a>
+value.<a href="#section-5.6-6.2.2.1.2.3" class="pilcrow">¶</a>
 </li>
                 </ul>
 </li>
-              <li class="normal" id="section-5.5-6.2.2.2">For nodes where an updated path secret was computed in step 1,
+              <li class="normal" id="section-5.6-6.2.2.2">For nodes where an updated path secret was computed in step 1,
 compute the corresponding node key pair and replace the values
-stored at the node with the computed values.<a href="#section-5.5-6.2.2.2" class="pilcrow">¶</a>
+stored at the node with the computed values.<a href="#section-5.6-6.2.2.2" class="pilcrow">¶</a>
 </li>
             </ul>
 </li>
         </ol>
-<p id="section-5.5-7">For example, in order to communicate the example update described in
+<p id="section-5.6-7">For example, in order to communicate the example update described in
 the previous section, the sender would transmit the following
-values:<a href="#section-5.5-7" class="pilcrow">¶</a></p>
+values:<a href="#section-5.6-7" class="pilcrow">¶</a></p>
 <table class="center" id="table-1">
           <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
 <thead>
@@ -2583,17 +2622,17 @@ values:<a href="#section-5.5-7" class="pilcrow">¶</a></p>
             </tr>
           </tbody>
         </table>
-<p id="section-5.5-9">In this table, the value pk(ns[X]) represents the public key
+<p id="section-5.6-9">In this table, the value pk(ns[X]) represents the public key
 derived from the node secret X, whereas pk(X) represents the public leaf key
 for user X.  The value E(K, S) represents
 the public-key encryption of the path secret S to the
-public key K (using HPKE).<a href="#section-5.5-9" class="pilcrow">¶</a></p>
-<p id="section-5.5-10">After processing the update, each recipient MUST delete outdated key material,
-specifically:<a href="#section-5.5-10" class="pilcrow">¶</a></p>
+public key K (using HPKE).<a href="#section-5.6-9" class="pilcrow">¶</a></p>
+<p id="section-5.6-10">After processing the update, each recipient MUST delete outdated key material,
+specifically:<a href="#section-5.6-10" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.5-11.1">The path secrets used to derive each updated node key pair.<a href="#section-5.5-11.1" class="pilcrow">¶</a>
+<li class="normal" id="section-5.6-11.1">The path secrets used to derive each updated node key pair.<a href="#section-5.6-11.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-5.5-11.2">Each outdated node key pair that was replaced by the update.<a href="#section-5.5-11.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-5.6-11.2">Each outdated node key pair that was replaced by the update.<a href="#section-5.6-11.2" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
@@ -2915,10 +2954,10 @@ co-path child.<a href="#section-7.4-5" class="pilcrow">¶</a></p>
 <p id="section-7.4-6">Finally, <code>original_child_resolution</code> is the array of <code>HPKEPublicKey</code> values of the
 nodes in the resolution of S but with the <code>unmerged_leaves</code> of P omitted. For
 example, in the ratchet tree depicted in <a href="#resolution-example" class="xref">Section 5.2</a> the
-<code>ParentHashInput</code> of node 5 with co-path child 4 would contain an empty
-<code>original_child_resolution</code> since 4's resolution includes only itself but 4 is also
-an unmerged leaf of 5. Meanwhile, the <code>ParentHashInput</code> of node 5 with co-path child
-6 has an array with one element in it: the HPKE public key of 6.<a href="#section-7.4-6" class="pilcrow">¶</a></p>
+<code>ParentHashInput</code> of node Z with co-path child C would contain an empty
+<code>original_child_resolution</code> since C's resolution includes only itself but C is also
+an unmerged leaf of Z. Meanwhile, the <code>ParentHashInput</code> of node Z with co-path child
+D has an array with one element in it: the HPKE public key of D.<a href="#section-7.4-6" class="pilcrow">¶</a></p>
 <div id="using-parent-hashes">
 <section id="section-7.4.1">
           <h4 id="name-using-parent-hashes">
@@ -2999,7 +3038,7 @@ might include a Key Package depending on whether or not it is blank.<a href="#se
 <div class="alignLeft art-text artwork" id="section-7.5-5">
 <pre>
 struct {
-    uint32 node_index;
+    uint32 leaf_index;
     optional&lt;KeyPackage&gt; key_package;
 } LeafNodeHashInput;
 </pre><a href="#section-7.5-5" class="pilcrow">¶</a>
@@ -3016,7 +3055,6 @@ struct {
 } ParentNode;
 
 struct {
-    uint32 node_index;
     optional&lt;ParentNode&gt; parent_node;
     opaque left_hash&lt;0..255&gt;;
     opaque right_hash&lt;0..255&gt;;
@@ -3485,53 +3523,35 @@ the resulting <code>psk_secret</code> is <code>psk_secret_[0]</code>, the all-ze
 the <code>encryption_secret</code> at the root and derives a tree of secrets with the same
 structure as the group's ratchet tree. Each leaf in the Secret Tree is
 associated with the same group member as the corresponding leaf in the ratchet
-tree. Nodes are also assigned an index according to their position in the array
-representation of the tree (described in <a href="#tree-math" class="xref">Appendix A</a>). If N is a node index in
-the Secret Tree then left(N) and right(N) denote the children of N (if they
-exist).<a href="#section-8.3-1" class="pilcrow">¶</a></p>
-<p id="section-8.3-2">The secret of any other node in the tree is derived from its parent's secret
-using a call to DeriveTreeSecret:<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+tree.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">If N is a parent node in the Secret Tree then the secrets of the children of N
+are defined as follows (where left(N) and right(N) denote the children of N):<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.3-3">
 <pre>
-DeriveTreeSecret(Secret, Label, Node, Generation, Length) =
-    ExpandWithLabel(Secret, Label, TreeContext, Length)
-
-Where TreeContext is specified as:
-
-struct {
-    uint32 node = Node;
-    uint32 generation = Generation;
-} TreeContext;
+tree_node_[N]_secret
+        |
+        |
+        +--&gt; ExpandWithLabel(., "tree", "left", KDF.Nh)
+        |    = tree_node_[left(N)]_secret
+        |
+        +--&gt; ExpandWithLabel(., "tree", "right", KDF.Nh)
+             = tree_node_[right(N)]_secret
 </pre><a href="#section-8.3-3" class="pilcrow">¶</a>
 </div>
-<p id="section-8.3-4">If N is a node index in the Secret Tree then the secrets of the children
-of N are defined to be:<a href="#section-8.3-4" class="pilcrow">¶</a></p>
+<p id="section-8.3-4">The secret in the leaf of the Secret Tree is used to initiate two symmetric hash
+ratchets, from which a sequence of single-use keys and nonces are derived, as
+described in <a href="#encryption-keys" class="xref">Section 8.4</a>. The root of each ratchet is computed as:<a href="#section-8.3-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.3-5">
 <pre>
 tree_node_[N]_secret
         |
         |
-        +--&gt; DeriveTreeSecret(., "tree", left(N), 0, KDF.Nh)
-        |    = tree_node_[left(N)]_secret
-        |
-        +--&gt; DeriveTreeSecret(., "tree", right(N), 0, KDF.Nh)
-             = tree_node_[right(N)]_secret
-</pre><a href="#section-8.3-5" class="pilcrow">¶</a>
-</div>
-<p id="section-8.3-6">The secret in the leaf of the Secret Tree is used to initiate two symmetric hash
-ratchets, from which a sequence of single-use keys and nonces are derived, as
-described in <a href="#encryption-keys" class="xref">Section 8.4</a>. The root of each ratchet is computed as:<a href="#section-8.3-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.3-7">
-<pre>
-tree_node_[N]_secret
-        |
-        |
-        +--&gt; DeriveTreeSecret(., "handshake", N, 0, KDF.Nh)
+        +--&gt; ExpandWithLabel(., "handshake", "", KDF.Nh)
         |    = handshake_ratchet_secret_[N]_[0]
         |
-        +--&gt; DeriveTreeSecret(., "application", N, 0, KDF.Nh)
+        +--&gt; ExpandWithLabel(., "application", "", KDF.Nh)
              = application_ratchet_secret_[N]_[0]
-</pre><a href="#section-8.3-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.3-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -3563,29 +3583,34 @@ j-th key/nonce pair in the sequence to encrypt (using the AEAD) the j-th message
 they send during that epoch. Each key/nonce pair MUST NOT be used to encrypt
 more than one message.<a href="#section-8.4-5" class="pilcrow">¶</a></p>
 <p id="section-8.4-6">Keys, nonces, and the secrets in ratchets are derived using
-DeriveTreeSecret. The context in a given call consists of the index
-of the sender's leaf in the ratchet tree and the current position in
-the ratchet.  In particular, the node index of the sender's leaf in the
-ratchet tree is the same as the node index of the leaf in the Secret Tree
-used to initialize the sender's ratchet.<a href="#section-8.4-6" class="pilcrow">¶</a></p>
+DeriveTreeSecret. The context in a given call consists of the current position
+in the ratchet.<a href="#section-8.4-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.4-7">
+<pre>
+DeriveTreeSecret(Secret, Label, Generation, Length) =
+    ExpandWithLabel(Secret, Label, Generation, Length)
+
+Where Generation is encoded as a uint32.
+</pre><a href="#section-8.4-7" class="pilcrow">¶</a>
+</div>
+<div class="alignLeft art-text artwork" id="section-8.4-8">
 <pre>
 ratchet_secret_[N]_[j]
       |
-      +--&gt; DeriveTreeSecret(., "nonce", N, j, AEAD.Nn)
+      +--&gt; DeriveTreeSecret(., "nonce", j, AEAD.Nn)
       |    = ratchet_nonce_[N]_[j]
       |
-      +--&gt; DeriveTreeSecret(., "key", N, j, AEAD.Nk)
+      +--&gt; DeriveTreeSecret(., "key", j,  AEAD.Nk)
       |    = ratchet_key_[N]_[j]
       |
       V
-DeriveTreeSecret(., "secret", N, j, KDF.Nh)
+DeriveTreeSecret(., "secret", j, KDF.Nh)
 = ratchet_secret_[N]_[j+1]
-</pre><a href="#section-8.4-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.4-8" class="pilcrow">¶</a>
 </div>
-<p id="section-8.4-8">Here, AEAD.Nn and AEAD.Nk denote the lengths
+<p id="section-8.4-9">Here, AEAD.Nn and AEAD.Nk denote the lengths
 in bytes of the nonce and key for the AEAD scheme defined by
-the ciphersuite.<a href="#section-8.4-8" class="pilcrow">¶</a></p>
+the ciphersuite.<a href="#section-8.4-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="deletion-schedule">
@@ -3610,20 +3635,20 @@ ratchets.<a href="#section-8.5-3" class="pilcrow">¶</a></p>
 forward secrecy for past messages. Members MAY keep unconsumed values around
 for some reasonable amount of time to handle out-of-order message delivery.<a href="#section-8.5-4" class="pilcrow">¶</a></p>
 <p id="section-8.5-5">For example, suppose a group member encrypts or (successfully) decrypts an
-application message using the j-th key and nonce in the ratchet of node
-index N in some epoch n. Then, for that member, at least the following
+application message using the j-th key and nonce in the ratchet of leaf node
+L in some epoch n. Then, for that member, at least the following
 values have been consumed and MUST be deleted:<a href="#section-8.5-5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.5-6.1">the <code>commit_secret</code>, <code>joiner_secret</code>, <code>epoch_secret</code>, <code>encryption_secret</code> of
 that epoch n as well as the <code>init_secret</code> of the previous epoch n-1,<a href="#section-8.5-6.1" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-8.5-6.2">all node secrets in the Secret Tree on the path from the root to the leaf with
-node index N,<a href="#section-8.5-6.2" class="pilcrow">¶</a>
+node L,<a href="#section-8.5-6.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-8.5-6.3">the first j secrets in the application data ratchet of node index N and<a href="#section-8.5-6.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-8.5-6.3">the first j secrets in the application data ratchet of node L and<a href="#section-8.5-6.3" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-8.5-6.4">
-            <code>application_ratchet_nonce_[N]_[j]</code> and <code>application_ratchet_key_[N]_[j]</code>.<a href="#section-8.5-6.4" class="pilcrow">¶</a>
+            <code>application_ratchet_nonce_[L]_[j]</code> and <code>application_ratchet_key_[L]_[j]</code>.<a href="#section-8.5-6.4" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-8.5-7">Concretely, suppose we have the following Secret Tree and ratchet for
@@ -4206,54 +4231,53 @@ struct {
 } Add;
 </pre><a href="#section-11.1.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-11.1.1-3">The proposer of the Add does not control where in the group's ratchet tree the
-new member is added.  Instead, the sender of the Commit message chooses a
-location for each added member and states it in the Commit message.<a href="#section-11.1.1-3" class="pilcrow">¶</a></p>
-<p id="section-11.1.1-4">An Add is applied after being included in a Commit message.  The position of the
-Add in the list of proposals determines the node index <code>index</code> of the leaf node
-where the new member will be added.  For the first Add in the Commit, <code>index</code> is
-the leftmost empty leaf in the tree, for the second Add, the next empty leaf to
-the right, etc.<a href="#section-11.1.1-4" class="pilcrow">¶</a></p>
+<p id="section-11.1.1-3">An Add is applied after being included in a Commit message.  The position of the
+Add in the list of proposals determines the leaf node where the new member will
+be added.  For the first Add in the Commit, the corresponding new member will be
+placed in the leftmost empty leaf in the tree, for the second Add, the next
+empty leaf to the right, etc. If no empty leaf exists, the tree is extended to
+the right.<a href="#section-11.1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1.1-5.1">
-              <p id="section-11.1.1-5.1.1">Validate the KeyPackage:<a href="#section-11.1.1-5.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-11.1.1-4.1">
+              <p id="section-11.1.1-4.1.1">Validate the KeyPackage:<a href="#section-11.1.1-4.1.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1.1-5.1.2.1">Verify that the signature on the KeyPackage is valid using the public key
-in the KeyPackage's credential<a href="#section-11.1.1-5.1.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.1.1-4.1.2.1">Verify that the signature on the KeyPackage is valid using the public key
+in the KeyPackage's credential<a href="#section-11.1.1-4.1.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.1.1-5.1.2.2">
-                  <p id="section-11.1.1-5.1.2.2.1">Verify that the following fields in the KeyPackage are unique among the
+                <li class="normal" id="section-11.1.1-4.1.2.2">
+                  <p id="section-11.1.1-4.1.2.2.1">Verify that the following fields in the KeyPackage are unique among the
 members of the group (including any other members added in the same
-Commit):<a href="#section-11.1.1-5.1.2.2.1" class="pilcrow">¶</a></p>
+Commit):<a href="#section-11.1.1-4.1.2.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-11.1.1-5.1.2.2.2.1">
-                      <code>(credential.identity, endpoint_id)</code> tuple<a href="#section-11.1.1-5.1.2.2.2.1" class="pilcrow">¶</a>
+<li class="normal" id="section-11.1.1-4.1.2.2.2.1">
+                      <code>(credential.identity, endpoint_id)</code> tuple<a href="#section-11.1.1-4.1.2.2.2.1" class="pilcrow">¶</a>
 </li>
-                    <li class="normal" id="section-11.1.1-5.1.2.2.2.2">
-                      <code>credential.signature_key</code><a href="#section-11.1.1-5.1.2.2.2.2" class="pilcrow">¶</a>
+                    <li class="normal" id="section-11.1.1-4.1.2.2.2.2">
+                      <code>credential.signature_key</code><a href="#section-11.1.1-4.1.2.2.2.2" class="pilcrow">¶</a>
 </li>
-                    <li class="normal" id="section-11.1.1-5.1.2.2.2.3">
-                      <code>hpke_init_key</code><a href="#section-11.1.1-5.1.2.2.2.3" class="pilcrow">¶</a>
+                    <li class="normal" id="section-11.1.1-4.1.2.2.2.3">
+                      <code>hpke_init_key</code><a href="#section-11.1.1-4.1.2.2.2.3" class="pilcrow">¶</a>
 </li>
                   </ul>
 </li>
-                <li class="normal" id="section-11.1.1-5.1.2.3">Verify that the KeyPackage is compatible with the group's parameters.  The
+                <li class="normal" id="section-11.1.1-4.1.2.3">Verify that the KeyPackage is compatible with the group's parameters.  The
 ciphersuite and protocol version of the KeyPackage must match those in
 use in the group.  If the GroupContext has a <code>required_capabilities</code>
 extension, then the required extensions and proposals MUST be listed in
-the KeyPackage's <code>capabilities</code> extension.<a href="#section-11.1.1-5.1.2.3" class="pilcrow">¶</a>
+the KeyPackage's <code>capabilities</code> extension.<a href="#section-11.1.1-4.1.2.3" class="pilcrow">¶</a>
 </li>
               </ul>
 </li>
-            <li class="normal" id="section-11.1.1-5.2">If necessary, extend the tree to the right until it has at least index + 1
-leaves<a href="#section-11.1.1-5.2" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.1-4.2">Identify the leaf L for the new member: if there are empty leaves in the tree,
+L is the leftmost empty leaf.  Otherwise, the tree is extended to the right
+by one leaf node and L is the new leaf.<a href="#section-11.1.1-4.2" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.1.1-5.3">For each non-blank intermediate node along the path from the leaf at position
-<code>index</code> to the root, add <code>index</code> to the <code>unmerged_leaves</code> list for the node.<a href="#section-11.1.1-5.3" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.1-4.3">For each non-blank intermediate node along the path from the leaf L
+to the root, add L's leaf index to the <code>unmerged_leaves</code> list for the node.<a href="#section-11.1.1-4.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.1.1-5.4">Set the leaf node in the tree at position <code>index</code> to a new node containing the
-public key from the KeyPackage in the Add, as well as the credential under
-which the KeyPackage was signed<a href="#section-11.1.1-5.4" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.1-4.4">Set the leaf node L to a new node containing the public key from the
+KeyPackage in the Add, as well as the credential under which the KeyPackage
+was signed.<a href="#section-11.1.1-4.4" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -4310,11 +4334,11 @@ struct {
 lookup MUST be done on the tree before any non-Remove proposals have
 been applied (the "old" tree in the terminology of <a href="#commit" class="xref">Section 11.2</a>), since
 proposals such as Update can change the KeyPackage stored at a leaf.
-Let <code>removed_index</code> be the node index of this leaf node.<a href="#section-11.1.3-4.1" class="pilcrow">¶</a>
+Let L be this leaf node.<a href="#section-11.1.3-4.1" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.1.3-4.2">Replace the leaf node at <code>removed_index</code> with a blank node<a href="#section-11.1.3-4.2" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.3-4.2">Replace the leaf node L with a blank node<a href="#section-11.1.3-4.2" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-11.1.3-4.3">Blank the intermediate nodes along the path from <code>removed_index</code> to the root<a href="#section-11.1.3-4.3" class="pilcrow">¶</a>
+            <li class="normal" id="section-11.1.3-4.3">Blank the intermediate nodes along the path from L to the root<a href="#section-11.1.3-4.3" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-11.1.3-4.4">Truncate the tree by removing leaves from the right side of the tree until the
 rightmost leaf node is not blank.<a href="#section-11.1.3-4.4" class="pilcrow">¶</a>
@@ -4689,7 +4713,7 @@ KeyPackages used in <code>Update</code> proposals.<a href="#section-11.2-16.4.1"
 <li class="normal" id="section-11.2-16.4.2.1">Assign this UpdatePath to the <code>path</code> field in the Commit.<a href="#section-11.2-16.4.2.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-11.2-16.4.2.2">Apply the UpdatePath to the tree, as described in
-<a href="#synchronizing-views-of-the-tree" class="xref">Section 5.5</a>, creating the new ratchet tree. Define
+<a href="#synchronizing-views-of-the-tree" class="xref">Section 5.6</a>, creating the new ratchet tree. Define
 <code>commit_secret</code> as the value <code>path_secret[n+1]</code> derived from the
 <code>path_secret[n]</code> value assigned to the root node.<a href="#section-11.2-16.4.2.2" class="pilcrow">¶</a>
 </li>
@@ -4805,7 +4829,7 @@ provisional ratchet tree and GroupContext, to generate the new ratchet tree
 and the <code>commit_secret</code>:<a href="#section-11.2-18.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.2-18.6.2.1">Apply the UpdatePath to the tree, as described in
-<a href="#synchronizing-views-of-the-tree" class="xref">Section 5.5</a>, and store <code>leaf_key_package</code> at the
+<a href="#synchronizing-views-of-the-tree" class="xref">Section 5.6</a>, and store <code>leaf_key_package</code> at the
 Committer's leaf.<a href="#section-11.2-18.6.2.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-11.2-18.6.2.2">Verify that the KeyPackage has a <code>parent_hash</code> extension and that its value
@@ -5112,8 +5136,7 @@ to be considered instead.<a href="#section-11.2.2-9.2.2.2" class="pilcrow">¶</a
 </li>
             <li class="normal" id="section-11.2.2-9.3">Identify a leaf in the <code>tree</code> array (any even-numbered node) whose
 <code>key_package</code> field is identical to the KeyPackage.  If no such field
-exists, return an error.  Let <code>index</code> represent the index of this node in the
-tree.<a href="#section-11.2.2-9.3" class="pilcrow">¶</a>
+exists, return an error.  Let <code>my_leaf</code> represent this leaf in the tree.<a href="#section-11.2.2-9.3" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-11.2.2-9.4">
               <p id="section-11.2.2-9.4.1">Construct a new group state using the information in the GroupInfo object.<a href="#section-11.2.2-9.4.1" class="pilcrow">¶</a></p>
@@ -5122,13 +5145,14 @@ tree.<a href="#section-11.2.2-9.3" class="pilcrow">¶</a>
 <code>confirmed_transcript_hash</code>, and <code>group_context_extensions</code> fields from
 the GroupInfo object.<a href="#section-11.2.2-9.4.2.1" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.2.2-9.4.2.2">The new member's position in the tree is <code>index</code>, as defined above.<a href="#section-11.2.2-9.4.2.2" class="pilcrow">¶</a>
+                <li class="normal" id="section-11.2.2-9.4.2.2">The new member's position in the tree is at the leaf <code>my_leaf</code>, as defined
+above.<a href="#section-11.2.2-9.4.2.2" class="pilcrow">¶</a>
 </li>
-                <li class="normal" id="section-11.2.2-9.4.2.3">Update the leaf at index <code>index</code> with the private key corresponding to the
+                <li class="normal" id="section-11.2.2-9.4.2.3">Update the leaf <code>my_leaf</code> with the private key corresponding to the
 public key in the node.<a href="#section-11.2.2-9.4.2.3" class="pilcrow">¶</a>
 </li>
                 <li class="normal" id="section-11.2.2-9.4.2.4">If the <code>path_secret</code> value is set in the GroupSecrets object: Identify the
-lowest common ancestor of the node index <code>index</code> and of the node index of
+lowest common ancestor of the leaf node <code>my_leaf</code> and of the node of
 the member with KeyPackageRef <code>GroupInfo.signer</code>. Set the private key for
 this node to the private key derived from the <code>path_secret</code>.<a href="#section-11.2.2-9.4.2.4" class="pilcrow">¶</a>
 </li>
@@ -5190,16 +5214,80 @@ struct {
 optional&lt;Node&gt; ratchet_tree&lt;1..2^32-1&gt;;
 </pre><a href="#section-11.3-3" class="pilcrow">¶</a>
 </div>
-<p id="section-11.3-4">The presence of a <code>ratchet_tree</code> extension in a GroupInfo message does not
+<p id="section-11.3-4">The nodes are listed in the order specified by a left-to-right in-order
+traversal of the rachet tree. Each node is listed between its left subtree and
+its right subtree.  (This is the same ordering as specified for the array-based
+trees outlined in <a href="#array-based-trees" class="xref">Appendix A</a>.)<a href="#section-11.3-4" class="pilcrow">¶</a></p>
+<p id="section-11.3-5">The leaves of the tree are stored in even-numbered entries in
+the array (the leaf with index L in array position 2*L). The root node of the
+tree is at position 2^k - 1 of the array, where k is the largest number such
+that 2^k is smaller than the length of the array. Intermediate parent nodes can
+be identified by performing the same calculation to the subarrays to the left
+and right of the root, following something like the following algorithm:<a href="#section-11.3-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-11.3-6">
+<pre>
+# Assuming a class Node that has left and right members
+def subtree_root(nodes):
+    # If there is only one node in the array return it
+    if len(nodes) == 1:
+        return Node(nodes[0])
+
+    # Otherwise, the length of the array MUST be odd
+    if len(nodes) % 2 == 0:
+        raise Exception("Malformed node array {}", len(nodes))
+
+    # Identify the root of the subtree
+    k = 0
+    while (2**(k+1)) &lt; len(nodes):
+       k += 1
+    R = 2**k - 1
+    root = Node(nodes[R])
+    root.left = subtree_root(nodes[:R])
+    root.right = subtree_root(nodes[(R+1):])
+    return root
+</pre><a href="#section-11.3-6" class="pilcrow">¶</a>
+</div>
+<p id="section-11.3-7">(Note that this is the same ordering of nodes as in the array-based tree representation
+described in <a href="#array-based-trees" class="xref">Appendix A</a>.  The algorithms in that section may be used to 
+simplify decoding this extension into other representations.)<a href="#section-11.3-7" class="pilcrow">¶</a></p>
+<p id="section-11.3-8">(Note that this is the same ordering of nodes as in the array-based tree representation
+described in <a href="#array-based-trees" class="xref">Appendix A</a>.  The algorithms in that section may be used to 
+simplify decoding this extension into other representations.)<a href="#section-11.3-8" class="pilcrow">¶</a></p>
+<p id="section-11.3-9">The example tree in <a href="#tree-computation-terminology" class="xref">Section 5.1</a> would be represented as an
+array of nodes in the following form, where R represents the "subtree root" for
+a given subarray of the node array:<a href="#section-11.3-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-11.3-10">
+<pre>
+              X
+        ______|______
+       /             \
+      V               Z
+    __|__           __|
+   /     \         /   \
+  U       W       Y     |
+ / \     / \     / \    |
+A   B   C   D   E   F   G
+
+                    1 1 1
+0 1 2 3 4 5 6 7 8 9 0 1 2
+&lt;-----------&gt; R &lt;-------&gt;
+&lt;---&gt; R &lt;---&gt;   &lt;---&gt; R -
+- R -   - R -   - R -
+</pre><a href="#section-11.3-10" class="pilcrow">¶</a>
+</div>
+<p id="section-11.3-11">The presence of a <code>ratchet_tree</code> extension in a GroupInfo message does not
 result in any changes to the GroupContext extensions for the group.  The ratchet
-tree provided is simply stored by the client and used for MLS operations.<a href="#section-11.3-4" class="pilcrow">¶</a></p>
-<p id="section-11.3-5">If this extension is not provided in a Welcome message, then the client will
+tree provided is simply stored by the client and used for MLS operations.<a href="#section-11.3-11" class="pilcrow">¶</a></p>
+<p id="section-11.3-12">If this extension is not provided in a Welcome message, then the client will
 need to fetch the ratchet tree over some other channel before it can generate or
 process Commit messages.  Applications should ensure that this out-of-band
 channel is provided with security protections equivalent to the protections that
 are afforded to Proposal and Commit messages.  For example, an application that
 encrypts Proposal and Commit messages might distribute ratchet trees encrypted
-using a key exchanged over the MLS channel.<a href="#section-11.3-5" class="pilcrow">¶</a></p>
+using a key exchanged over the MLS channel.<a href="#section-11.3-12" class="pilcrow">¶</a></p>
+<p id="section-11.3-13">Regardless of how the client obtains the tree, the client MUST verify that the
+root hash of the ratchet tree matches the <code>tree_hash</code> of the GroupContext before
+using the tree for MLS operations.<a href="#section-11.3-13" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -6292,40 +6380,48 @@ thyla.van.der@merwe.tech<a href="#section-17-1.12" class="pilcrow">¶</a>
 </dl>
 </section>
 </section>
-<div id="tree-math">
+<div id="array-based-trees">
 <section id="appendix-A">
-      <h2 id="name-tree-math">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-tree-math" class="section-name selfRef">Tree Math</a>
+      <h2 id="name-array-based-trees">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-array-based-trees" class="section-name selfRef">Array-Based Trees</a>
       </h2>
 <p id="appendix-A-1">One benefit of using left-balanced trees is that they admit a simple
 flat array representation.  In this representation, leaf nodes are
 even-numbered nodes, with the n-th leaf at 2*n.  Intermediate nodes
-are held in odd-numbered nodes.  For example, an 11-element tree has
+are held in odd-numbered nodes.  For example, tree with 11 leaves has
 the following structure:<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A-2">
 <pre>
-                                             X
-                     X
-         X                       X                       X
-   X           X           X           X           X
-X     X     X     X     X     X     X     X     X     X     X
-0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
+                                                   X
+                           X
+               X                       X                       X
+         X           X           X           X           X
+      X     X     X     X     X     X     X     X     X     X     X
+Node: 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
+Leaf: 0     1     2     3     4     5     6     7     8     9    10
 </pre><a href="#appendix-A-2" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A-3">This allows us to compute relationships between tree nodes simply by
-manipulating indices, rather than having to maintain complicated
-structures in memory, even for partial trees. The basic
-rule is that the high-order bits of parent and child nodes have the
-following relation (where <code>x</code> is an arbitrary bit string):<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+manipulating indices, rather than having to maintain complicated structures in
+memory. The basic rule is that the high-order bits of parent and child nodes
+indices have the following relation (where <code>x</code> is an arbitrary bit string):<a href="#appendix-A-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A-4">
 <pre>
 parent=01x =&gt; left=00x, right=10x
 </pre><a href="#appendix-A-4" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A-5">The following python code demonstrates the tree computations
-necessary for MLS.  Test vectors can be derived from the diagram
-above.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-A-6">
+<p id="appendix-A-5">Since node relationships are implicit, the algorithms for adding and removing
+nodes at the right edge of the tree are quite simple:<a href="#appendix-A-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-A-6.1">Add: Append a blank parent node to the array of nodes, then append the new
+leaf node<a href="#appendix-A-6.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="appendix-A-6.2">Remove: Remove the rightmost two nodes from the array of nodes<a href="#appendix-A-6.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="appendix-A-7">The following python code demonstrates the tree computations necessary to use an
+array-based tree for MLS.<a href="#appendix-A-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-A-8">
 <pre>
 # The exponent of the largest power of 2 less than x. Equivalent to:
 #   int(math.floor(math.log(x, 2)))
@@ -6460,12 +6556,106 @@ def common_ancestor_direct(x, y, _):
        xn, yn = xn &gt;&gt; 1, yn &gt;&gt; 1
        k += 1
     return (xn &lt;&lt; k) + (1 &lt;&lt; (k-1)) - 1
-</pre><a href="#appendix-A-6" class="pilcrow">¶</a>
+</pre><a href="#appendix-A-8" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="link-based-trees">
+<section id="appendix-B">
+      <h2 id="name-link-based-trees">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-link-based-trees" class="section-name selfRef">Link-Based Trees</a>
+      </h2>
+<p id="appendix-B-1">An implementation may choose to store ratchet trees in a "link-based"
+representation, where each node stores references to its parents and/or
+children.   (As opposed to the array-based representation suggested above, where
+these relationships are computed from relationships between nodes' indices in
+the array.)  Such an implementation needs to update these links to maintain the
+left-balanced structure of the tree as the tree is extended to add new members,
+or truncated when memebers are removed.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">The following code snippet shows how these algorithms could be implemented in
+Python.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-B-3">
+<pre>
+class Node:
+    def __init__(self, value, parent=None, left=None, right=None):
+        self.value = value    # Value of the node
+        self.parent = parent  # Parent node
+        self.left = left      # Left child node
+        self.right = right    # Right child node
+
+    def leaf(self):
+        return self.left == None and self.right == None
+
+    def span(self):
+        if self.leaf():
+            return 1
+        return self.left.span() + self.right.span()
+
+    def full(self):
+        span = self.span()
+        while span % 2 == 0:
+            span &gt;&gt;= 1
+        return span == 1
+
+    def rightmost_leaf(self):
+        X = self
+        while X.right != None:
+            X = X.right
+        return X
+
+class Tree:
+    def __init__(self):
+        self.root = None  # Root node of the tree, initially empty
+
+    def extend(self, N):
+        if self.root == None:
+            self.root = N
+            return
+
+        # Identify the proper point to insert the new parent node
+        X = self.root.rightmost_leaf()
+        while X.full() and X != self.root:
+            X = X.parent
+
+        # If X is not full, insert the new parent under X
+        P = Node("_", right=N)
+        N.parent = P
+        if not X.full():
+            P.parent = X
+            P.left = X.right
+            X.right.parent = P
+            X.right = P
+            return
+
+        # If X is full, then X is the root, so P replaces the root
+        P.left = self.root
+        self.root.parent = P
+        self.root = P
+        return
+
+    def truncate(self):
+        X = self.root.rightmost_leaf()
+        if X == self.root:
+            self.root = None
+            return
+
+        # If X's parent is the root, then shift the root to the left
+        if X.parent == self.root:
+            self.root = self.root.left
+            self.root.parent = None
+            return
+
+        # Otherwise, reassign the right child of the parent's parent
+        Q = X.parent.parent
+        Q.right = X.parent.left
+        Q.right.parent = Q
+        return
+</pre><a href="#appendix-B-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-B">
+<section id="appendix-C">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
