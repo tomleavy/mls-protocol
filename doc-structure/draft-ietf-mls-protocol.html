@@ -1030,7 +1030,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 4 June 2022</td>
+<td class="center">Expires 18 June 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-ietf-mls-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2021-12-01" class="published">1 December 2021</time>
+<time datetime="2021-12-15" class="published">15 December 2021</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-06-04">4 June 2022</time></dd>
+<dd class="expires"><time datetime="2022-06-18">18 June 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ in size ranging from two to thousands.<a href="#section-abstract-1" class="pilcr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 4 June 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 18 June 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1808,8 +1808,8 @@ Signature Key:  </dt>
 <dt id="section-2-2.15">
 Handshake Message:  </dt>
         <dd style="margin-left: 1.5em" id="section-2-2.16">
-          <p id="section-2-2.16.1">An MLSPlaintext or MLSCiphertext message carrying an MLS message, as opposed
-to application data.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
+          <p id="section-2-2.16.1">An MLSPlaintext or MLSCiphertext message carrying an MLS Proposal or Commit
+object, as opposed to application data.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-2.17">
@@ -1865,13 +1865,14 @@ group AKE in the sense that there can be more than two participants in the
 protocol, and continuous group AKE in the sense that the set of participants in
 the protocol can change over time.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <p id="section-4-2">The core organizing principles of MLS are <em>groups</em> and <em>epochs</em>.  A group
-represents a linear sequence of epochs.  In each epoch, a set of authenticated
-<em>members</em> agree on an <em>epoch secret</em> that is known only to the members of the
-group in that epoch.  The set of members involved in the group can change from
-one epoch to the next, and MLS assures that only the members in the current
-epoch have access to the epoch secret.  From the epoch secret, members derive
-further shared secrets for message encryption, group membership authentication,
-etc.<a href="#section-4-2" class="pilcrow">¶</a></p>
+represents a logical collection of clents that share a common secret value at
+any given time.  The history of a group is divided into a linear sequence of
+epochs.  In each epoch, a set of authenticated <em>members</em> agree on an <em>epoch
+secret</em> that is known only to the members of the group in that epoch.  The set
+of members involved in the group can change from one epoch to the next, and MLS
+assures that only the members in the current epoch have access to the epoch
+secret.  From the epoch secret, members derive further shared secrets for
+message encryption, group membership authentication, etc.<a href="#section-4-2" class="pilcrow">¶</a></p>
 <span id="name-overview-of-mls-group-evolu"></span><figure id="figure-1">
         <div class="alignLeft art-text artwork" id="section-4-3.1">
 <pre>
@@ -1914,11 +1915,15 @@ information about the state of a group at an epoch, to allow a new member to
 add themselves to the group.<a href="#section-4-5.5" class="pilcrow">¶</a>
 </li>
       </ul>
-<p id="section-4-6">MLS also provides a common framing layer for sending Proposal messages, Commit
-messages, and application data.  An <em>MLSPlaintext</em> message provides sender
-authentication for unencrypted Proposal and Commit messages.  An <em>MLSCiphertext</em>
-message provides encryption and authentication for both Proposal/Commit message
-and application data.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-6">KeyPackage, Welcome, and PublicGroupState messages are used to initiate a group or
+introduce new members, so they are exchanged between group members and clients
+not yet in the group.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-7">Proposal and Commit messages are sent from one member of a group to the others.
+MLS provides a common framing layer for sending messages within a group,
+including Proposal and Commit as well as application data.  An <em>MLSPlaintext</em>
+message provides sender authentication for unencrypted Proposal and Commit
+messages.  An <em>MLSCiphertext</em> message provides encryption and authentication for
+both Proposal/Commit message and application data.<a href="#section-4-7" class="pilcrow">¶</a></p>
 <div id="cryptographic-state-and-evolution">
 <section id="section-4.1">
         <h3 id="name-cryptographic-state-and-evo">
@@ -1944,10 +1949,11 @@ entropy to the group.  This fresh entropy is provided only to members in the new
 epoch, not to members who have been removed, so it maintains the confidentiality
 of the epoch secret (in other words, it provides post-compromise security with
 respect to those members).<a href="#section-4.1-4" class="pilcrow">¶</a></p>
-<p id="section-4.1-5">For each Commit, there is a corresponding Welcome message.  The Welcome message
-provides new members with the information they need to initialize their views of
-the key schedule and ratchet tree, so that these views are equivalent to the
-views held by other members of the group in this epoch.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">For each Commit that adds member(s) to the group, there is a corresponding
+Welcome message.  The Welcome message provides new members with the information
+they need to initialize their views of the key schedule and ratchet tree, so
+that these views are equivalent to the views held by other members of the group
+in this epoch.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
 <p id="section-4.1-6">In addition to defining how one epoch secret leads to the next, the key schedule
 also defines a collection of secrets that are derived from the epoch secret.
 For example:<a href="#section-4.1-6" class="pilcrow">¶</a></p>
@@ -2064,11 +2070,11 @@ and broadcast Add and Commit message that the current group can use to update
 their state, and a Welcome message that the new client can use to
 initialize its state and join the group.<a href="#section-4.2-9" class="pilcrow">¶</a></p>
 <p id="section-4.2-10">To enforce the forward secrecy and post-compromise security of messages, each
-member periodically updates their leaf secret.  A member can update this message
-by sending a Commit (possibly with no proposals), or by sending an Update
-message that is committed by another member.  Once the other members of the
-group have processed these messages, the group's secrets will be unknown to an
-attacker that had compromised the sender's prior leaf secret.<a href="#section-4.2-10" class="pilcrow">¶</a></p>
+member periodically updates the keys that represent them to the group.  A member
+does this by sending a Commit (possibly with no proposals), or by sending an
+Update message that is committed by another member.  Once the other members of
+the group have processed these messages, the group's secrets will be unknown to
+an attacker that had compromised the sender's prior leaf secret.<a href="#section-4.2-10" class="pilcrow">¶</a></p>
 <p id="section-4.2-11">Update messages should be sent at regular intervals of time as long as the group
 is active, and members that don't update should eventually be removed from the
 group. It's left to the application to determine an appropriate amount of time
