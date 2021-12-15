@@ -3986,6 +3986,9 @@ by the new grou's ciphersuite.<a href="#section-10.2-2.3.2.4" class="pilcrow">¶
             </ul>
 </li>
         </ul>
+<p id="section-10.2-3">Resumption PSKs with usage <code>reinit</code> MUST NOT be used in other contexts.  A
+PreSharedKey proposal with type <code>resumption</code> and usage <code>reinit</code> MUST be
+considered invalid.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sub-group-branching">
@@ -4010,6 +4013,9 @@ old group's tree at the epoch indicated in the PreSharedKey.<a href="#section-10
         </ul>
 <p id="section-10.3-4">In addition, to avoid key re-use, the <code>psk_nonce</code> included in the
 <code>PreSharedKeyID</code> object MUST be a randomly sampled nonce of length <code>KDF.Nh</code>.<a href="#section-10.3-4" class="pilcrow">¶</a></p>
+<p id="section-10.3-5">Resumption PSKs with usage <code>branch</code> MUST NOT be used in other contexts.  A
+PreSharedKey proposal with type <code>resumption</code> and usage <code>branch</code> MUST be
+considered invalid.<a href="#section-10.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
