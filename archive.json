@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-12-12T01:07:43.455208+00:00",
+  "timestamp": "2021-12-16T01:04:36.669628+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4981,7 +4981,7 @@
       "labels": [],
       "body": "Right now, we treat the re-init and branch PSK cases as distinct cases, as opposed to just having a general \"export PSK from one group+epoch, insert it into another\" function.  What I would call a \"resumption PSK\", following TLS.   Even though we have the distinction, the content of the PSK itself is the same: (group ID, epoch, resumption secret).  So the only difference is that the PreSharedKeyID has a bit that signals the intent of injecting this resumption PSK.\r\n\r\nDo we really need that bit?  If there's not a compelling need, it would streamline the API and allow for more flexibility if we just had the notion of a resumption PSK.",
       "createdAt": "2021-11-04T14:47:01Z",
-      "updatedAt": "2021-12-10T22:25:27Z",
+      "updatedAt": "2021-12-15T15:45:41Z",
       "closedAt": null,
       "comments": [
         {
@@ -5074,6 +5074,27 @@
           "body": "Commenting on #518 here, to keep discussion from splitting to the PR.\r\n\r\nThere are a few issues here that could use clarify, and some confusion in the interpretation of the proposals.\r\n\r\nFirst - as @kkohbrok pointed out, if anything is unclear/underspecified, then that should be clarified and cleaned up vs. removal as the default. From the confusion above, it is clear that some pieces are not sufficiently specified.\r\n\r\nSecond - There is a core distinction between how PSKs are used in MLS vs. TLS that we need to be careful of. In TLS, these are used strictly for the same _two_ members communicating again after a finished session. It is not used again within the same session nor outside of the protocol (exporter keys are for that). Namely, the uses are:\r\n\r\n1. Group-internal use (resumption by an identical member set of the two parties)\r\n \r\nIn MLS, these assumptions change by the very fact that the group may have more than 2 members. For the protocol-external case we have exporter keys as well. For PSK use, we have the following:\r\n\r\n1. Group-internal use (resumption by an identical member set)\r\n2. Subgroup-internal use (resumption by a proper subset of members)\r\n3. Session-internal use (since continuous KE implies that keying material may be injected)\r\n\r\nWhile the session-internal use is not the focus of this discussion, it has been previously (i.e. proving knowledge of prior group state). This contrasts against TLS were the handshake takes place only once\r\n\r\nPoint 2 is notable in that it is impossible for a proper subset of TLS session members to use session information in a separate session (i.e. that would imply only one communication party with no partner). In MLS, this is possible, and we need to be careful about mis-aligning TLS for precedent. To avoid potential forks, etc., and clarity of key source, any group-subset PSK use really ought to be denoted (currently a 'branch'). @kkohbrok is correct that there could be subtle attacks on this if key use is not properly separated.\r\n\r\n\r\nIn addition to the above there seems to be confusion on what resumption is linked to (this is consequently something that needs more clarity in the spec.). To be precise in alignment of terms, using a PSK in TLS for communication in a new session is aligned to using a PSK in MLS for a new group, i.e. it being a continuous session. Thus we need to align discussion here between \"alive\" and \"dead\" sessions in TLS to \"alive\" and \"dead\" groups in MLS - not epochs. We can get a reinit PSK from a live group, i.e. if a member wants to force a restart for any reason and instantiates a new group with the reinit secret. This signals to all members joining that group that the prior group should be terminated and not considered secure/alive after the point of reinit use. It is an edge case, but possible. Similarly and more commonly, we could get a branch PSK from a dead group, i.e. if a new (sub-)group wants members to prove knowledge from some prior connection. Thus it follows that we can branch from both \"alive\" and \"dead\" groups. This may be helpful in terms of authentication.\r\n\r\nI am favorable to @bifurcation 's PSKUsage suggestion, i.e. that if there are other desired uses apart from the above cases the application can provide for those. The \"bleeding\" of key separation across different uses is something that is concerning, and should involve closer scrutiny before inclusion in the specification. If anything, more separation is safer at this stage, vs consolidation.\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
           "createdAt": "2021-12-10T22:25:27Z",
           "updatedAt": "2021-12-10T22:25:27Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@br-hale Good point about the differences from the two-party case.  I think your taxonomy is not quite complete, though. You could also imagine cases where the epoch into which the resumption PSK is injected has members that were not in the group in the epoch in which it was extracted (and these members were provided the PSK some other way).  For instance, in the session-internal case where there have been some Adds in the meantime.\r\n\r\nTo try to factor this a little differently, it seems like you have at least three independent columns in the truth table here comparing the extraction epoch to the injection epoch:\r\n\r\n* Same group or different group (\"group\" is the term that matches TLS \"session\"; linear sequence of epochs)\r\n* Some members have been removed\r\n* Some members have been added\r\n\r\nSo you have at least 8 cases to cover to start with assuming you care about both of those axes (same/different group and membership).\r\n\r\nIt's not clear to me why those are the two axes that one cares about.  On the one hand, why is it not important to distinguish ciphersuite changes as well, or changes in extensions?  On the other hand, why do we need to agree on membership changes here, given that the key schedule already confirms that we agree on the membership?  Basically, I don't understand (a) what cases need to be distinguished, (b) why do these cases need to be distinguished, and (c) why the required separation properties aren't provided by some other mechanism already.\r\n\r\nI would also note that you don't get the benefits of key separation unless the recipients know how to verify that the usage is right for the injection context. (Otherwise, a malicious PSK sender can send the wrong value.)  For the same/different group, that's easy enough to do based on key schedule continuity.  But membership is problematic.  For example, if you're changing the ciphersuite between extraction and injection, then all of the KeyPackages and Credentials will be different -- what do you compare to verify equality?\r\n\r\nI can update #518 to add PSKUsage, but the cases we put there need to at least be enforceable, and ideally fit into some principled taxonomy (even if all the cases in the taxonomy aren't enforceable).",
+          "createdAt": "2021-12-14T15:38:07Z",
+          "updatedAt": "2021-12-14T15:38:07Z"
+        },
+        {
+          "author": "br-hale",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "For the record, distinguishing on ciphersuite changes was brought up earlier in the WG - I am in the support if bringing it back on the discussion table is an option...\r\nSeparately though, for most other changes during the lifespan of a group, proposals basically perform a similar action for distinguishing between keys and separating changes from epoch to epoch. The difference with the PSK is there is no \"one way\" to interpret a PSK's use (as compared to e.g. a ciphersuite change). This also means that it can be more challenging to provably separate out misuse. \r\n[BTW: I am assuming in this discussion you mean ciphersuite change in the context of the listed components, since reinit is actually used for ciphersuite key changes per line 1598.]\r\n\r\nYou are quite correct that there is a group-external use, i.e. the \"different group\" case. However, anything outside of the group/session is an external/exporter key use. Namely, the MLS protocol spec is about a single session and anything that is used in other groups/sessions is an external key (similar to TLS export from session). The distinction between PSK usage and external/exporter keys (whether the latter is used for another application or injected into a different group entirely) is that PSK use is within the analysis bounds of the given session. To this point, there is a gray area on item 2 (subgroup-internal use / resumption by a proper subset of members). This is probably the only one I could see an argument for also pushing as an exporter key use. \r\n\r\nThe issue of some members added between PSK usage is really reducible to two cases: a) a member was already in the set and the PSK use appears as item 1 or 3 (group-internal use or session-internal use) or b) a member was added and the PSK offers no security beyond that of an exporter key inject. The potential value proposition is for existing members, there is no loss for a new member, and the it is better to offer the value as possible than to deny it based on the weakest link.\r\n\r\nThe issue of some members being removed between PSK usage is similarly reducible. If the ejected member does not have the current group state then knowing a PSK should not provide value. It is similar to knowing an exporter key but having no place to export it into. The goal of PSK usage is to strengthen an existent system vs. being the sole point of security for that. If our KDF is done correctly, then combing current group state and the PSK will not be problematic (former unknown but latter known to the ejected member).\r\n\r\n",
+          "createdAt": "2021-12-15T02:46:00Z",
+          "updatedAt": "2021-12-15T02:46:00Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "So @kkohbrok and I had some offline discussion about this, and it led me to the conclusion that what I'm really grumpy about is a need for more clarity in the branch and reinit definitions.  We don't need a full taxonomy of uses if (a) we can say \"use this PSK usage for this specific protocol feature\", and (b) we have some escape hatch that allows for usages of resumption PSKs outside those specific protocol features.\r\n\r\nI have filed #525 reflecting this theory.  Hopefully folks find it more agreeable.",
+          "createdAt": "2021-12-15T15:45:41Z",
+          "updatedAt": "2021-12-15T15:45:41Z"
         }
       ]
     },
@@ -37457,7 +37478,7 @@
       "labels": [],
       "body": "The specification currently assumes that a Credential provides a singular identity for a client, when in reality that is not the case.  For example, X509Credential can provide a whole collection of identities, and it's up to the application to decide if its preferred identity is among them.  Just like in TLS, a server can send a cert with 100 domains, but the TLS client knows which one it's looking for.\r\n\r\nThis PR refactors the parts of the spec that refer to identity to be consistent with this idea.  The main impacts are to processing of Update and Remove-within-External-Commit, both cases in which you want the new KeyPackage to logically represent the same identity as the old one.\r\n\r\nThis PR also removes the `endpoint_id` field from KeyPackage.  Since we now reference KeyPackages by KeyPackageID, there's no longer a need for a separate identifier.  (Unless we want an identifier that's stable across epochs, but (a) it's not clear to me that that is needed in general and (b) it can easily be added in an extension, as in fact we have done in Webex.)",
       "createdAt": "2021-11-16T22:20:20Z",
-      "updatedAt": "2021-12-10T23:30:02Z",
+      "updatedAt": "2021-12-15T15:59:12Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
@@ -37545,6 +37566,27 @@
           "body": "Zooming out on this problem, I will make a couple remarks about options for identifying parties. First, it seems that the above alternatives (and adding some not discussed) can generally be grouped into one of the following categories (for these, 'persistence' implies over the duration of the session/group, and 'directly authenticated' implies either as a credential or an identifier signed through use of a credential):\r\n\r\n1. endpoint identifiers change across epochs and directly authenticated along with that change\r\n2. endpoint identifiers are persistent across epochs and directly authenticated once\r\n3. endpoint identifiers are not persistent across epochs, but directly authenticated only once \r\n4. endpoint identifiers are persistent across epochs, but unauthenticated\r\n\r\nI note the above differentiators, since the role of endpoint identifiers begins to factor in when assessing E2EE. @chelseakomlo and I are working on some of the 'ends' aspect of E2EE and I think the current PR change could prove non-trivial with respect to justifying E2EE in MLS. Option 3 is what Signal does and, throughout the development of MLS, Signal as been used as a guidepost for 'at least equivalent' security. Naturally, if credentials are used directly, we meet Option 2 or 1, dependent on handling. Please correct me if I am wrong, but it appears that the current PR would lead us into Option 4.\r\n\r\nI support keeping credentials, at least in the sense of keys. Actually, in this respect, it is a little confusing with regard the issue with x509. Since early on, \"credential\" in MLS has been used as denoting a signature key, not a certificate that may contain more. Maybe I am not quite seeing the issue as to why the application cannot handle interpreting the certificate as separate to the credential in the spec.\r\n\r\n \r\n",
           "createdAt": "2021-12-10T23:30:02Z",
           "updatedAt": "2021-12-10T23:30:02Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@br-hale Strongly disagree with 'Since early on, \"credential\" in MLS has been used as denoting a signature key, not a certificate that may contain more.'  The notion of a Credential has always included at least an identifier as well as the signature key, in order to address the Unknown Key Share / Identity Misbinding attacks that occur in Signal and elsewhere.  If you put that together with the idea that Credentials are verifiable using some AS, you basically arrive at certificates.\r\n\r\nIn your taxonomy, only option (1) actually works for MLS, assuming that by \"endpoint identifiers\", you mean the authenticated ones, and not just the opaque `endpoint_id`, which just has to be unique.  Option (4) is clearly unacceptable, because the whole point of these identifiers is that they're authenticated by the AS.  Options (2) and (3) don't make sense because members can be added to the group and need to be able to authenticate the other members when they join (so \"directly authenticate once\" doesn't work).  Note that MLS is unlike Signal in that the membership is multi-party and dynamic, and that we seek to address UKS issues that Signal explicitly disclaims.\r\n\r\n> @chelseakomlo and I are working on some of the 'ends' aspect of E2EE and I think the current PR change could prove non-trivial with respect to justifying E2EE in MLS.\r\n\r\nCould you describe more what the issue is here?  Just because the endpoints can change the set of identities they express doesn't seem like it undermines the notion of E2EE.",
+          "createdAt": "2021-12-14T16:08:27Z",
+          "updatedAt": "2021-12-14T16:08:27Z"
+        },
+        {
+          "author": "br-hale",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "@bifurcation I agree that option (1) is what is needed for MLS. The discussion above seems to advocate for a variant of option (4) though. This variant question also seems to be the crux of the matter @kkohbrok was pointing out above, so if something is being miscommunicated here it would help if you could clarify that, i.e. that we are at least on the same page regarding (1) being the goal. The 'Signal alignment' only holds as a baseline, i.e. if you are advocating for (4) then I would say that we can and should do better. The claim about options (2) and (3) is incorrect though, since direct authentication occurs at time of group join. \r\n\r\nTo avoid diverging down side discussion points and to keep this PR decision on track, it is essential to establish clarity on the claim that MLS (with the current PR) would be able to offer option (1). Copying from @kkohbrok notes above, we have that (quote):\r\n- leaf index: is not tied to any particular identity/key package\r\n- key package (id/hash): potentially changes across epochs\r\n- identity in the credential: not unique per group\r\n(end quote)\r\n\r\nand as @bifurcation you say, the opaque endpoint_id is by no means sufficient. By elimination, this does not leave many options. So what aspect are you referring ref. \"the authenticated ones\"? I.e. what persistent or rotated endpoint identifier is there which consistently links authenticity throughout the lifespan of the group? Anything that is not persistent is insufficient as is anything that is authenticated in a disconnected manner (e.g. can be replaced and authenticated with a new key that is not linked to the prior one). \r\n",
+          "createdAt": "2021-12-15T02:45:56Z",
+          "updatedAt": "2021-12-15T02:45:56Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@br-hale What I mean by \"the authenticated ones\" is the identifier(s) in the Credential, in the KeyPackage, which are supposed to be authenticated with the AS.  To be specific: For BasicCredential, the `identity` field, and for X509Credential, identifiers in the `subject` or `subjectAltName` fields.\r\n\r\nSo yes, we have a number of identifiers for endpoints:\r\n\r\n1. Identifiers in credentials (as above)\r\n2. Leaf index: Unique within a group; constant for a member's lifetime in the group, by virtue of tree math\r\n3. `endpoint_id`: Unique within a group; constant for a member's lifetime in the group, by fiat\r\n4. KeyPackageID (==hash): Unique within a group; changes on Commit/Update by the member\r\n\r\nThe point of this PR is just to clarify that the identifiers authenticated in credentials are neither unique within a group nor constant across Commit/Update by the member.  (And to clarify what must remain constant across Commit/Update.)  Does that seem problematic to you?",
+          "createdAt": "2021-12-15T15:59:12Z",
+          "updatedAt": "2021-12-15T15:59:12Z"
         }
       ],
       "reviews": []
@@ -38048,21 +38090,21 @@
       "id": "PR_kwDOBoyH6c4vN3Iw",
       "title": "Consolidate resumption PSK cases",
       "url": "https://github.com/mlswg/mls-protocol/pull/518",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Fixes #502 ",
       "createdAt": "2021-11-30T23:49:26Z",
-      "updatedAt": "2021-12-10T22:26:09Z",
+      "updatedAt": "2021-12-15T16:30:30Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "944ad181dfec5915ade68ec5ba484933b3247ef0",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "consolidate-psk",
       "headRefOid": "a03e84ac1226797c6740eb584a3484d618489b68",
-      "closedAt": null,
+      "closedAt": "2021-12-15T16:30:30Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -38073,6 +38115,13 @@
           "body": "Comments in associated #502 discussion.",
           "createdAt": "2021-12-10T22:26:09Z",
           "updatedAt": "2021-12-10T22:26:09Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing in favor of #525 ",
+          "createdAt": "2021-12-15T16:30:30Z",
+          "updatedAt": "2021-12-15T16:30:30Z"
         }
       ],
       "reviews": [
@@ -38138,24 +38187,26 @@
       "id": "PR_kwDOBoyH6c4vQznm",
       "title": "Revamp overview sections",
       "url": "https://github.com/mlswg/mls-protocol/pull/520",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "First part of fixing #409 ",
       "createdAt": "2021-12-01T17:06:11Z",
-      "updatedAt": "2021-12-09T13:15:18Z",
+      "updatedAt": "2021-12-15T16:29:35Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "22511303091bc68165a5208686ad252837f96b3e",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "doc-structure",
-      "headRefOid": "3654dc6444cb7ee6f41aa861e3473f4a3bb6e822",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "023f047737d63e2a3a05f2ae8bbe2082587bc2fb",
+      "closedAt": "2021-12-15T16:29:35Z",
+      "mergedAt": "2021-12-15T16:29:35Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "500f8d670bc73c7e276209ffbc0dd2b0758f452a"
+      },
       "comments": [],
       "reviews": [
         {
@@ -38273,6 +38324,166 @@
               "updatedAt": "2021-12-09T13:15:18Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xpurS",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:03:36Z",
+          "updatedAt": "2021-12-15T16:03:36Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "Updated to refer to Proposal/Commit.  I think it's fine to use them here before their definitions.",
+              "createdAt": "2021-12-15T16:03:36Z",
+              "updatedAt": "2021-12-15T16:03:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xpvcD",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:06:08Z",
+          "updatedAt": "2021-12-15T16:06:08Z",
+          "comments": [
+            {
+              "originalPosition": 115,
+              "body": "That understanding is correct!",
+              "createdAt": "2021-12-15T16:06:08Z",
+              "updatedAt": "2021-12-15T16:06:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xpwA8",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:07:57Z",
+          "updatedAt": "2021-12-15T16:07:58Z",
+          "comments": [
+            {
+              "originalPosition": 120,
+              "body": "KeyPackage is a little unique in that it is both something that is handled by the application and something that appears within other objects (like `Add` and `Commit`). Other things that are handled by the application are don't appear within other objects (`PublicGroupState`, but also `Welcome`, `MLSPlaintext`, and `MLSCiphertext`)",
+              "createdAt": "2021-12-15T16:07:57Z",
+              "updatedAt": "2021-12-15T16:07:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xpxjL",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:13:02Z",
+          "updatedAt": "2021-12-15T16:13:02Z",
+          "comments": [
+            {
+              "originalPosition": 134,
+              "body": "Your proposed text is a bit more detail that I'd like for this section.  But I have revised to clarify that MLSPlaintext/Ciphertext are for messages *within* a group, where as KeyPackage/Welcome/PublicGroupState are *outside* a group.",
+              "createdAt": "2021-12-15T16:13:02Z",
+              "updatedAt": "2021-12-15T16:13:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xpyS6",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:15:29Z",
+          "updatedAt": "2021-12-15T16:15:30Z",
+          "comments": [
+            {
+              "originalPosition": 162,
+              "body": "Technically, you can generate a Welcome message with no recipients, in which case you can have a Welcome corresponding to every Commit.  But I can see how that's confusing at this level.  Revised to say \"each Commit that adds member(s) to the group\".",
+              "createdAt": "2021-12-15T16:15:29Z",
+              "updatedAt": "2021-12-15T16:15:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xpztp",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:20:11Z",
+          "updatedAt": "2021-12-15T16:20:11Z",
+          "comments": [
+            {
+              "originalPosition": 93,
+              "body": "Agree that this is unclear.  Flipped it around to start with groups and say that a group's history is divided into a linear sequence of epochs. ",
+              "createdAt": "2021-12-15T16:20:11Z",
+              "updatedAt": "2021-12-15T16:20:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xp0bj",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:22:32Z",
+          "updatedAt": "2021-12-15T16:22:33Z",
+          "comments": [
+            {
+              "originalPosition": 257,
+              "body": "`can update this message` -- this is just a typo, and we shouldn't mention leaf secrets here.  Reworded.\r\n\r\n",
+              "createdAt": "2021-12-15T16:22:32Z",
+              "updatedAt": "2021-12-15T16:22:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xp2It",
+          "commit": {
+            "abbreviatedOid": "3654dc6"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-15T16:27:54Z",
+          "updatedAt": "2021-12-15T16:27:55Z",
+          "comments": [
+            {
+              "originalPosition": 261,
+              "body": "The differences to sender keys are larger than you say.  With sender keys, each sender has an independent key `k_i`; there is no shared group state.  To remove someone (including PCS updates), each sender needs to distribute a new key `k'_i` to the remaining `N-1` participants.  This results in `(N-1)^2` messages of size `O(1)`.\r\n\r\nIn MLS, because there is shared group state, you only need some entropy that is not sent to the evicted member, as you say.  So you only need a single message of size `O(N-1)` in the worst case and `O(log(N-1))` with a populated tree.",
+              "createdAt": "2021-12-15T16:27:54Z",
+              "updatedAt": "2021-12-15T16:27:55Z"
+            }
+          ]
         }
       ]
     },
@@ -38343,24 +38554,26 @@
       "id": "PR_kwDOBoyH6c4vctWX",
       "title": "Generalize tree extend/truncate algorithms",
       "url": "https://github.com/mlswg/mls-protocol/pull/522",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This PR builds on #507 and #521.  It adds the following:\r\n\r\n* An explicit note in `Ratchet Tree Terminology` that implementations may use any representation\r\n* A general description of how nodes are added to / removed from the tree\r\n* Specific algorithms for \"array-based trees\" and \"link-based trees\"\r\n\r\n(I also made a few minor editorial revisions.)\r\n\r\n@TWal @franziskuskiefer - I think this hits the right balance of specificity and generality.  Interested in your thoughts here.",
       "createdAt": "2021-12-06T16:30:14Z",
-      "updatedAt": "2021-12-08T08:06:21Z",
+      "updatedAt": "2021-12-15T16:30:09Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "descriptive",
       "headRefOid": "05fdeee5ad6cd808d774b7ccd46e77d46284d8a2",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2021-12-15T16:30:08Z",
+      "mergedAt": "2021-12-15T16:30:08Z",
+      "mergedBy": "bifurcation",
+      "mergeCommit": {
+        "oid": "6754a8edc9d77c902643d37a519b9a546ab00b4e"
+      },
       "comments": [
         {
           "author": "TWal",
@@ -38653,7 +38866,7 @@
       "labels": [],
       "body": "The current use of `wire_format` is a bit weird to me: it is the first value of both `MLSPlaintext` and `MLSCiphertext` which allows the implementations to differentiate between them. Then it looks like it should be implemented as a regular tagged union, which is what this pull request does.\r\n\r\nThis does not imply any changes to existing implementations.\r\n\r\nOne thing that this pull-request changes is that `MLSPlaintext` is forced to have `wire_format = mls_plaintext`, but I don't see why it would have any other values in this case?",
       "createdAt": "2021-12-07T16:50:20Z",
-      "updatedAt": "2021-12-10T16:24:46Z",
+      "updatedAt": "2021-12-14T20:06:07Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
@@ -38678,8 +38891,121 @@
           "body": "Thank you, now I understand better why `MLSPlaintext` doesn't have `wire_format = mls_plaintext` like in `MLSCiphertext`.\r\n\r\nI didn't think that `MLSCiphertext` were decoded to a `MLSPlaintext`. In fact, the document never mentions this, however it mentions the converse at the end of section 9.0 (but doesn't talk about `wire_format` though).\r\nIn the rest of the document, messages are named as `MLSPlaintext` (e.g. \"The MLSPlaintext MUST be signed\" and not \"The message MUST be signed\"), so implicitly `MLSCiphertext` have been converted to `MLSPlaintext` (which is a bit weird I think, especially regarding the `membership_tag` that exists in `MLSPlaintext` and not in `MLSCiphertext`).\r\n\r\nI think it would be valuable to refactor the part of the document related to message framing to remove such ambiguities.\r\n\r\nThe easiest way would be to be explicit about the conversion between `MLSPlaintext` and `MLSCiphertext`.\r\n\r\nI spent a lot of time thinking about the nicest way to handle these structures when I implemented these things in the F* implementation of MLS, and I think it could lead to a refactorization of this document.\r\n\r\nWe can define the content of a message (so really, meta-data + the real content) like this:\r\n\r\n    struct {\r\n        opaque group_id<0..255>;\r\n        uint64 epoch;\r\n        Sender sender;\r\n        opaque authenticated_data<0..2^32-1>;\r\n    \r\n        ContentType content_type;\r\n        select (MLSPlaintext.content_type) {\r\n            case application:\r\n              opaque application_data<0..2^32-1>;\r\n    \r\n            case proposal:\r\n              Proposal proposal;\r\n    \r\n            case commit:\r\n              Commit commit;\r\n        }\r\n    } MLSMessageContent;\r\n\r\nAnd the authentication of a message like this:\r\n\r\n    struct {\r\n        opaque signature<0..2^16-1>;\r\n        optional<MAC> confirmation_tag;\r\n    } MLSMessageAuth;\r\n\r\nIf you have a `MLSMessageContent`, you can compute `MLSMessageAuth` (using a signing key, `confirmation_key`, `interim_transcript_hash` and `GroupContext`).\r\nThis would be done by filling correctly the structures `MLSMessageContentTBS` and `MLSMessageContentTBM` (previously `MLSPlaintextTB.`)\r\n\r\nYou can then do the following conversions:\r\n* `MLSPlaintext` to `(MLSMessageContent, MLSMessageAuth)`\r\n* `(MLSMessageContent, MLSMessageAuth)` to `MLSPlaintext` (using `membership_key` and `GroupContext` to compute `membership_tag`)\r\n* `MLSCiphertext` to `(MLSMessageContent, MLSMessageAuth)` (using `sender_data_secret`, and the current state of the Secret Tree)\r\n* `(MLSMessageContent, MLSMessageAuth)` to `MLSCiphertext` (using `sender_data_secret`, and the current state of the Secret Tree)\r\n\r\nThen the rest of the document can then talk about `MLSMessageContent` instead of `MLSPlaintext`.\r\n\r\nI would understand if you want to do the minimal possible changes, however I think doing this kind of big refactor would make this document a lot easier to understand for a first-time reader.\r\n",
           "createdAt": "2021-12-10T16:24:46Z",
           "updatedAt": "2021-12-10T16:24:46Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@TWal - That proposal actually seems like it could make the programming easier, in addition to making the text clearer.  I would be game for a PR if you'd like to write one up.\r\n\r\nGoing back to the original point about `wire_format`: Note that the signature in the MLSMessageAuth is specific to a wire format, so the conversions you note might not be quite as decoupled as you think.  But you still end up with something nicer than what we have today. \r\n\r\n```\r\n# Signing + Encryption\r\n\r\nMLSMessageContent \r\n  --(GroupContext, wire_format, sig_priv, confirmation_key)--> \r\n  (wire_format, MLSMessageContent, MLSMessageAuth)\r\n\r\n  * Compute message signature\r\n  * Update confirmed transcript hash\r\n  * Compute confirmation tag\r\n  * Update interim transcript hash\r\n\r\n\r\n(mls_plaintext, MLSMessageContent, MLSMessageAuth) \r\n  --(GroupContext, membership_key)--> \r\n  MLSPlaintext\r\n\r\n  * Compute membership_tag\r\n  * Assemble MLSPlaintext\r\n\r\n\r\n(mls_ciphertext, MLSMessageContent, MLSMessageAuth) \r\n  --(sender_data_secret, Secret Tree)-->\r\n  MLSCiphertext\r\n\r\n  * Encode and encrypt content\r\n  * Encode and encrypt sender data\r\n  * Assemble MLSCiphertext\r\n\r\n\r\n# Decryption + Verification\r\n\r\nMLSPlaintext \r\n  --(GroupContext, membership_key)-->\r\n  (mls_plaintext, MLSMessageContent, MLSMessageAuth)\r\n\r\n  * Verify membership_tag\r\n  * Parse MLSPlaintext into MLSMessageContent, MLSMessageAuth\r\n\r\n\r\nMLSCiphertext\r\n  --(sender_data_secret, Secret Tree)-->\r\n  (mls_ciphertext, MLSMessageContent, MLSMessageAuth)\r\n\r\n  * Decrypt and decode sender data\r\n  * Decrypt and decode content\r\n  * Parse MLSCiphertext and decrypted values into MLSMessageContent, MLSMessageAuth\r\n\r\n\r\n(wire_format, MLSMessageContent, MLSMessageAuth)\r\n  --(GroupContext, wire_format, sig_pub, confirmation_key)-->\r\n  MLSMessageContent\r\n\r\n  * Verify message signature\r\n  * Update confirmed transcript hash\r\n  * Verify confirmation tag\r\n  * Update interim transcript hash\r\n```",
+          "createdAt": "2021-12-14T20:06:07Z",
+          "updatedAt": "2021-12-14T20:06:07Z"
         }
       ],
+      "reviews": []
+    },
+    {
+      "number": 524,
+      "id": "PR_kwDOBoyH6c4v0_cY",
+      "title": "Careful truncation",
+      "url": "https://github.com/mlswg/mls-protocol/pull/524",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As @kkohbrok noted [on the mailing list](https://mailarchive.ietf.org/arch/msg/mls/P8CiOeQy3lev7s5vbnaRkPwRa1Q/), the current truncation algorithm breaks parent hashes.  This PR implements the \"careful truncation\" algorithm he proposes.",
+      "createdAt": "2021-12-14T14:45:18Z",
+      "updatedAt": "2021-12-14T18:31:00Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "ph-trunc",
+      "headRefOid": "16add2e84a2b2f079dfdd20d5f3039301e7bda2f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4xkqqA",
+          "commit": {
+            "abbreviatedOid": "43c82e5"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-14T15:50:55Z",
+          "updatedAt": "2021-12-14T15:50:56Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "If the parent node is the root node, it can be removed even if it is non-blank, since removing the root node doesn't destroy any valid parent hash chains.",
+              "createdAt": "2021-12-14T15:50:56Z",
+              "updatedAt": "2021-12-14T15:50:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xlBIt",
+          "commit": {
+            "abbreviatedOid": "16add2e"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-14T16:59:35Z",
+          "updatedAt": "2021-12-14T16:59:35Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Good point.  Updated to reflect this.",
+              "createdAt": "2021-12-14T16:59:35Z",
+              "updatedAt": "2021-12-14T16:59:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xlZvo",
+          "commit": {
+            "abbreviatedOid": "16add2e"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2021-12-14T18:31:00Z",
+          "updatedAt": "2021-12-14T18:31:00Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 525,
+      "id": "PR_kwDOBoyH6c4v5flh",
+      "title": "Tighten up branch and reinit; define ResumptionPSKUsage",
+      "url": "https://github.com/mlswg/mls-protocol/pull/525",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR reflects further discussion on #502 and replaces #518.  The high-level impacts are:\r\n\r\n* Add clearer, more prescriptive definitions of the re-init and branch operations\r\n* Use a single syntax for all resumption PSKs, but also have a `usage` parameter to distinguish cases\r\n* Allow an `application` usage to cover any other cases defined by applications\r\n\r\nOnce #520 lands, we should also add some text to the protocol overview to describe these operations.  Pasting some text here for usage in that future PR...\r\n\r\n```\r\n## Relationships Between Epochs\r\n\r\nA group comprises a single linear sequence of epochs. However, it can sometimes\r\nbe useful to express relationships between epochs, either within a group or\r\nacross groups.  MLS derives a resumption pre-shared key (PSK) from each epoch to\r\nallow a entropy extracted from one epoch to be injected into a future epoch,\r\neffectively creating a causal link between the two epochs.\r\n\r\nMLS supports two ways to tie a new group to an existing group. Re-initialization\r\ncloses one group and creates a new group comprising the same members with\r\ndifferent parameters. Branching starts a new group with a subset of the original\r\ngroup's participants (with no effect on the original group).  In both cases,\r\nthe new group is linked to the old group via a resumption PSK.\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]           epoch_B_[0]\r\n     .                     |\r\n     .  PSK(usage=reinit)  |\r\n     .....................>|\r\n                           |\r\n                           V\r\n                      epoch_B_[1]\r\n~~~~~\r\n{: title=\"Reinitializing a group\" }\r\n\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]           epoch_B_[0]\r\n     |                     |\r\n     |  PSK(usage=branch)  |\r\n     |....................>|\r\n     |                     |\r\n     V                     V\r\nepoch_A_[n+1]         epoch_B_[1]\r\n~~~~~\r\n{: title=\"Branching a group\" }\r\n\r\nApplications may also choose to use resumption PSKs to link epochs in other\r\nways.  For example, the following figure shows a case where a resumption PSK\r\nfrom epoch `n` is injected into epoch `n+k`.  This demonstrates that the members\r\nof the group at epoch `n+k` were also members at epoch `n` (irrespective of any\r\nchanges to these members' keys due to Updates or Commits.\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]\r\n     |                     \r\n     |  PSK(usage=application)  \r\n     |.....................\r\n     |                    . \r\n     |                    . \r\n    ...                  ...\r\n     |                    . \r\n     |                    . \r\n     V                    .\r\nepoch_A_[n+k-1]           .\r\n     |                    . \r\n     |                    . \r\n     |<.................... \r\n     |                      \r\n     V                     \r\nepoch_A_[n+k]       \r\n~~~~~\r\n{: title=\"Reinjecting entropy from an earlier epoch\" }\r\n```",
+      "createdAt": "2021-12-15T15:45:11Z",
+      "updatedAt": "2021-12-15T15:45:11Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "headRepository": "mlswg/mls-protocol",
+      "headRefName": "psk-usages",
+      "headRefOid": "5b9590b55b09085fd2e7affb3a765f8943f02b75",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]
