@@ -5,7 +5,7 @@
 Network Working Group                                          R. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                             B. Beurdouche
-Expires: 17 June 2022                                    Inria & Mozilla
+Expires: 19 June 2022                                    Inria & Mozilla
                                                                R. Robert
                                                                         
                                                              J. Millican
@@ -14,7 +14,7 @@ Expires: 17 June 2022                                    Inria & Mozilla
                                                                   Google
                                                           K. Cohn-Gordon
                                                     University of Oxford
-                                                        14 December 2021
+                                                        16 December 2021
 
 
               The Messaging Layer Security (MLS) Protocol
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 June 2022.
+   This Internet-Draft will expire on 19 June 2022.
 
 Copyright Notice
 
@@ -2625,8 +2625,8 @@ sender_data_nonce = ExpandWithLabel(sender_data_secret, "nonce", ciphertext_samp
       the root
 
    *  Truncate the tree by removing leaves from the right side of the
-      tree as long as the following conditions hold (since non-blank
-      intermediate nodes hold information that is necessary for
+      tree as long as all of the following conditions hold (since non-
+      blank intermediate nodes hold information that is necessary for
       verifying parent hashes):
 
       -  The rightmost leaf is blank
