@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2021-12-16T01:04:36.669628+00:00",
+  "timestamp": "2021-12-19T01:10:33.625038+00:00",
   "repo": "mlswg/mls-protocol",
   "labels": [
     {
@@ -4981,7 +4981,7 @@
       "labels": [],
       "body": "Right now, we treat the re-init and branch PSK cases as distinct cases, as opposed to just having a general \"export PSK from one group+epoch, insert it into another\" function.  What I would call a \"resumption PSK\", following TLS.   Even though we have the distinction, the content of the PSK itself is the same: (group ID, epoch, resumption secret).  So the only difference is that the PreSharedKeyID has a bit that signals the intent of injecting this resumption PSK.\r\n\r\nDo we really need that bit?  If there's not a compelling need, it would streamline the API and allow for more flexibility if we just had the notion of a resumption PSK.",
       "createdAt": "2021-11-04T14:47:01Z",
-      "updatedAt": "2021-12-15T15:45:41Z",
+      "updatedAt": "2021-12-17T06:15:36Z",
       "closedAt": null,
       "comments": [
         {
@@ -5095,6 +5095,13 @@
           "body": "So @kkohbrok and I had some offline discussion about this, and it led me to the conclusion that what I'm really grumpy about is a need for more clarity in the branch and reinit definitions.  We don't need a full taxonomy of uses if (a) we can say \"use this PSK usage for this specific protocol feature\", and (b) we have some escape hatch that allows for usages of resumption PSKs outside those specific protocol features.\r\n\r\nI have filed #525 reflecting this theory.  Hopefully folks find it more agreeable.",
           "createdAt": "2021-12-15T15:45:41Z",
           "updatedAt": "2021-12-15T15:45:41Z"
+        },
+        {
+          "author": "br-hale",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "That seems like a well-reasoned solution. ",
+          "createdAt": "2021-12-17T06:15:35Z",
+          "updatedAt": "2021-12-17T06:15:35Z"
         }
       ]
     },
@@ -5244,6 +5251,54 @@
           "updatedAt": "2021-12-01T14:58:19Z"
         }
       ]
+    },
+    {
+      "number": 528,
+      "id": "I_kwDOBoyH6c5Ajrn9",
+      "title": "Include `context` in `MLSPlaintextTBS` for sender_type `NewMember`",
+      "url": "https://github.com/mlswg/mls-protocol/issues/528",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "From what I can see, there is no reason not to sign the context in the case of an external init. I'm not sure why it got taken out, but while implementing external inits, verification went through even when including the context.",
+      "createdAt": "2021-12-17T10:11:11Z",
+      "updatedAt": "2021-12-17T10:11:11Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 530,
+      "id": "I_kwDOBoyH6c5Aj4q4",
+      "title": "Require uniqueness of RatchetTreeExtensions in GroupInfo",
+      "url": "https://github.com/mlswg/mls-protocol/issues/530",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A GroupInfo (or a PublicGroupState) should only ever contain one RatchetTreeExtension. Either that or it should be specified what happens if there is more than one.",
+      "createdAt": "2021-12-17T11:09:22Z",
+      "updatedAt": "2021-12-17T11:54:58Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 531,
+      "id": "I_kwDOBoyH6c5Ak7dL",
+      "title": "MLS version is used inconsistently in strings",
+      "url": "https://github.com/mlswg/mls-protocol/issues/531",
+      "state": "OPEN",
+      "author": "raphaelrobert",
+      "authorAssociation": "MEMBER",
+      "assignees": [],
+      "labels": [],
+      "body": "Both \"mls10\" and \"MLS 1.0\" are used. I'd go for \"mls10\" everywhere.",
+      "createdAt": "2021-12-17T16:26:39Z",
+      "updatedAt": "2021-12-17T16:26:39Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -37478,7 +37533,7 @@
       "labels": [],
       "body": "The specification currently assumes that a Credential provides a singular identity for a client, when in reality that is not the case.  For example, X509Credential can provide a whole collection of identities, and it's up to the application to decide if its preferred identity is among them.  Just like in TLS, a server can send a cert with 100 domains, but the TLS client knows which one it's looking for.\r\n\r\nThis PR refactors the parts of the spec that refer to identity to be consistent with this idea.  The main impacts are to processing of Update and Remove-within-External-Commit, both cases in which you want the new KeyPackage to logically represent the same identity as the old one.\r\n\r\nThis PR also removes the `endpoint_id` field from KeyPackage.  Since we now reference KeyPackages by KeyPackageID, there's no longer a need for a separate identifier.  (Unless we want an identifier that's stable across epochs, but (a) it's not clear to me that that is needed in general and (b) it can easily be added in an extension, as in fact we have done in Webex.)",
       "createdAt": "2021-11-16T22:20:20Z",
-      "updatedAt": "2021-12-15T15:59:12Z",
+      "updatedAt": "2021-12-17T06:43:15Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
@@ -37587,6 +37642,13 @@
           "body": "@br-hale What I mean by \"the authenticated ones\" is the identifier(s) in the Credential, in the KeyPackage, which are supposed to be authenticated with the AS.  To be specific: For BasicCredential, the `identity` field, and for X509Credential, identifiers in the `subject` or `subjectAltName` fields.\r\n\r\nSo yes, we have a number of identifiers for endpoints:\r\n\r\n1. Identifiers in credentials (as above)\r\n2. Leaf index: Unique within a group; constant for a member's lifetime in the group, by virtue of tree math\r\n3. `endpoint_id`: Unique within a group; constant for a member's lifetime in the group, by fiat\r\n4. KeyPackageID (==hash): Unique within a group; changes on Commit/Update by the member\r\n\r\nThe point of this PR is just to clarify that the identifiers authenticated in credentials are neither unique within a group nor constant across Commit/Update by the member.  (And to clarify what must remain constant across Commit/Update.)  Does that seem problematic to you?",
           "createdAt": "2021-12-15T15:59:12Z",
           "updatedAt": "2021-12-15T15:59:12Z"
+        },
+        {
+          "author": "br-hale",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The issue of credentials not being unique or constant is at the heart of this. Other items here are not authenticated or are reliant on those credentials and therefore the consistency of e.g. the leaf index does not actually imply consistency of identity. \r\n\r\nIf credentials were not unique/constant in the sense that a prior one signs off on the next one, then we would inherit consistency from that (which is different from the case here). Similarly, if a single root identity (\"identity\") were to forward to other sub-identities, then there is consistency in the meaning of identity. \r\n\r\nWhat we have here is a backdoor on switching out identities which would be allowed by the spec - yes, they are subcomponents of a credential, but any sender is not actually assured of which identity they are conversing with. For example, Alice may trust a domain name / email address from Bob, but when that switches part-way through the conversation, there is no opt-out point or notification to Alice. There is considerable drift available to Bob (either unintentionally or maliciously) that could occur without knowledge from other group members. This is noticeably different from the case that Bob simply maliciously forwards messages externally, as the drift occurs internally to the group.",
+          "createdAt": "2021-12-17T06:43:15Z",
+          "updatedAt": "2021-12-17T06:43:15Z"
         }
       ],
       "reviews": []
@@ -38866,13 +38928,13 @@
       "labels": [],
       "body": "The current use of `wire_format` is a bit weird to me: it is the first value of both `MLSPlaintext` and `MLSCiphertext` which allows the implementations to differentiate between them. Then it looks like it should be implemented as a regular tagged union, which is what this pull request does.\r\n\r\nThis does not imply any changes to existing implementations.\r\n\r\nOne thing that this pull-request changes is that `MLSPlaintext` is forced to have `wire_format = mls_plaintext`, but I don't see why it would have any other values in this case?",
       "createdAt": "2021-12-07T16:50:20Z",
-      "updatedAt": "2021-12-14T20:06:07Z",
+      "updatedAt": "2021-12-17T16:40:20Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
-      "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
+      "baseRefOid": "6754a8edc9d77c902643d37a519b9a546ab00b4e",
       "headRepository": "TWal/mls-protocol",
       "headRefName": "twal_wire_format",
-      "headRefOid": "1a9b8c3ac11a4a6ef3834ab827429ec65984d814",
+      "headRefOid": "839aa87dab229251cb9dd94bfcd5dd6c555d7c40",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -38898,6 +38960,27 @@
           "body": "@TWal - That proposal actually seems like it could make the programming easier, in addition to making the text clearer.  I would be game for a PR if you'd like to write one up.\r\n\r\nGoing back to the original point about `wire_format`: Note that the signature in the MLSMessageAuth is specific to a wire format, so the conversions you note might not be quite as decoupled as you think.  But you still end up with something nicer than what we have today. \r\n\r\n```\r\n# Signing + Encryption\r\n\r\nMLSMessageContent \r\n  --(GroupContext, wire_format, sig_priv, confirmation_key)--> \r\n  (wire_format, MLSMessageContent, MLSMessageAuth)\r\n\r\n  * Compute message signature\r\n  * Update confirmed transcript hash\r\n  * Compute confirmation tag\r\n  * Update interim transcript hash\r\n\r\n\r\n(mls_plaintext, MLSMessageContent, MLSMessageAuth) \r\n  --(GroupContext, membership_key)--> \r\n  MLSPlaintext\r\n\r\n  * Compute membership_tag\r\n  * Assemble MLSPlaintext\r\n\r\n\r\n(mls_ciphertext, MLSMessageContent, MLSMessageAuth) \r\n  --(sender_data_secret, Secret Tree)-->\r\n  MLSCiphertext\r\n\r\n  * Encode and encrypt content\r\n  * Encode and encrypt sender data\r\n  * Assemble MLSCiphertext\r\n\r\n\r\n# Decryption + Verification\r\n\r\nMLSPlaintext \r\n  --(GroupContext, membership_key)-->\r\n  (mls_plaintext, MLSMessageContent, MLSMessageAuth)\r\n\r\n  * Verify membership_tag\r\n  * Parse MLSPlaintext into MLSMessageContent, MLSMessageAuth\r\n\r\n\r\nMLSCiphertext\r\n  --(sender_data_secret, Secret Tree)-->\r\n  (mls_ciphertext, MLSMessageContent, MLSMessageAuth)\r\n\r\n  * Decrypt and decode sender data\r\n  * Decrypt and decode content\r\n  * Parse MLSCiphertext and decrypted values into MLSMessageContent, MLSMessageAuth\r\n\r\n\r\n(wire_format, MLSMessageContent, MLSMessageAuth)\r\n  --(GroupContext, wire_format, sig_pub, confirmation_key)-->\r\n  MLSMessageContent\r\n\r\n  * Verify message signature\r\n  * Update confirmed transcript hash\r\n  * Verify confirmation tag\r\n  * Update interim transcript hash\r\n```",
           "createdAt": "2021-12-14T20:06:07Z",
           "updatedAt": "2021-12-14T20:06:07Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Okay, I'll start working on a PR that uses this decomposition!",
+          "createdAt": "2021-12-16T16:37:42Z",
+          "updatedAt": "2021-12-16T16:37:42Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "I'm not against attempting to refactor this. It has grown organically over time and could certainly benefit from a holistic overhaul. (@TWal not that you omitted the membership tag in your proposal above)",
+          "createdAt": "2021-12-16T18:11:24Z",
+          "updatedAt": "2021-12-16T18:11:24Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I made a first draft on how the Message Framing section would look like after the refactor. If you agree about these changes I'll change the mentions to `MLSPlaintext` everywhere in the document. What do you think about it? I'm not used to write RFC-like documents so I'm not 100% sure about the formulation I used.\r\n\r\n@raphaelrobert the membership tag is present only in the plaintext and not is the ciphertext, so is it is not part of `MLSMessageAuth`, but only part of `MLSPlaintext`.",
+          "createdAt": "2021-12-17T16:40:20Z",
+          "updatedAt": "2021-12-17T16:40:20Z"
         }
       ],
       "reviews": []
@@ -38914,13 +38997,13 @@
       "labels": [],
       "body": "As @kkohbrok noted [on the mailing list](https://mailarchive.ietf.org/arch/msg/mls/P8CiOeQy3lev7s5vbnaRkPwRa1Q/), the current truncation algorithm breaks parent hashes.  This PR implements the \"careful truncation\" algorithm he proposes.",
       "createdAt": "2021-12-14T14:45:18Z",
-      "updatedAt": "2021-12-14T18:31:00Z",
+      "updatedAt": "2021-12-16T20:22:05Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "ph-trunc",
-      "headRefOid": "16add2e84a2b2f079dfdd20d5f3039301e7bda2f",
+      "headRefOid": "15d265dc830e8a7848937f1f63ef91d17ed5d131",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -38979,6 +39062,26 @@
           "createdAt": "2021-12-14T18:31:00Z",
           "updatedAt": "2021-12-14T18:31:00Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xvAWk",
+          "commit": {
+            "abbreviatedOid": "16add2e"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2021-12-16T17:34:12Z",
+          "updatedAt": "2021-12-16T17:34:13Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "```suggestion\r\n  as all of the following conditions hold (since non-blank intermediate nodes hold\r\n```",
+              "createdAt": "2021-12-16T17:34:12Z",
+              "updatedAt": "2021-12-16T17:34:13Z"
+            }
+          ]
         }
       ]
     },
@@ -38994,13 +39097,205 @@
       "labels": [],
       "body": "This PR reflects further discussion on #502 and replaces #518.  The high-level impacts are:\r\n\r\n* Add clearer, more prescriptive definitions of the re-init and branch operations\r\n* Use a single syntax for all resumption PSKs, but also have a `usage` parameter to distinguish cases\r\n* Allow an `application` usage to cover any other cases defined by applications\r\n\r\nOnce #520 lands, we should also add some text to the protocol overview to describe these operations.  Pasting some text here for usage in that future PR...\r\n\r\n```\r\n## Relationships Between Epochs\r\n\r\nA group comprises a single linear sequence of epochs. However, it can sometimes\r\nbe useful to express relationships between epochs, either within a group or\r\nacross groups.  MLS derives a resumption pre-shared key (PSK) from each epoch to\r\nallow a entropy extracted from one epoch to be injected into a future epoch,\r\neffectively creating a causal link between the two epochs.\r\n\r\nMLS supports two ways to tie a new group to an existing group. Re-initialization\r\ncloses one group and creates a new group comprising the same members with\r\ndifferent parameters. Branching starts a new group with a subset of the original\r\ngroup's participants (with no effect on the original group).  In both cases,\r\nthe new group is linked to the old group via a resumption PSK.\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]           epoch_B_[0]\r\n     .                     |\r\n     .  PSK(usage=reinit)  |\r\n     .....................>|\r\n                           |\r\n                           V\r\n                      epoch_B_[1]\r\n~~~~~\r\n{: title=\"Reinitializing a group\" }\r\n\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]           epoch_B_[0]\r\n     |                     |\r\n     |  PSK(usage=branch)  |\r\n     |....................>|\r\n     |                     |\r\n     V                     V\r\nepoch_A_[n+1]         epoch_B_[1]\r\n~~~~~\r\n{: title=\"Branching a group\" }\r\n\r\nApplications may also choose to use resumption PSKs to link epochs in other\r\nways.  For example, the following figure shows a case where a resumption PSK\r\nfrom epoch `n` is injected into epoch `n+k`.  This demonstrates that the members\r\nof the group at epoch `n+k` were also members at epoch `n` (irrespective of any\r\nchanges to these members' keys due to Updates or Commits.\r\n\r\n~~~~~\r\nepoch_A_[n-1]\r\n     |\r\n     |\r\n     |<-- ReInit\r\n     |\r\n     V\r\nepoch_A_[n]\r\n     |                     \r\n     |  PSK(usage=application)  \r\n     |.....................\r\n     |                    . \r\n     |                    . \r\n    ...                  ...\r\n     |                    . \r\n     |                    . \r\n     V                    .\r\nepoch_A_[n+k-1]           .\r\n     |                    . \r\n     |                    . \r\n     |<.................... \r\n     |                      \r\n     V                     \r\nepoch_A_[n+k]       \r\n~~~~~\r\n{: title=\"Reinjecting entropy from an earlier epoch\" }\r\n```",
       "createdAt": "2021-12-15T15:45:11Z",
-      "updatedAt": "2021-12-15T15:45:11Z",
+      "updatedAt": "2021-12-17T06:16:33Z",
       "baseRepository": "mlswg/mls-protocol",
       "baseRefName": "main",
       "baseRefOid": "2de18dce6939cf7cbb619d5824e2560c6e5efd57",
       "headRepository": "mlswg/mls-protocol",
       "headRefName": "psk-usages",
       "headRefOid": "5b9590b55b09085fd2e7affb3a765f8943f02b75",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "One question regarding the diagram in the PR description. In the re-init case, shouldn't the \"B\" group start at epoch `n+1`? At least that's what the PR specifies in the spec.",
+          "createdAt": "2021-12-16T07:20:05Z",
+          "updatedAt": "2021-12-16T07:20:05Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think the re-init diagram is fine because the spec says\r\n\r\n    The `epoch` in the Welcome message MUST be 1\r\n\r\nHowever in the branch case (and application case) diagram I don't think there should be a ReInit proposal? (At least it is not said in the spec).\r\n\r\nAlso, it is not entirely clear how to construct a `PreSharedKeyID` in the branch case (or application case): what values should have `psk_group_id` and `psk_epoch`?",
+          "createdAt": "2021-12-16T13:32:51Z",
+          "updatedAt": "2021-12-16T13:32:51Z"
+        },
+        {
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Ah, sorry I misread. You are right and the re-init diagram is fine the way it is.",
+          "createdAt": "2021-12-16T13:55:29Z",
+          "updatedAt": "2021-12-16T13:55:29Z"
+        },
+        {
+          "author": "br-hale",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Minor typo in the text above: \"allow a entropy\" -> \"allow entropy\".",
+          "createdAt": "2021-12-17T06:16:33Z",
+          "updatedAt": "2021-12-17T06:16:33Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4xsV07",
+          "commit": {
+            "abbreviatedOid": "5b9590b"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Looks good! Although I'm not sure in the branching keys we want to have the exact same key packages as in the main group.",
+          "createdAt": "2021-12-16T07:01:28Z",
+          "updatedAt": "2021-12-16T07:04:48Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "Do we really want the KeyPackages to be identical? This seems to constitute key-reuse across groups. This is where a (identity,endpoint_id) tuple would come in handy ;-) But I think going with the new multi-identity credentials, we could mandate here that the application has to ensure that the participants in the new group are a subset of the participants in the old group",
+              "createdAt": "2021-12-16T07:01:28Z",
+              "updatedAt": "2021-12-16T07:04:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOBoyH6c4xvGQv",
+          "commit": {
+            "abbreviatedOid": "5b9590b"
+          },
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "state": "COMMENTED",
+          "body": "I think this looks fine generally (just one comment)",
+          "createdAt": "2021-12-16T17:57:54Z",
+          "updatedAt": "2021-12-16T18:01:16Z",
+          "comments": [
+            {
+              "originalPosition": 143,
+              "body": "I wonder if we can be a bit more firm on the fact that the Welcome message should be provided at the same time as the Commit. Because if not, there's an attack vector where malicious members can shut down a group without an obvious way to recover from it.",
+              "createdAt": "2021-12-16T17:57:54Z",
+              "updatedAt": "2021-12-16T18:01:16Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 526,
+      "id": "PR_kwDOBoyH6c4v8b_5",
+      "title": "Unambiguous signatures",
+      "url": "https://github.com/mlswg/mls-protocol/pull/526",
+      "state": "OPEN",
+      "author": "TWal",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Signatures as specified in the MLS protocol document are ambiguous, in the sense that signatures produced for one purpose in the protocol can be (maliciously) used in a different place of the protocol.\r\nIndeed, we found that for example, a `KeyPackage` can have the same serialization as `MLSPlaintextTBS`, which proves that one signature could be accepted for different structures.\r\n\r\nThe collisions we have found so far are quite artificial, so it is not super clear how to exploit this, but at least it makes it impossible to have provable security.\r\n\r\nThe solution is pretty simple, we simply prefix each signed value with a label, in a fashion similar to `ExpandWithLabel`.\r\nThat way, when calling `SignWithLabel` you can give the structure name in the `Label` argument.",
+      "createdAt": "2021-12-16T11:56:57Z",
+      "updatedAt": "2021-12-18T18:52:01Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "6754a8edc9d77c902643d37a519b9a546ab00b4e",
+      "headRepository": "TWal/mls-protocol",
+      "headRefName": "twal_signature",
+      "headRefOid": "4c0c8bfaa0c5e4eb3adad656b6fd02479598d0bd",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Something that is still bothering me is the `MLSPlaintextTBS` structure:\r\n\r\n    struct {\r\n        select (MLSPlaintextTBS.sender.sender_type) {\r\n            case member:\r\n                GroupContext context;\r\n    \r\n            case preconfigured:\r\n            case new_member:\r\n                struct{};\r\n        }\r\n    \r\n        WireFormat wire_format;\r\n        opaque group_id<0..255>;\r\n        uint64 epoch;\r\n        Sender sender;\r\n        opaque authenticated_data<0..2^32-1>;\r\n    \r\n        ContentType content_type;\r\n        select (MLSPlaintextTBS.content_type) {\r\n            case application:\r\n              opaque application_data<0..2^32-1>;\r\n    \r\n            case proposal:\r\n              Proposal proposal;\r\n    \r\n            case commit:\r\n              Commit commit;\r\n        }\r\n    } MLSPlaintextTBS;\r\n\r\nSince the first `select` is done on a field defined after it, this structure is not parsable. We could say that's not a problem since we only need to serialize it, but for security purposes I would recommend to put it at the end, like this:\r\n\r\n    struct {\r\n        WireFormat wire_format;\r\n        opaque group_id<0..255>;\r\n        uint64 epoch;\r\n        Sender sender;\r\n        opaque authenticated_data<0..2^32-1>;\r\n    \r\n        ContentType content_type;\r\n        select (MLSPlaintextTBS.content_type) {\r\n            case application:\r\n              opaque application_data<0..2^32-1>;\r\n    \r\n            case proposal:\r\n              Proposal proposal;\r\n    \r\n            case commit:\r\n              Commit commit;\r\n        }\r\n\r\n        select (MLSPlaintextTBS.sender.sender_type) {\r\n            case member:\r\n                GroupContext context;\r\n    \r\n            case preconfigured:\r\n            case new_member:\r\n                struct{};\r\n        }\r\n    } MLSPlaintextTBS;\r\n\r\nWhat do you think about it?\r\n",
+          "createdAt": "2021-12-16T13:18:46Z",
+          "updatedAt": "2021-12-16T13:18:46Z"
+        },
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "Nice one! Crafting collisions is probably not straightforward, but eliminating the the risk altogether is the way to go.",
+          "createdAt": "2021-12-16T18:14:19Z",
+          "updatedAt": "2021-12-16T18:14:19Z"
+        },
+        {
+          "author": "TWal",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "It is actually quite easy to craft collisions, I made a script do find them: https://github.com/TWal/TLSCollisionFinder\r\n(I wanted to check whether there was accidentally a way do disambiguate the structures)",
+          "createdAt": "2021-12-18T18:52:00Z",
+          "updatedAt": "2021-12-18T18:52:00Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOBoyH6c4xtoAJ",
+          "commit": {
+            "abbreviatedOid": "666e267"
+          },
+          "author": "kkohbrok",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Great catch and a neat solution!",
+          "createdAt": "2021-12-16T12:46:34Z",
+          "updatedAt": "2021-12-16T12:46:34Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 527,
+      "id": "PR_kwDOBoyH6c4v8na2",
+      "title": "Stronger parent hashes for authenticated identities",
+      "url": "https://github.com/mlswg/mls-protocol/pull/527",
+      "state": "OPEN",
+      "author": "TWal",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Our proposal\r\n============\r\n\r\nThe parent hash construction currently authenticates only the public keys in the ratchet tree and does not protect other tree contents, notably the credentials at the leaves.\r\nConsequently, a malicious member can tamper with the credentials before sending a Welcome package to a new member, even if it cannot tamper with the public keys.\r\n\r\nInstead of using the tree resolution in the parent hash computation, we propose to use the tree hash.\r\n\r\nThe last time this was discussed on the list, it was agreed that it would be better to use tree hashes from a security point of view, but it was felt that complexity-wise that the recipient of a Welcome message would have to do O(n^2) work.\r\nA more thorough analysis shows that processing a Welcome message can be done in O(n*log(log(n))).\r\nThe result is that each signature captures the full tree contents including leaf credentials, which provides better authentication guarantees for member identities.\r\n\r\nEfficient algorithm to process a Commit\r\n=======================================\r\n\r\nWhen processing Commits, the implementation can store the tree hashes of every subtree.\r\nThat way, with n being the number of leaves, you can process each proposal in O(log(n)) and each UpdatePath in O(log(n)).\r\nThen you can check the parent hash when processing a Commit in O(p*log(n)) where p is the number of proposals.\r\n\r\nEfficient (enough) algorithm to process a Welcome\r\n=================================================\r\n\r\nWhen processing a Welcome message, we need to do the parent hash verification procedure.\r\nTo do it with the new parent hash, we need to compute tree hashes of subtrees at the last time they were updated.\r\nThis can be done using the following modified tree hash:\r\n\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(leaf) if leaf not in excluded_leaves\r\n    OldTreeHash(leaf, excluded_leaves) = Hash(blank leaf) if leaf in excluded_leaves\r\n    OldTreeHash(node, excluded_leaves) = Hash(node.content | OldTreeHash(node.left, left_excluded_leaves) | OldTreeHash(node.right, right_excluded_leaves))\r\n    where left_excluded_leaves = leaves that are in excluded_leaves and in node.left (same for right_excluded_leaves).\r\n    and `excluded_leaves` are removed from `node.content.unmerged_leaves`.\r\n\r\nThen we can compute the parent hash for a node `N` with child `C` and sibling `S` using `OldTreeHash(S, N.content.unmerged_leaves)`: this old tree hash don't change when Adds are applied to the tree.\r\n\r\nIn the next paragraph, we will see that we can compute the parent hash for every node in `O(n*log(n))`.\r\n\r\nLet `h` be the height of the tree (so `h = log(n)`). There are `O(2^{h-i})` nodes at height `i`, and computing the parent hash for a node at height `i` is done in `O(2^i)`.\r\nHence, the complexity for the parent hash verification procedure is:\r\n\r\n      \\sum_{i=1}^h O(2^i 2^{h-i})\r\n    = \\sum_{i=1}^h O(2^h)\r\n    = O(h 2^h)\r\nAnd since `h = log(n)`, the complexity is `O(n*log(n))`.\r\n\r\nEfficient algorithm to process a Welcome\r\n========================================\r\n\r\nImagine we have the following tree:\r\n\r\n                  W\r\n            ______|______\r\n           /             \\\r\n          U               Y [E, G]\r\n        __|__           __|__\r\n       /     \\         /     \\\r\n      T       V       X [E]   Z [G, H]\r\n     / \\     / \\     / \\     / \\\r\n    A   B   C   D   E   F   G   H\r\n\r\nFor each node `N`, `OldTreeHash(N, excluded_leaves)` will be called with different values for `excluded_leaves`.\r\n\r\nFor example, if the sibling is always the right child, then:\r\n- `OldTreeHash(H, .)` will be called with 1 time with `. = [H]` (when computing the parent hash of `Z`) and 2 times with `. = []` (when computing the parent hash of `Y` and `W`)\r\n- `OldTreeHash(Z, .)` will be called with 1 time with `. = [G]` (when computing the parent hash of `Y`) and 1 time with `. = []` (when computing the parent hash of `W`)\r\n\r\nIf the sibling is always the left child, then:\r\n- `OldTreeHash(A, .)` will be called 3 times with `. = []` (when computing the parent hash of `T`, `U`, `W`)\r\n- `OldTreeHash(T, .)` will be called 2 times with `. = []` (when computing the parent hash of `U`, `W`)\r\n\r\nWe can see that some values are computed several times, which means that the whole computation could be sped up using memoization.\r\n\r\nTo estimate the speedup, we will estimate with how many values for `excluded_leaves` is called `OldTreeHash(N, .)` for each node `N`. Summing up these values will give a complexity, which will be `O(n*log(log(n)))`.\r\n\r\nLet `node.parent[k]` be the `k`th parent of `node`, and `node.leaves` be the set of leaves in the subtree rooted at `node`.\r\nThen, each call of `OldTreeHash(node, excluded_leaves)` will have `excluded_leaves = Intersection(node.parent[k].unmerged_leaves, node.leaves)` for some `k`.\r\nLet's note this set `excluded_leaves_k`.\r\nThe tree has the invariant that if `i <= j` then `excluded_leaves_j` is a subset of `excluded_leaves_i` (i.e. the sets `excluded_leaves_k` are decreasing).\r\n\r\nLet d be the depth of `node` (with the root being at depth 1). Then, the set `excluded_leaves_set := {excluded_leaves_1, ..., excluded_leaves_{d-1}}` corresponds to the values for `excluded_leaves` in the calls to `OldTreeHash(N, .)`.\r\n\r\nFirst bound: `|excluded_leaves_set| <= d-1 <= d` because it is defined using `d-1` values.\r\nSecond bound: `|excluded_leaves_set| <= 2^{h-d}+1` because `|excluded_leaves_0| <= 2^{h-d}` and the sets `excluded_leaves_k` are decreasing.\r\nTherefore: for a node at depth d, `|excluded_leaves_set| <= min(d, 2^{h-d}+1)`\r\n\r\nThe complexity to do the parent hash verification procedure is therefore in `O(sum_{i=1}^h 2^i min(i, 2^{h-i}+1))`.\r\n\r\nLet's estimate this complexity more explicitly:\r\n\r\n       sum_{i=1}^h 2^i min(i, 2^{h-i}+1)\r\n    <= (sum_{i=1}^t i 2^i) + (sum_{i=t+1}^h 2^i (2^{h-i}+1)) [for all t]\r\n    =  (2 (t-1) 2^t + 2) + ((h-t) 2^h + 2^{h+1} - 2^{t+1}) [for all t]\r\n\r\nFor the first inequality, we split the sum in two parts and use `min(i, 2^{h-i}+1) <= i` in the left part and `min(i, 2^{h-i}+1) <= 2^{h-i}+1` in the right part.\r\nFor the second equality, it can be derived using the formula for geometric sum.\r\n\r\nIf we take `t = h - log(h)`, we can compute that the left part is `O(2^h)` and the right part is `O(log(h)*2^h)`.\r\n\r\nTherefore, the parent hash verification procedure complexity is `O(log(h)*2^h) = O(n*log(log(n)))`.\r\n\r\nOne might say that adding memoization has a cost and isn't in O(1), but here it is: using the fact that `excluded_leaves_k` are decreasing, if you process the tree in a bottom-up or top-down way, you only have to compare the length of the current `excluded_leaves` to the length of the previous one, and it tells you if you need to recompute the tree hash.\r\n\r\nThe current parent hash is not super fast\r\n=========================================\r\n\r\nIn the worst case, if most internal nodes are blank, then computing the parent hash for a node is in O(size of its subtree), which give an O(n*log(n)) complexity as we saw in the section about the naive algorithm.\r\n\r\nWhen processing a Commit, if most of the internal nodes are blank, then computing the new parent hashes is in O(n) which is quite slow.",
+      "createdAt": "2021-12-16T12:54:02Z",
+      "updatedAt": "2021-12-16T18:28:54Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "6754a8edc9d77c902643d37a519b9a546ab00b4e",
+      "headRepository": "TWal/mls-protocol",
+      "headRefName": "twal_parent_hash",
+      "headRefOid": "1b258b36729258c939a8cf43e07f21d1da32a9ce",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "raphaelrobert",
+          "authorAssociation": "MEMBER",
+          "body": "@psyoptix Since you worked on this last, it would be great if you could have a look at this.",
+          "createdAt": "2021-12-16T18:28:54Z",
+          "updatedAt": "2021-12-16T18:28:54Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 529,
+      "id": "PR_kwDOBoyH6c4v_0jh",
+      "title": "Refactor Group Joining and fix External Inits",
+      "url": "https://github.com/mlswg/mls-protocol/pull/529",
+      "state": "OPEN",
+      "author": "kkohbrok",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR refactors the two sections on Group Joining (via Welcome and via External Init) by changing the `GroupInfo` struct that can be used for both cases. The `external_pub` used in the course of an External Init is added as an optional field. This PR also:\r\n\r\n- removes the redundant ProtocolVersion in the GroupInfo\r\n- adds a GroupInfoTBS struct to follow the convention of specifying a TBS struct for signed messages\r\n- implicitly, the `confirmed_transcript_hash` and `confirmation_tag` is now used for external inits instead of the `interim_transcript_hash`, which was not sufficient to create a valid commit",
+      "createdAt": "2021-12-17T10:53:40Z",
+      "updatedAt": "2021-12-17T10:59:26Z",
+      "baseRepository": "mlswg/mls-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "6754a8edc9d77c902643d37a519b9a546ab00b4e",
+      "headRepository": "kkohbrok/mls-protocol",
+      "headRefName": "refactor_pgs_and_welcome",
+      "headRefOid": "b970e193c9ef66a0e3cd7ae430cb0614924e27b5",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
